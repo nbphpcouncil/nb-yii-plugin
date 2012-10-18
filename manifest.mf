@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+OpenIDE-Module: org.nbphpcouncil.modules.php.yii
+OpenIDE-Module-Localizing-Bundle: org/nbphpcouncil/modules/php/yii/Bundle.properties
+OpenIDE-Module-Specification-Version: 0.1
+
