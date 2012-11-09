@@ -3,6 +3,27 @@ nb-yii-plugin
 
 Yii Framework plugin for NetBeans 7.3+
 
+## Usage
+
+### Install Plugin
+
+Download a nbm file or create it yourself. And please, install it.
+
+### Existing Source
+
+Project directory : Please, specify the webapp directory 
+
+e.g. 
+
+    testdrive (webapp directory)
+    ├── assets
+    ├── css
+    ├── images
+    ├── index-test.php
+    ├── index.php
+    ├── nbproject
+    ├── protected
+    └── themes
 
 ## Features
 
