@@ -30,6 +30,7 @@ e.g.
 - Badge icon
 - Go To Action 
 - Go To View
+- Code Completion on the view file
 
 
 ### Go To Action
@@ -52,6 +53,31 @@ You can open the view file for action method of the controller.(similar to Go To
 4. Navigate > Go To View
 
 If you set the keymap for this action, it's more useful.(Please, search with "php")
+
+### Code Completion on the view file
+Provide support for code completion on the View file. 
+
+e.g. webapp/protected/controllers/SiteController.php
+```php
+class SiteController extends Controller {
+    // something...
+
+    public function actionIndex(){
+        // ...
+        $this->render('foo', array(
+            'var1' => $var,
+            'var2' => 'bar',
+        ));
+    }
+}
+```
+
+e.g. webapp/protected/views/site/index.php
+
+```php
+$ // [Ctrl + Space] popup $var1, $var2, $this, ...
+$this-> // [Ctrl + Space] popup SiteController methods and fields
+```
 
 ## License
 
