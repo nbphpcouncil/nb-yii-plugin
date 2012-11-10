@@ -6,10 +6,12 @@ package org.nbphpcouncil.modules.php.yii;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
+import org.nbphpcouncil.modules.php.yii.editor.YiiEditorExtender;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.netbeans.modules.php.api.framework.BadgeIcon;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
 import org.netbeans.modules.php.api.phpmodule.PhpModuleProperties;
+import org.netbeans.modules.php.spi.editor.EditorExtender;
 import org.netbeans.modules.php.spi.framework.PhpFrameworkProvider;
 import org.netbeans.modules.php.spi.framework.PhpModuleActionsExtender;
 import org.netbeans.modules.php.spi.framework.PhpModuleExtender;
@@ -142,5 +144,10 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
     @Override
     public FrameworkCommandSupport getFrameworkCommandSupport(PhpModule pm) {
         return null;
+    }
+
+    @Override
+    public EditorExtender getEditorExtender(PhpModule phpModule) {
+        return new YiiEditorExtender();
     }
 }
