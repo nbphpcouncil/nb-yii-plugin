@@ -77,6 +77,19 @@ public class YiiUtils {
      * Get view file object
      *
      * @param controller
+     * @param actionId action name(view file name). e.g actionIndex -> index
+     * @return view file object
+     */
+    public static FileObject getView(FileObject controller, String actionId) {
+        String controllerId = getViewFolderName(controller.getName());
+        String pathToView = String.format(VIEW_RELATIVE_PATH_FORMAT, controllerId, actionId);
+        return controller.getFileObject(pathToView);
+    }
+
+    /**
+     * Get view file object
+     *
+     * @param controller
      * @param method
      * @return view file object
      */
