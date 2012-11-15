@@ -54,6 +54,24 @@ You can open the view file for action method of the controller.(similar to Go To
 
 If you set the keymap for this action, it's more useful.(Please, search with "php")
 
+### Hyper link to view file
+
+You can open the view file from parameter of render method.
+
+e.g.
+```php
+public actionIndex() {
+    // something ...
+
+    $this->render('foo', array('bar' => $bar));
+}
+```
+When you use the render method like above, if foo.php exists, you do the following.
+
+1. Hold down Ctrl key on the first parameter (foo)
+2. Wait to be changed string color to blue
+3. Click (foo)
+
 ### Code Completion on the view file
 Provide support for code completion on the View file. 
 
