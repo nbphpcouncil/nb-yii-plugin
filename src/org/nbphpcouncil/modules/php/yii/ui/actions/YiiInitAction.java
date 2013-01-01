@@ -3,6 +3,7 @@
  */
 package org.nbphpcouncil.modules.php.yii.ui.actions;
 
+import java.io.IOException;
 import org.nbphpcouncil.modules.php.yii.Yii;
 import org.nbphpcouncil.modules.php.yii.util.ProjectPropertiesSupport;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
@@ -19,6 +20,7 @@ import org.openide.util.NbBundle;
 public class YiiInitAction extends BaseAction {
 
     public static YiiInitAction INSTANCE = new YiiInitAction();
+    private static final long serialVersionUID = -8225489767443450330L;
 
     private YiiInitAction() {
     }
@@ -43,7 +45,8 @@ public class YiiInitAction extends BaseAction {
 
     @Override
     @NbBundle.Messages({
-        "MSG_YiiInitAction=Complete"
+        "MSG_YiiInitAction=Complete",
+        "MSG_YiiInitActionFail=Can't create code completion file"
     })
     protected void actionPerformed(PhpModule phpModule) {
         // called via shortcut
@@ -51,6 +54,13 @@ public class YiiInitAction extends BaseAction {
             return;
         }
         ProjectPropertiesSupport.setYiiIncludePath(phpModule);
+        try {
+            // add code completion file
+            YiiUtils.createCodeCompletionFile(phpModule);
+        } catch (IOException ex) {
+            NotificationDisplayer.getDefault().notify(getFullName(), ImageUtilities.loadImageIcon(Yii.YII_ICON_16, true), Bundle.MSG_YiiInitActionFail(), null);
+            return;
+        }
         NotificationDisplayer.getDefault().notify(getFullName(), ImageUtilities.loadImageIcon(Yii.YII_ICON_16, true), Bundle.MSG_YiiInitAction(), null);
     }
 }
