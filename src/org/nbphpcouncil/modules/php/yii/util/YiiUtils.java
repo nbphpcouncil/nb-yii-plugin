@@ -8,9 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.nbphpcouncil.modules.php.yii.Yii;
+import org.nbphpcouncil.modules.php.yii.YiiPhpFrameworkProvider;
 import org.netbeans.modules.php.api.editor.PhpClass;
+import org.netbeans.modules.php.api.phpmodule.PhpModule;
 import org.netbeans.modules.php.api.util.FileUtils;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 import org.openide.util.Exceptions;
 
 /**
@@ -25,6 +29,20 @@ public class YiiUtils {
     private static final String CONTROLLERS_DIRECTORY_NAME = "controllers"; // NOI18N
     private static final String ACTION_METHOD_PREFIX = "action";
     private static final String VIEW_RELATIVE_PATH_FORMAT = "../../views/%s/%s.php";
+    private static final String NBPROJECT = "nbproject";
+
+    /**
+     * Check whether php module is yii
+     *
+     * @param phpModule
+     * @return true if php module is yii, otherwiser false
+     */
+    public static boolean isYii(PhpModule phpModule) {
+        if (phpModule == null) {
+            return false;
+        }
+        return YiiPhpFrameworkProvider.getInstance().isInPhpModule(phpModule);
+    }
 
     /**
      * Get include path.
@@ -228,5 +246,37 @@ public class YiiUtils {
         }
         string = string.toLowerCase();
         return string.substring(0, 1).toUpperCase() + string.substring(1);
+    }
+
+    /**
+     * Create code completion file
+     *
+     * @param phpModule
+     * @throws IOException
+     */
+    public static void createCodeCompletionFile(PhpModule phpModule) throws IOException {
+        if (!isYii(phpModule)) {
+            return;
+        }
+        FileObject codeCompletion = FileUtil.getConfigFile(Yii.YII_CODE_COMPLETION_CONFIG_PATH);
+        FileObject nbproject = getNbproject(phpModule);
+        if (nbproject != null && codeCompletion != null) {
+            codeCompletion.copy(nbproject, codeCompletion.getName(), codeCompletion.getExt());
+        }
+    }
+
+    /**
+     * Get nbproject directory
+     *
+     * @param phpModule
+     * @return
+     */
+    public static FileObject getNbproject(PhpModule phpModule) {
+        FileObject projectDirectory = phpModule.getProjectDirectory();
+        FileObject nbproject = null;
+        if (projectDirectory != null) {
+            nbproject = projectDirectory.getFileObject(NBPROJECT);
+        }
+        return nbproject;
     }
 }

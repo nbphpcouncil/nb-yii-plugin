@@ -11,9 +11,9 @@ Download a nbm file or create it yourself. And please, install it.
 
 ### Existing Source
 
-Project directory : Please, specify the webapp directory 
+Project directory : Please, specify the webapp directory
 
-e.g. 
+e.g.
 
     testdrive (webapp directory)
     ├── assets
@@ -28,9 +28,10 @@ e.g.
 ## Features
 
 - Badge icon
-- Go To Action 
+- Go To Action
 - Go To View
 - Code Completion on the view file
+- Init Action
 
 
 ### Go To Action
@@ -73,7 +74,7 @@ When you use the render method like above, if foo.php exists, you do the followi
 3. Click (foo)
 
 ### Code Completion on the view file
-Provide support for code completion on the View file. 
+Provide support for code completion on the View file.
 
 e.g. webapp/protected/controllers/SiteController.php
 ```php
@@ -96,6 +97,14 @@ e.g. webapp/protected/views/site/index.php
 $ // [Ctrl + Space] popup $var1, $var2, $this, ...
 $this-> // [Ctrl + Space] popup SiteController methods and fields
 ```
+
+### Init Action
+Run the followings:
+
+- Set framework directory path to Project Properties.
+- Create a file for code completion.
+
+**Project right-click > Yii > Init**
 
 ## License
 

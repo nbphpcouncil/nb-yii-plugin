@@ -3,10 +3,12 @@
  */
 package org.nbphpcouncil.modules.php.yii;
 
+import java.util.Collections;
 import java.util.List;
 import javax.swing.Action;
 import org.nbphpcouncil.modules.php.yii.ui.actions.YiiGoToActionAction;
 import org.nbphpcouncil.modules.php.yii.ui.actions.YiiGoToViewAction;
+import org.nbphpcouncil.modules.php.yii.ui.actions.YiiInitAction;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.netbeans.modules.php.spi.framework.PhpModuleActionsExtender;
 import org.netbeans.modules.php.spi.framework.actions.GoToActionAction;
@@ -28,7 +30,7 @@ public class YiiActionsExtender extends PhpModuleActionsExtender {
 
     @Override
     public List<? extends Action> getActions() {
-        return super.getActions(); //To change body of generated methods, choose Tools | Templates.
+        return Collections.singletonList(YiiInitAction.getInstance());
     }
 
     @Override
