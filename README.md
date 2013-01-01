@@ -32,6 +32,7 @@ e.g.
 - Go To View
 - Code Completion on the view file
 - Init Action
+- PHPUnit Test Init Action
 
 
 ### Go To Action
@@ -105,6 +106,11 @@ Run the followings:
 - Create a file for code completion.
 
 **Project right-click > Yii > Init**
+
+### PHPUnit Test Init Action
+Set bootstrap.php and phpunit.xml to project properties.
+
+**Project right-click > Yii > PHPUnit Test Init**
 
 ## License
 

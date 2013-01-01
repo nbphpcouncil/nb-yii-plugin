@@ -34,6 +34,7 @@ public class YiiUtils {
     private static final String VIEWS_PATH = PROTECTED_PATH + "views";
     private static final String CONTROLLERS_PATH = PROTECTED_PATH + "controllers";
     private static final String MODELS_PATH = PROTECTED_PATH + "models";
+    private static final String TESTS_PATH = PROTECTED_PATH + "tests";
 
     /**
      * Check whether php module is yii
@@ -287,18 +288,53 @@ public class YiiUtils {
         return nbproject;
     }
 
+    /**
+     * Get views directory (protected/views)
+     *
+     * @param phpModule
+     * @return
+     */
     public static FileObject getViewsDirectory(PhpModule phpModule) {
         return getDirectory(phpModule, VIEWS_PATH);
     }
 
+    /**
+     * Get controllers directory (protected/controllers)
+     *
+     * @param phpModule
+     * @return
+     */
     public static FileObject getControllersDirectory(PhpModule phpModule) {
         return getDirectory(phpModule, CONTROLLERS_PATH);
     }
 
+    /**
+     * Get models directory (protected/models)
+     *
+     * @param phpModule
+     * @return
+     */
     public static FileObject getModelsDirectory(PhpModule phpModule) {
         return getDirectory(phpModule, MODELS_PATH);
     }
 
+    /**
+     * Get tests directory (protected/tests)
+     *
+     * @param phpModule
+     * @return
+     */
+    public static FileObject getTestsDirectory(PhpModule phpModule) {
+        return getDirectory(phpModule, TESTS_PATH);
+    }
+
+    /**
+     * Get directory
+     *
+     * @param phpModule
+     * @param path relative path from source directory
+     * @return
+     */
     public static FileObject getDirectory(PhpModule phpModule, String path) {
         FileObject sourceDirectory = phpModule.getSourceDirectory();
         if (sourceDirectory == null) {
