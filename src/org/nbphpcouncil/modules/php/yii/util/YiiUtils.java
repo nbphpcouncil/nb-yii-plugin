@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.nbphpcouncil.modules.php.yii.YiiPhpFrameworkProvider;
 import org.netbeans.modules.php.api.editor.PhpClass;
+import org.netbeans.modules.php.api.phpmodule.PhpModule;
 import org.netbeans.modules.php.api.util.FileUtils;
 import org.openide.filesystems.FileObject;
 import org.openide.util.Exceptions;
@@ -25,6 +27,19 @@ public class YiiUtils {
     private static final String CONTROLLERS_DIRECTORY_NAME = "controllers"; // NOI18N
     private static final String ACTION_METHOD_PREFIX = "action";
     private static final String VIEW_RELATIVE_PATH_FORMAT = "../../views/%s/%s.php";
+
+    /**
+     * Check whether php module is yii
+     *
+     * @param phpModule
+     * @return true if php module is yii, otherwiser false
+     */
+    public static boolean isYii(PhpModule phpModule) {
+        if (phpModule == null) {
+            return false;
+        }
+        return YiiPhpFrameworkProvider.getInstance().isInPhpModule(phpModule);
+    }
 
     /**
      * Get include path.
