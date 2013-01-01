@@ -3,9 +3,10 @@
  */
 package org.nbphpcouncil.modules.php.yii;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.Action;
+import org.nbphpcouncil.modules.php.yii.ui.actions.PHPUnitInitAction;
 import org.nbphpcouncil.modules.php.yii.ui.actions.YiiGoToActionAction;
 import org.nbphpcouncil.modules.php.yii.ui.actions.YiiGoToViewAction;
 import org.nbphpcouncil.modules.php.yii.ui.actions.YiiInitAction;
@@ -30,12 +31,15 @@ public class YiiActionsExtender extends PhpModuleActionsExtender {
 
     @Override
     public List<? extends Action> getActions() {
-        return Collections.singletonList(YiiInitAction.getInstance());
+        List<Action> actions = new ArrayList<Action>();
+        actions.add(YiiInitAction.getInstance());
+        actions.add(PHPUnitInitAction.getInstance());
+        return actions;
     }
 
     @Override
     public RunCommandAction getRunCommandAction() {
-        return super.getRunCommandAction(); //To change body of generated methods, choose Tools | Templates.
+        return super.getRunCommandAction();
     }
 
     @Override

@@ -23,6 +23,9 @@ import org.openide.filesystems.FileObject;
  */
 public class ProjectPropertiesSupport {
 
+    private static final String BOOTSTRAP_PHP = "bootstrap.php"; //NOI18N
+    private static final String PHPUNIT_XML = "phpunit.xml"; //NOI18N
+
     /**
      * Set include path
      *
@@ -58,6 +61,33 @@ public class ProjectPropertiesSupport {
         }
         List<String> includePath = YiiUtils.getIncludePath(index);
         setIncludePath(phpModule, includePath);
+    }
+
+    /**
+     * Set PHPUnit bootstap.php and phpunit.xml
+     *
+     * @param phpModule
+     */
+    public static void setPHPUnit(PhpModule phpModule) {
+        PhpProject phpProject = getPhpProject(phpModule);
+        if (phpProject == null) {
+            return;
+        }
+        PhpProjectProperties phpProjectProperties = new PhpProjectProperties(phpProject);
+        FileObject testsDirectory = YiiUtils.getTestsDirectory(phpModule);
+        if (testsDirectory == null) {
+            return;
+        }
+        FileObject bootstrap = testsDirectory.getFileObject(BOOTSTRAP_PHP);
+        if (bootstrap != null) {
+            phpProjectProperties.setPhpUnitBootstrap(bootstrap.getPath());
+            phpProjectProperties.setPhpUnitBootstrapForCreateTests(true);
+        }
+        FileObject phpunitXml = testsDirectory.getFileObject(PHPUNIT_XML);
+        if (phpunitXml != null) {
+            phpProjectProperties.setPhpUnitConfiguration(phpunitXml.getPath());
+        }
+        phpProjectProperties.save();
     }
 
     /**
