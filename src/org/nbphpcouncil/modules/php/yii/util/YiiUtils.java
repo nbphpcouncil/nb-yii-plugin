@@ -30,6 +30,10 @@ public class YiiUtils {
     private static final String ACTION_METHOD_PREFIX = "action";
     private static final String VIEW_RELATIVE_PATH_FORMAT = "../../views/%s/%s.php";
     private static final String NBPROJECT = "nbproject";
+    private static final String PROTECTED_PATH = "protected/";
+    private static final String VIEWS_PATH = PROTECTED_PATH + "views";
+    private static final String CONTROLLERS_PATH = PROTECTED_PATH + "controllers";
+    private static final String MODELS_PATH = PROTECTED_PATH + "models";
 
     /**
      * Check whether php module is yii
@@ -83,11 +87,14 @@ public class YiiUtils {
         if (!fo.isData() || !FileUtils.isPhpFile(fo)) {
             return false;
         }
+
         FileObject viewsDirectory = fo.getFileObject("../../../views"); // NOI18N
         if (viewsDirectory == null || !viewsDirectory.isFolder()) {
             return false;
         }
-
+        if (!fo.getPath().contains(VIEWS_PATH)) {
+            return false;
+        }
         return true;
     }
 
@@ -278,5 +285,25 @@ public class YiiUtils {
             nbproject = projectDirectory.getFileObject(NBPROJECT);
         }
         return nbproject;
+    }
+
+    public static FileObject getViewsDirectory(PhpModule phpModule) {
+        return getDirectory(phpModule, VIEWS_PATH);
+    }
+
+    public static FileObject getControllersDirectory(PhpModule phpModule) {
+        return getDirectory(phpModule, CONTROLLERS_PATH);
+    }
+
+    public static FileObject getModelsDirectory(PhpModule phpModule) {
+        return getDirectory(phpModule, MODELS_PATH);
+    }
+
+    public static FileObject getDirectory(PhpModule phpModule, String path) {
+        FileObject sourceDirectory = phpModule.getSourceDirectory();
+        if (sourceDirectory == null) {
+            return null;
+        }
+        return sourceDirectory.getFileObject(path);
     }
 }
