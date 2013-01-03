@@ -33,6 +33,7 @@ e.g.
 - Code Completion on the view file
 - Init Action
 - PHPUnit Test Init Action
+- New Yii Project Wizard
 
 
 ### Go To Action
@@ -112,9 +113,31 @@ Set bootstrap.php and phpunit.xml to project properties.
 
 **Project right-click > Yii > PHPUnit Test Init**
 
+### New Yii Project Wizard
+
+#### Set yiic.php
+
+**Tools > Option > PHP > Yii**
+Please set the path to YiiRoot/framework/yiic.php
+(Browse... please choose the yiic.php file)
+
+#### Create new project
+
+1. File > New Project
+2. Categories : PHP, Projects : PHP Application
+3. Set Name and Location
+4. Set Run Configuration
+5. PHP Frameworks > Yii PHP Web Framework
+
+Run the followings:
+
+- If you check PHPUnit settings, Run PHPUnit Test Init Action.
+- Create a file for code completion.
+- Set include path.
+
 ## License
 
 ## TODO
 
 - add license
-
+- code completion for widget

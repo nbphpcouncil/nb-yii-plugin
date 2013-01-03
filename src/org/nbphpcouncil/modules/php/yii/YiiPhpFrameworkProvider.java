@@ -4,9 +4,12 @@
 package org.nbphpcouncil.modules.php.yii;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import org.nbphpcouncil.modules.php.yii.commands.YiiScript;
 import org.nbphpcouncil.modules.php.yii.editor.YiiEditorExtender;
+import org.nbphpcouncil.modules.php.yii.ui.options.YiiOptions;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.netbeans.modules.php.api.framework.BadgeIcon;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
@@ -103,7 +106,7 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
 
     @Override
     public PhpModuleExtender createPhpModuleExtender(PhpModule pm) {
-        return null;
+        return new YiiPhpModuleExtender();
     }
 
     /**
@@ -121,13 +124,18 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
             return properties;
         }
         // set include path
-        FileObject index = sourceDirectory.getFileObject("index.php"); // NOI18N
-        if (index != null) {
-            List<String> includePaths = YiiUtils.getIncludePath(index);
+        String path = YiiOptions.getInstance().getYiiScript();
+        if (path != null && !path.isEmpty()) {
+            path = path.replace(YiiScript.YII_SCRIPT_NAME_LONG, ""); // NOI18N
+            List<String> includePaths = Collections.singletonList(path);
             properties = properties.setIncludePath(includePaths);
         }
 
-        // TODO add unit test and webroot directories
+        // add unit test and webroot directories
+        FileObject tests = YiiUtils.getTestsDirectory(pm);
+        if (tests != null) {
+            properties = properties.setTests(tests);
+        }
         return properties;
     }
 
