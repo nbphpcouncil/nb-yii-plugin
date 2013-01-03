@@ -5,13 +5,12 @@ package org.nbphpcouncil.modules.php.yii.util;
 
 import java.util.List;
 import javax.swing.DefaultListModel;
-import org.netbeans.api.project.Project;
-import org.netbeans.api.project.ui.OpenProjects;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
 import org.netbeans.modules.php.project.PhpProject;
 import org.netbeans.modules.php.project.classpath.BasePathSupport.Item;
 import org.netbeans.modules.php.project.classpath.IncludePathSupport;
 import org.netbeans.modules.php.project.ui.customizer.PhpProjectProperties;
+import org.netbeans.modules.php.project.util.PhpProjectUtils;
 import org.netbeans.spi.project.support.ant.AntProjectHelper;
 import org.netbeans.spi.project.support.ant.PropertyEvaluator;
 import org.netbeans.spi.project.support.ant.ReferenceHelper;
@@ -97,21 +96,10 @@ public class ProjectPropertiesSupport {
      * @return PhpProject
      */
     public static PhpProject getPhpProject(PhpModule phpModule) {
-        OpenProjects projects = OpenProjects.getDefault();
-        if (phpModule == null || projects == null) {
+        if (phpModule == null) {
             return null;
         }
-        PhpProject phpProject = null;
-        FileObject projectDirectory = phpModule.getProjectDirectory();
-        for (Project project : projects.getOpenProjects()) {
-            if (project.getProjectDirectory() == projectDirectory) {
-                phpProject = project.getLookup().lookup(PhpProject.class);
-            }
-            if (phpProject != null) {
-                break;
-            }
-        }
-        return phpProject;
+        return PhpProjectUtils.getPhpProject(phpModule.getProjectDirectory());
     }
 
     /**
