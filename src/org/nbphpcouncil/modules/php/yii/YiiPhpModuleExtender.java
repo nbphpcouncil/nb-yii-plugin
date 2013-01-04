@@ -88,10 +88,16 @@ public class YiiPhpModuleExtender extends PhpModuleExtender {
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
             }
-            FileObject projectDirectory = phpModule.getProjectDirectory();
+            FileObject sourceDirectory = phpModule.getSourceDirectory();
             FileObject config = null;
-            if (projectDirectory != null) {
-                config = projectDirectory.getFileObject("protected/config/main.php"); // NOI18N
+            FileObject index = null;
+            if (sourceDirectory != null) {
+                sourceDirectory.refresh();
+                index = sourceDirectory.getFileObject("index.php"); // NOI18N
+                config = sourceDirectory.getFileObject("protected/config/main.php"); // NOI18N
+            }
+            if (index != null) {
+                files.add(index);
             }
             if (config != null) {
                 files.add(config);
