@@ -136,8 +136,8 @@ Run the followings:
 - Set include path.
 
 ## License
+[Common Development and Distribution License (CDDL) v1.0 and GNU General Public License (GPL) v2](http://netbeans.org/cddl-gplv2.html)
 
 ## TODO
 
-- add license
 - code completion for widget
