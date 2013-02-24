@@ -41,6 +41,7 @@
  */
 package org.nbphpcouncil.modules.php.yii.editor;
 
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.Document;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
@@ -94,6 +95,7 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
      * @param offset
      * @return true if view file exsits, otherwise false.
      */
+    @SuppressWarnings("unchecked")
     private boolean verifyState(Document doc, int offset) {
         // get FileObject
         Source source = Source.create(doc);
@@ -101,28 +103,33 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
         if (!YiiUtils.isController(targetFile)) {
             return false;
         }
+        AbstractDocument abstractDoc = (AbstractDocument) doc;
+        abstractDoc.readLock();
+        try {
+            TokenHierarchy hierarchy = TokenHierarchy.get(doc);
+            TokenSequence<PHPTokenId> ts = hierarchy.tokenSequence(PHPTokenId.language());
+            if (ts == null) {
+                return false;
+            }
+            ts.move(offset);
+            ts.moveNext();
+            int newOffset = ts.offset();
 
-        TokenHierarchy hierarchy = TokenHierarchy.get(doc);
-        TokenSequence<PHPTokenId> ts = hierarchy.tokenSequence(PHPTokenId.language());
-        if (ts == null) {
-            return false;
-        }
-        ts.move(offset);
-        ts.moveNext();
-        int newOffset = ts.offset();
+            Token<PHPTokenId> token = ts.token();
+            setTarget(token);
 
-        Token<PHPTokenId> token = ts.token();
-        setTarget(token);
-
-        if (target.isEmpty() || !isRenderMethod(ts)) {
-            return false;
-        }
-        // set view file
-        view = YiiUtils.getView(targetFile, target);
-        if (view != null) {
-            targetStart = newOffset + 1;
-            targetEnd = targetStart + target.length();
-            return true;
+            if (target.isEmpty() || !isRenderMethod(ts)) {
+                return false;
+            }
+            // set view file
+            view = YiiUtils.getView(targetFile, target);
+            if (view != null) {
+                targetStart = newOffset + 1;
+                targetEnd = targetStart + target.length();
+                return true;
+            }
+        } finally {
+            abstractDoc.readUnlock();
         }
 
         return false;
