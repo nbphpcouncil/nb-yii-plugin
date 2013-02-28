@@ -55,7 +55,16 @@ You can open the view file for action method of the controller.(similar to Go To
 3. Right-click on Editor
 4. Navigate > Go To View
 
-If you set the keymap for this action, it's more useful.(Please, search with "php")
+If you set the keymap for this action, it's more useful.(Please, search with "php")  
+If you set the theme on main.php, you will go to there.
+```php
+// protected/main.php
+// e.g. set themes/basic
+array(
+    // something...
+    'theme' => 'basic',
+);
+```
 
 ### Hyper link to view file
 
