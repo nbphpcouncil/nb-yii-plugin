@@ -43,14 +43,29 @@ package org.nbphpcouncil.modules.php.yii.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.nbphpcouncil.modules.php.yii.Yii;
 import org.nbphpcouncil.modules.php.yii.YiiPhpFrameworkProvider;
+import org.netbeans.modules.csl.spi.ParserResult;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
+import org.netbeans.modules.parsing.spi.ParseException;
 import org.netbeans.modules.php.api.editor.PhpClass;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
 import org.netbeans.modules.php.api.util.FileUtils;
+import org.netbeans.modules.php.api.util.StringUtils;
+import org.netbeans.modules.php.editor.parser.api.Utils;
+import org.netbeans.modules.php.editor.parser.astnodes.ArrayElement;
+import org.netbeans.modules.php.editor.parser.astnodes.Expression;
+import org.netbeans.modules.php.editor.parser.astnodes.visitors.DefaultVisitor;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.Exceptions;
@@ -63,16 +78,18 @@ public class YiiUtils {
 
     private static final String YII_INCLUDE_PATH_REGEX = "^\\$yii=.+'(.+/framework)/yii\\.php';$"; // NOI18N
     private static final String CONTROLLER_SUFIX = "Controller"; // NOI18N
-    private static final String CONTROLLER_RELATIVE_PATH_FORMAT = "../../../controllers/%s.php"; // NOI18N
     private static final String CONTROLLERS_DIRECTORY_NAME = "controllers"; // NOI18N
-    private static final String ACTION_METHOD_PREFIX = "action";
-    private static final String VIEW_RELATIVE_PATH_FORMAT = "../../views/%s/%s.php";
-    private static final String NBPROJECT = "nbproject";
-    private static final String PROTECTED_PATH = "protected/";
-    private static final String VIEWS_PATH = PROTECTED_PATH + "views";
-    private static final String CONTROLLERS_PATH = PROTECTED_PATH + "controllers";
-    private static final String MODELS_PATH = PROTECTED_PATH + "models";
-    private static final String TESTS_PATH = PROTECTED_PATH + "tests";
+    private static final String ACTION_METHOD_PREFIX = "action"; // NOI18N
+    private static final String VIEW_RELATIVE_PATH_FORMAT = "../..%s/views/%s/%s.php"; // NOI18N
+    private static final String THEME_PATH = "/../themes/%s"; // NOI18N
+    private static final String NBPROJECT = "nbproject"; // NOI18N
+    private static final String PROTECTED_PATH = "protected/"; // NOI18N
+    private static final String VIEWS_PATH = PROTECTED_PATH + "views"; // NOI18N
+    private static final String CONTROLLERS_PATH = PROTECTED_PATH + "controllers"; // NOI18N
+    private static final String MODELS_PATH = PROTECTED_PATH + "models"; // NOI18N
+    private static final String TESTS_PATH = PROTECTED_PATH + "tests"; // NOI18N
+    private static final String CONFIG_PATH = PROTECTED_PATH + "config"; // NOI18N
+    private static final String THEMES_PATH = "themes"; // NOI18N
 
     /**
      * Check whether php module is yii
@@ -85,6 +102,10 @@ public class YiiUtils {
             return false;
         }
         return YiiPhpFrameworkProvider.getInstance().isInPhpModule(phpModule);
+    }
+
+    private static PhpModule getPhpModule(FileObject fileObject) {
+        return PhpModule.forFileObject(fileObject);
     }
 
     /**
@@ -126,15 +147,18 @@ public class YiiUtils {
         if (!fo.isData() || !FileUtils.isPhpFile(fo)) {
             return false;
         }
+        PhpModule phpModule = getPhpModule(fo);
+        FileObject viewsDirectory = getViewsDirectory(phpModule);
+        FileObject themesDirestory = getThemesDirectory(phpModule);
+        List<FileObject> directories = Arrays.asList(viewsDirectory, themesDirestory);
+        for (FileObject directory : directories) {
+            String relativePath = FileUtil.getRelativePath(directory, fo);
+            if (!StringUtils.isEmpty(relativePath)) {
+                return true;
+            }
+        }
 
-        FileObject viewsDirectory = fo.getFileObject("../../../views"); // NOI18N
-        if (viewsDirectory == null || !viewsDirectory.isFolder()) {
-            return false;
-        }
-        if (!fo.getPath().contains(VIEWS_PATH)) {
-            return false;
-        }
-        return true;
+        return false;
     }
 
     /**
@@ -146,8 +170,7 @@ public class YiiUtils {
      */
     public static FileObject getView(FileObject controller, String actionId) {
         String controllerId = getViewFolderName(controller.getName());
-        String pathToView = String.format(VIEW_RELATIVE_PATH_FORMAT, controllerId, actionId);
-        return controller.getFileObject(pathToView);
+        return getView(controller, controllerId, actionId);
     }
 
     /**
@@ -160,7 +183,49 @@ public class YiiUtils {
     public static FileObject getView(FileObject controller, PhpClass.Method method) {
         String viewFolderName = getViewFolderName(controller.getName());
         String viewName = getViewName(method);
-        String pathToView = String.format(VIEW_RELATIVE_PATH_FORMAT, viewFolderName, viewName);
+        return getView(controller, viewFolderName, viewName);
+    }
+
+    private static FileObject getView(FileObject controller, String controllerId, String actionId) {
+        PhpModule phpModule = PhpModule.forFileObject(controller);
+        FileObject projectDirectory = phpModule.getProjectDirectory();
+
+        // get main.php
+        FileObject main = null;
+        if (projectDirectory != null) {
+            main = projectDirectory.getFileObject(CONFIG_PATH + "/main.php"); // NOI18N
+        }
+
+        // get theme
+        final Set<String> themes = new HashSet<String>();
+        try {
+            ParserManager.parse(Collections.singleton(Source.create(main)), new UserTask() {
+                @Override
+                public void run(ResultIterator resultIterator) throws Exception {
+                    if (resultIterator == null) {
+                        return;
+                    }
+                    ParserResult parserResult = (ParserResult) resultIterator.getParserResult();
+                    final MainVisitor mainVisitor = new MainVisitor();
+                    mainVisitor.scan(Utils.getRoot(parserResult));
+                    themes.addAll(mainVisitor.getThemeName());
+                }
+            });
+        } catch (ParseException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        String themeName = ""; // NOI18N
+        for (String theme : themes) {
+            themeName = theme;
+            break;
+        }
+        String themePath = ""; // NOI18N
+        if (!themeName.isEmpty()) {
+            themePath = String.format(THEME_PATH, themeName);
+        }
+
+        // create relative path from controller to view file
+        String pathToView = String.format(VIEW_RELATIVE_PATH_FORMAT, themePath, controllerId, actionId);
         return controller.getFileObject(pathToView);
     }
 
@@ -185,9 +250,12 @@ public class YiiUtils {
             return null;
         }
         String controllerName = getControllerFileName(view.getParent().getNameExt());
-        String pathToController = String.format(CONTROLLER_RELATIVE_PATH_FORMAT, controllerName);
-        return view.getFileObject(pathToController);
-
+        PhpModule phpModule = getPhpModule(view);
+        FileObject controllersDirectory = getControllersDirectory(phpModule);
+        if (controllersDirectory != null) {
+            return controllersDirectory.getFileObject(controllerName + ".php"); //NOI18N
+        }
+        return null;
     }
 
     /**
@@ -367,6 +435,16 @@ public class YiiUtils {
     }
 
     /**
+     * Get themes directory (protected/themes).
+     *
+     * @param phpModule
+     * @return
+     */
+    public static FileObject getThemesDirectory(PhpModule phpModule) {
+        return getDirectory(phpModule, THEMES_PATH);
+    }
+
+    /**
      * Get directory
      *
      * @param phpModule
@@ -379,5 +457,28 @@ public class YiiUtils {
             return null;
         }
         return sourceDirectory.getFileObject(path);
+    }
+
+    private static class MainVisitor extends DefaultVisitor {
+
+        private static final String THEME = "theme"; // NOI18N
+        private Set<String> themeName = new HashSet<String>();
+
+        @Override
+        public void visit(ArrayElement node) {
+            super.visit(node);
+            Expression key = node.getKey();
+            String keyName = YiiCodeUtils.getStringValue(key);
+            if (keyName.equals(THEME)) {
+                String value = YiiCodeUtils.getStringValue(node.getValue());
+                if (!value.isEmpty()) {
+                    themeName.add(value);
+                }
+            }
+        }
+
+        public synchronized Set<String> getThemeName() {
+            return themeName;
+        }
     }
 }

@@ -90,15 +90,17 @@ public class YiiEditorExtender extends EditorExtender {
 
         if (YiiUtils.isView(fo)) {
             FileObject controller = YiiUtils.getController(fo);
-            List<PhpBaseElement> elements = new LinkedList<PhpBaseElement>();
-            String controllerName = controller.getName();
-            // add controller and variables
-            PhpClass controllerClass = new PhpClass(controllerName, controllerName);
-            PhpVariable phpVariable = new PhpVariable("$this", controllerClass, controller, 0); // NOI18N
-            elements.add(phpVariable);
-            elements.addAll(parseAction(fo));
+            if (controller != null) {
+                List<PhpBaseElement> elements = new LinkedList<PhpBaseElement>();
+                String controllerName = controller.getName();
+                // add controller and variables
+                PhpClass controllerClass = new PhpClass(controllerName, controllerName);
+                PhpVariable phpVariable = new PhpVariable("$this", controllerClass, controller, 0); // NOI18N
+                elements.add(phpVariable);
+                elements.addAll(parseAction(fo));
 
-            return elements;
+                return elements;
+            }
         }
         return Collections.emptyList();
     }
