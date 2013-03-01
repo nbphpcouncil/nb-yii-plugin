@@ -150,7 +150,7 @@ public class YiiScript {
      */
     private PhpExecutable createPhpExecutable(PhpModule phpModule) {
         return new PhpExecutable(yiicPath)
-                .workDir(FileUtil.toFile(phpModule.getProjectDirectory().getParent()));
+                .workDir(FileUtil.toFile(phpModule.getSourceDirectory().getParent()));
 
     }
 
