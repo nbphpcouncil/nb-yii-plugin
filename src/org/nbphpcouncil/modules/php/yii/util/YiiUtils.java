@@ -144,7 +144,9 @@ public class YiiUtils {
      * @return true if file is view file, otherwise false.
      */
     public static boolean isView(FileObject fo) {
-        if (!fo.isData() || !FileUtils.isPhpFile(fo)) {
+        if (fo == null
+                || !fo.isData()
+                || !FileUtils.isPhpFile(fo)) {
             return false;
         }
         PhpModule phpModule = getPhpModule(fo);
@@ -152,9 +154,12 @@ public class YiiUtils {
         FileObject themesDirestory = getThemesDirectory(phpModule);
         List<FileObject> directories = Arrays.asList(viewsDirectory, themesDirestory);
         for (FileObject directory : directories) {
-            String relativePath = FileUtil.getRelativePath(directory, fo);
-            if (!StringUtils.isEmpty(relativePath)) {
-                return true;
+            // #3
+            if (directory != null) {
+                String relativePath = FileUtil.getRelativePath(directory, fo);
+                if (!StringUtils.isEmpty(relativePath)) {
+                    return true;
+                }
             }
         }
 
