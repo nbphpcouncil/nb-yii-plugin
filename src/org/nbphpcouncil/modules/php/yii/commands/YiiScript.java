@@ -48,6 +48,8 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.nbphpcouncil.modules.php.yii.ui.options.YiiOptions;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.netbeans.api.extexecution.ExecutionDescriptor;
@@ -60,7 +62,6 @@ import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
@@ -77,6 +78,7 @@ public class YiiScript {
     private static final String WEBAPP_COMMAND = "webapp"; // NOI18N
     private String yiicPath;
     public static final String OPTIONS_SUB_PATH = "Yii"; // NOI18N
+    private static final Logger LOGGER = Logger.getLogger(YiiScript.class.getName());
 
     private YiiScript(String yiicPath) {
         this.yiicPath = yiicPath;
@@ -108,17 +110,21 @@ public class YiiScript {
      * @return true if plugin can create a yii project, otherwise false
      */
     public boolean initProject(PhpModule phpModule) {
-        FileObject projectDirectory = phpModule.getProjectDirectory();
+        FileObject sourceDirectory = phpModule.getSourceDirectory();
+        if (sourceDirectory == null) {
+            LOGGER.log(Level.WARNING, "Not found source directory!");
+            return false;
+        }
 
         List<String> params = new ArrayList<String>();
         params.add(WEBAPP_COMMAND);
-        params.add(projectDirectory.getName());
+        params.add(sourceDirectory.getName());
         try {
             createPhpExecutable(phpModule)
                     .additionalParameters(params)
                     .runAndWait(getInitProjectDescriptor(), PhpExecutable.ANSI_STRIPPING_FACTORY, WEBAPP_COMMAND);
         } catch (ExecutionException ex) {
-            Exceptions.printStackTrace(ex);
+            LOGGER.log(Level.WARNING, "Failed to excute php, please check yiic path or php interpriter on option panel");
         }
 
         return YiiUtils.isYii(phpModule);
