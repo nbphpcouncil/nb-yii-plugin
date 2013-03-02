@@ -113,14 +113,6 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.netbeans.modules.php.project</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <implementation-version/>
-                    </run-dependency>
-                </dependency>
-                <dependency>
                     <code-name-base>org.netbeans.modules.project.ant</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>

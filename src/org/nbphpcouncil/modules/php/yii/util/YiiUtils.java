@@ -76,7 +76,7 @@ import org.openide.util.Exceptions;
  */
 public class YiiUtils {
 
-    private static final String YII_INCLUDE_PATH_REGEX = "^\\$yii=.+'(.+/framework)/yii\\.php';$"; // NOI18N
+    private static final String YII_INCLUDE_PATH_REGEX = "^\\$yii *=.+'(.+/framework)/yii\\.php';$"; // NOI18N
     private static final String CONTROLLER_SUFIX = "Controller"; // NOI18N
     private static final String CONTROLLERS_DIRECTORY_NAME = "controllers"; // NOI18N
     private static final String ACTION_METHOD_PREFIX = "action"; // NOI18N
