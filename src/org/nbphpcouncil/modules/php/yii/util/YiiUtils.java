@@ -121,7 +121,7 @@ public class YiiUtils {
         List<String> lines = null;
         List<String> includePath = new ArrayList<String>();
         try {
-            lines = index.asLines();
+            lines = index.asLines("UTF-8"); // NOI18N
             Pattern pattern = Pattern.compile(YII_INCLUDE_PATH_REGEX);
             for (String line : lines) {
                 Matcher matcher = pattern.matcher(line);
