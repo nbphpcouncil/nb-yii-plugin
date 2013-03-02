@@ -41,18 +41,24 @@
  */
 package org.nbphpcouncil.modules.php.yii.util;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
-import javax.swing.DefaultListModel;
+import org.netbeans.api.project.FileOwnerQuery;
+import org.netbeans.api.project.Project;
+import org.netbeans.api.project.ProjectManager;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
-import org.netbeans.modules.php.project.PhpProject;
-import org.netbeans.modules.php.project.classpath.BasePathSupport.Item;
-import org.netbeans.modules.php.project.classpath.IncludePathSupport;
-import org.netbeans.modules.php.project.ui.customizer.PhpProjectProperties;
-import org.netbeans.modules.php.project.util.PhpProjectUtils;
+import org.netbeans.modules.php.api.util.StringUtils;
 import org.netbeans.spi.project.support.ant.AntProjectHelper;
-import org.netbeans.spi.project.support.ant.PropertyEvaluator;
-import org.netbeans.spi.project.support.ant.ReferenceHelper;
+import org.netbeans.spi.project.support.ant.EditableProperties;
+import org.netbeans.spi.project.support.ant.PropertyUtils;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
+import org.openide.util.Exceptions;
+import org.openide.util.Mutex;
+import org.openide.util.MutexException;
 
 /**
  *
@@ -60,6 +66,10 @@ import org.openide.filesystems.FileObject;
  */
 public class ProjectPropertiesSupport {
 
+    public static final String INCLUDE_PATH = "include.path"; // NOI18N
+    public static final String PHP_UNIT_BOOTSTRAP = "phpunit.bootstrap"; // NOI18N
+    public static final String PHP_UNIT_BOOTSTRAP_FOR_CREATE_TESTS = "phpunit.bootstrap.create.tests"; // NOI18N
+    public static final String PHP_UNIT_CONFIGURATION = "phpunit.configuration"; // NOI18N
     private static final String BOOTSTRAP_PHP = "bootstrap.php"; //NOI18N
     private static final String PHPUNIT_XML = "phpunit.xml"; //NOI18N
 
@@ -69,21 +79,82 @@ public class ProjectPropertiesSupport {
      * @param phpModule
      * @param paths path is relative path
      */
-    public static void setIncludePath(PhpModule phpModule, List<String> paths) {
-        PhpProject phpProject = getPhpProject(phpModule);
-        if (phpProject == null) {
-            return;
+    public static void setIncludePath(final PhpModule phpModule, final List<String> paths) {
+        try {
+            // store properties
+            ProjectManager.mutex().writeAccess(new Mutex.ExceptionAction<Void>() {
+                @Override
+                public Void run() throws IOException {
+                    Project project = getProject(phpModule);
+                    AntProjectHelper helper = getAntProjectHelper(project);
+                    if (helper == null) {
+                        return null;
+                    }
+                    EditableProperties properties = helper.getProperties(AntProjectHelper.PROJECT_PROPERTIES_PATH);
+                    List<String> currentIncludePaths = Arrays.asList(getIncludePaths(project));
+                    List<String> includePaths = new LinkedList<String>();
+                    boolean isAdded = false;
+                    for (String path : paths) {
+                        FileObject sourceDirectory = phpModule.getSourceDirectory();
+                        FileObject target = null;
+                        if (sourceDirectory != null) {
+                            target = sourceDirectory.getFileObject(path);
+                        }
+                        for (String currentPath : currentIncludePaths) {
+                            currentPath = currentPath + ":"; //NOI18N
+                            includePaths.add(currentPath);
+                        }
+                        if (target != null) {
+                            File file = FileUtil.toFile(target);
+                            String absolutePath = file.getAbsolutePath();
+                            if (!currentIncludePaths.contains(absolutePath)) {
+                                if (paths.size() > 1) {
+                                    absolutePath = absolutePath + ":"; // NOI18N
+                                }
+                                includePaths.add(absolutePath); //NOI18N
+                                isAdded = true;
+                            }
+                        }
+                    }
+                    if (isAdded) {
+                        properties.setProperty(INCLUDE_PATH, includePaths.toArray(new String[0]));
+                        helper.putProperties(AntProjectHelper.PROJECT_PROPERTIES_PATH, properties);
+                    }
+                    ProjectManager.getDefault().saveProject(project);
+                    return null;
+                }
+            });
+        } catch (MutexException e) {
+            Exceptions.printStackTrace((IOException) e.getException());
         }
 
-        PhpProjectProperties properties = createProjectProperties(phpProject);
-        DefaultListModel includePathListModel = properties.getIncludePathListModel();
-        for (String path : paths) {
-            Item item = Item.create(path);
-            if (!includePathListModel.contains(item)) {
-                includePathListModel.addElement(item);
-            }
+    }
+
+    /**
+     * Get include path from project.properties.
+     *
+     * @param project
+     * @return
+     */
+    public static String getIncludePath(Project project) {
+        String includePath = ""; // NOI18N
+        if (project != null) {
+            AntProjectHelper helper = getAntProjectHelper(project);
+            EditableProperties properties = helper.getProperties(AntProjectHelper.PROJECT_PROPERTIES_PATH);
+            includePath = properties.getProperty(INCLUDE_PATH);
         }
-        properties.save();
+        return includePath;
+    }
+
+    /**
+     * Get includle paths as array from project properties.
+     *
+     * @param project
+     * @return
+     */
+    public static String[] getIncludePaths(Project project) {
+        String includePath = getIncludePath(project);
+        return PropertyUtils.tokenizePath(includePath);
     }
 
     /**
@@ -92,7 +163,11 @@ public class ProjectPropertiesSupport {
      * @param phpModule
      */
     public static void setYiiIncludePath(PhpModule phpModule) {
-        FileObject index = phpModule.getSourceDirectory().getFileObject("index.php"); //NOI18N
+        FileObject sourceDirectory = phpModule.getSourceDirectory();
+        if (sourceDirectory == null) {
+            return;
+        }
+        FileObject index = sourceDirectory.getFileObject("index.php"); //NOI18N
         if (index == null) {
             return;
         }
@@ -105,53 +180,100 @@ public class ProjectPropertiesSupport {
      *
      * @param phpModule
      */
-    public static void setPHPUnit(PhpModule phpModule) {
-        PhpProject phpProject = getPhpProject(phpModule);
-        if (phpProject == null) {
-            return;
+    public static void setPHPUnit(final PhpModule phpModule) {
+        try {
+            // store properties
+            ProjectManager.mutex().writeAccess(new Mutex.ExceptionAction<Void>() {
+                @Override
+                public Void run() throws IOException {
+                    Project project = getProject(phpModule);
+                    AntProjectHelper helper = getAntProjectHelper(project);
+                    if (helper == null) {
+                        return null;
+                    }
+                    EditableProperties properties = helper.getProperties(AntProjectHelper.PROJECT_PROPERTIES_PATH);
+                    if (properties != null) {
+                        FileObject testsDirectory = YiiUtils.getTestsDirectory(phpModule);
+                        if (testsDirectory == null) {
+                            return null;
+                        }
+                        FileObject bootstrap = testsDirectory.getFileObject(BOOTSTRAP_PHP);
+                        if (bootstrap != null) {
+                            properties.setProperty(PHP_UNIT_BOOTSTRAP, relativizeFile(project, bootstrap.getPath()));
+                            properties.setProperty(PHP_UNIT_BOOTSTRAP_FOR_CREATE_TESTS, "true"); // NOI18N
+                        }
+                        FileObject phpunitXml = testsDirectory.getFileObject(PHPUNIT_XML);
+                        if (phpunitXml != null) {
+                            properties.setProperty(PHP_UNIT_CONFIGURATION, relativizeFile(project, phpunitXml.getPath()));
+                        }
+
+                        helper.putProperties(AntProjectHelper.PROJECT_PROPERTIES_PATH, properties);
+                    }
+
+                    ProjectManager.getDefault().saveProject(project);
+                    return null;
+                }
+            });
+        } catch (MutexException e) {
+            Exceptions.printStackTrace((IOException) e.getException());
         }
-        PhpProjectProperties phpProjectProperties = new PhpProjectProperties(phpProject);
-        FileObject testsDirectory = YiiUtils.getTestsDirectory(phpModule);
-        if (testsDirectory == null) {
-            return;
-        }
-        FileObject bootstrap = testsDirectory.getFileObject(BOOTSTRAP_PHP);
-        if (bootstrap != null) {
-            phpProjectProperties.setPhpUnitBootstrap(bootstrap.getPath());
-            phpProjectProperties.setPhpUnitBootstrapForCreateTests(true);
-        }
-        FileObject phpunitXml = testsDirectory.getFileObject(PHPUNIT_XML);
-        if (phpunitXml != null) {
-            phpProjectProperties.setPhpUnitConfiguration(phpunitXml.getPath());
-        }
-        phpProjectProperties.save();
     }
 
     /**
-     * Get PhpProject
+     * Get Project for PhpModule.
      *
      * @param phpModule
-     * @return PhpProject
+     * @return
      */
-    public static PhpProject getPhpProject(PhpModule phpModule) {
-        if (phpModule == null) {
+    public static Project getProject(PhpModule phpModule) {
+        FileObject projectDirectory = phpModule.getProjectDirectory();
+        if (projectDirectory == null) {
             return null;
         }
-        return PhpProjectUtils.getPhpProject(phpModule.getProjectDirectory());
+        return getProject(projectDirectory);
+
     }
 
     /**
-     * Create project properties
+     * Get Project for FileObject.
+     *
+     * @param fo
+     * @return
+     */
+    public static Project getProject(FileObject fo) {
+        return FileOwnerQuery.getOwner(fo);
+    }
+
+    /**
+     * Get AntProjectHelper.
      *
      * @param project
      * @return
      */
-    private static PhpProjectProperties createProjectProperties(PhpProject project) {
-        AntProjectHelper antProjectHelper = project.getHelper();
-        ReferenceHelper referenceHelper = project.getRefHelper();
-        PropertyEvaluator evaluator = project.getLookup().lookup(PropertyEvaluator.class);
-        IncludePathSupport includePathSupport = new IncludePathSupport(evaluator, referenceHelper, antProjectHelper);
-        PhpProjectProperties properties = new PhpProjectProperties(project, includePathSupport, null);
-        return properties;
+    private static AntProjectHelper getAntProjectHelper(Project project) {
+        if (project == null) {
+            return null;
+        }
+        return project.getLookup().lookup(AntProjectHelper.class);
+    }
+
+    /**
+     * Relativize file.
+     *
+     * @param project
+     * @param filePath
+     * @return
+     */
+    private static String relativizeFile(Project project, String filePath) {
+        if (StringUtils.hasText(filePath)) {
+            File file = new File(filePath);
+            String path = PropertyUtils.relativizeFile(FileUtil.toFile(project.getProjectDirectory()), file);
+            if (path == null) {
+                // sorry, cannot be relativized
+                path = file.getAbsolutePath();
+            }
+            return path;
+        }
+        return ""; // NOI18N
     }
 }

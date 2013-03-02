@@ -48,6 +48,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.nbphpcouncil.modules.php.yii.Yii;
@@ -76,7 +78,7 @@ import org.openide.util.Exceptions;
  */
 public class YiiUtils {
 
-    private static final String YII_INCLUDE_PATH_REGEX = "^\\$yii=.+'(.+/framework)/yii\\.php';$"; // NOI18N
+    private static final String YII_INCLUDE_PATH_REGEX = "^\\$yii *=.+'(.+/framework)/yii\\.php';$"; // NOI18N
     private static final String CONTROLLER_SUFIX = "Controller"; // NOI18N
     private static final String CONTROLLERS_DIRECTORY_NAME = "controllers"; // NOI18N
     private static final String ACTION_METHOD_PREFIX = "action"; // NOI18N
@@ -90,6 +92,7 @@ public class YiiUtils {
     private static final String TESTS_PATH = PROTECTED_PATH + "tests"; // NOI18N
     private static final String CONFIG_PATH = PROTECTED_PATH + "config"; // NOI18N
     private static final String THEMES_PATH = "themes"; // NOI18N
+    private static final Logger LOGGER = Logger.getLogger(YiiUtils.class.getName());
 
     /**
      * Check whether php module is yii
@@ -118,7 +121,7 @@ public class YiiUtils {
         List<String> lines = null;
         List<String> includePath = new ArrayList<String>();
         try {
-            lines = index.asLines();
+            lines = index.asLines("UTF-8"); // NOI18N
             Pattern pattern = Pattern.compile(YII_INCLUDE_PATH_REGEX);
             for (String line : lines) {
                 Matcher matcher = pattern.matcher(line);
@@ -144,7 +147,9 @@ public class YiiUtils {
      * @return true if file is view file, otherwise false.
      */
     public static boolean isView(FileObject fo) {
-        if (!fo.isData() || !FileUtils.isPhpFile(fo)) {
+        if (fo == null
+                || !fo.isData()
+                || !FileUtils.isPhpFile(fo)) {
             return false;
         }
         PhpModule phpModule = getPhpModule(fo);
@@ -152,9 +157,12 @@ public class YiiUtils {
         FileObject themesDirestory = getThemesDirectory(phpModule);
         List<FileObject> directories = Arrays.asList(viewsDirectory, themesDirestory);
         for (FileObject directory : directories) {
-            String relativePath = FileUtil.getRelativePath(directory, fo);
-            if (!StringUtils.isEmpty(relativePath)) {
-                return true;
+            // #3
+            if (directory != null) {
+                String relativePath = FileUtil.getRelativePath(directory, fo);
+                if (!StringUtils.isEmpty(relativePath)) {
+                    return true;
+                }
             }
         }
 
@@ -188,12 +196,16 @@ public class YiiUtils {
 
     private static FileObject getView(FileObject controller, String controllerId, String actionId) {
         PhpModule phpModule = PhpModule.forFileObject(controller);
-        FileObject projectDirectory = phpModule.getProjectDirectory();
+        FileObject sourceDirectory = phpModule.getSourceDirectory();
 
         // get main.php
         FileObject main = null;
-        if (projectDirectory != null) {
-            main = projectDirectory.getFileObject(CONFIG_PATH + "/main.php"); // NOI18N
+        if (sourceDirectory != null) {
+            main = sourceDirectory.getFileObject(CONFIG_PATH + "/main.php"); // NOI18N
+        }
+        if (main == null) {
+            LOGGER.log(Level.INFO, "Not found main.php");
+            return null;
         }
 
         // get theme
