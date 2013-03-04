@@ -41,6 +41,7 @@
  */
 package org.nbphpcouncil.modules.php.yii.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,6 +55,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.nbphpcouncil.modules.php.yii.Yii;
 import org.nbphpcouncil.modules.php.yii.YiiPhpFrameworkProvider;
+import org.nbphpcouncil.modules.php.yii.preferences.YiiPreferences;
 import org.netbeans.modules.csl.spi.ParserResult;
 import org.netbeans.modules.parsing.api.ParserManager;
 import org.netbeans.modules.parsing.api.ResultIterator;
@@ -238,7 +240,36 @@ public class YiiUtils {
 
         // create relative path from controller to view file
         String pathToView = String.format(VIEW_RELATIVE_PATH_FORMAT, themePath, controllerId, actionId);
-        return controller.getFileObject(pathToView);
+
+        FileObject view = controller.getFileObject(pathToView);
+
+        // use "Create a new view file automatically" option
+        if (view == null && YiiPreferences.useAutoCreateView(phpModule)) {
+            view = createViewFileAuto(controller, pathToView);
+        }
+        return view;
+    }
+
+    /**
+     * For auto create option.
+     *
+     * @param controller
+     * @param pathToView
+     * @return
+     */
+    private static FileObject createViewFileAuto(FileObject controller, String pathToView) {
+        String viewPath = FileUtil.normalizePath(controller.getParent().getPath() + pathToView);
+        File file = new File(viewPath);
+        FileObject view = null;
+        try {
+            // create file
+            if (file.createNewFile()) {
+                view = FileUtil.toFileObject(file);
+            }
+        } catch (IOException ex) {
+            LOGGER.log(Level.WARNING, "view file path : {0}", viewPath);
+        }
+        return view;
     }
 
     /**

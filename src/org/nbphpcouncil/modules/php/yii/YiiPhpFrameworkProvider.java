@@ -55,6 +55,7 @@ import org.netbeans.modules.php.api.phpmodule.PhpModuleProperties;
 import org.netbeans.modules.php.spi.editor.EditorExtender;
 import org.netbeans.modules.php.spi.framework.PhpFrameworkProvider;
 import org.netbeans.modules.php.spi.framework.PhpModuleActionsExtender;
+import org.netbeans.modules.php.spi.framework.PhpModuleCustomizerExtender;
 import org.netbeans.modules.php.spi.framework.PhpModuleExtender;
 import org.netbeans.modules.php.spi.framework.PhpModuleIgnoredFilesExtender;
 import org.netbeans.modules.php.spi.framework.commands.FrameworkCommandSupport;
@@ -100,8 +101,7 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
     }
 
     /**
-     * Check whether project is Yii Framework. Find
-     * WebRoot/appname/protected/yiic.
+     * Check whether project is Yii Framework. Find WebRoot/appname/protected/yiic.
      *
      * @param pm PhpModule
      * @return boolean true if exist yiic file, otherwise false
@@ -121,8 +121,7 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
     }
 
     /**
-     * Get configuration files. Files is displayed on Important Files node.
-     * appname/protected/config
+     * Get configuration files. Files is displayed on Important Files node. appname/protected/config
      *
      * @param pm PhpModule
      * @return File[]
@@ -148,8 +147,8 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
     }
 
     /**
-     * Get PhpModuleProperties. This method is called when only creating new
-     * project. Please, notice that properties setXXX() method has return value.
+     * Get PhpModuleProperties. This method is called when only creating new project. Please, notice that properties
+     * setXXX() method has return value.
      *
      * @param pm
      * @return
@@ -195,5 +194,10 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
     @Override
     public EditorExtender getEditorExtender(PhpModule phpModule) {
         return new YiiEditorExtender();
+    }
+
+    @Override
+    public PhpModuleCustomizerExtender createPhpModuleCustomizerExtender(PhpModule phpModule) {
+        return new YiiPhpModuleCustomizerExtender(phpModule);
     }
 }
