@@ -100,6 +100,12 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
         // get FileObject
         Source source = Source.create(doc);
         FileObject targetFile = source.getFileObject();
+
+        // check whether target file is view
+        if (YiiUtils.isView(targetFile)) {
+            targetFile = YiiUtils.getController(targetFile);
+        }
+
         if (!YiiUtils.isController(targetFile)) {
             return false;
         }
@@ -136,7 +142,7 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
     }
 
     /**
-     * Verify whether method name is "render".
+     * Verify whether method name is "render" or "renderPartial".
      *
      * @param ts TokenSequence
      * @return true if render method, otherwise false
@@ -145,7 +151,8 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
         ts.movePrevious();
         ts.movePrevious();
         Token<PHPTokenId> render = ts.token();
-        if (render.text().toString().equals("render")) { // NOI18N
+        String text = render.text().toString();
+        if (text.equals("render") || text.equals("renderPartial")) { // NOI18N
             return true;
         }
         return false;
