@@ -175,28 +175,52 @@ public class YiiUtils {
      * Get view file object
      *
      * @param controller
-     * @param actionId action name(view file name). e.g actionIndex -> index
-     * @return view file object
-     */
-    public static FileObject getView(FileObject controller, String actionId) {
-        String controllerId = getViewFolderName(controller.getName());
-        return getView(controller, controllerId, actionId);
-    }
-
-    /**
-     * Get view file object
-     *
-     * @param controller
      * @param method
      * @return view file object
      */
     public static FileObject getView(FileObject controller, PhpClass.Method method) {
         String viewFolderName = getViewFolderName(controller.getName());
         String viewName = getViewName(method);
-        return getView(controller, viewFolderName, viewName);
+        String pathToView = getRelativePathToView(controller, viewFolderName, viewName);
+        if (pathToView == null) {
+            return null;
+        }
+
+        // get view file
+        FileObject view = controller.getFileObject(pathToView);
+
+        // use "Create a new view file automatically" option
+        PhpModule phpModule = PhpModule.forFileObject(controller);
+        if (view == null && YiiPreferences.useAutoCreateView(phpModule)) {
+            view = createViewFileAuto(controller, pathToView);
+        }
+        return view;
     }
 
-    private static FileObject getView(FileObject controller, String controllerId, String actionId) {
+    /**
+     * Get relative path to view file from controller.
+     *
+     * @param controller
+     * @param actionId action name(view file name). e.g actionIndex -> index
+     * @return view file object
+     */
+    public static String getRelativePathToView(FileObject controller, String actionId) {
+        String controllerId = getViewFolderName(controller.getName());
+        return getRelativePathToView(controller, controllerId, actionId);
+    }
+
+    /**
+     * Get relative path to view file from controller.
+     *
+     * @param controller
+     * @param controllerId
+     * @param actionId
+     * @return
+     */
+    private static String getRelativePathToView(FileObject controller, String controllerId, String actionId) {
+        if (controller == null) {
+            return null;
+        }
         PhpModule phpModule = PhpModule.forFileObject(controller);
         FileObject sourceDirectory = phpModule.getSourceDirectory();
 
@@ -211,6 +235,23 @@ public class YiiUtils {
         }
 
         // get theme
+        String themeName = getThemeName(main);
+        String themePath = ""; // NOI18N
+        if (!themeName.isEmpty()) {
+            themePath = String.format(THEME_PATH, themeName);
+        }
+
+        // create relative path from controller to view file
+        return String.format(VIEW_RELATIVE_PATH_FORMAT, themePath, controllerId, actionId);
+    }
+
+    /**
+     * Get theme name from main.php file.
+     *
+     * @param main
+     * @return theme name if find the theme, otherwise empty string.
+     */
+    public static String getThemeName(FileObject main) {
         final Set<String> themes = new HashSet<String>();
         try {
             ParserManager.parse(Collections.singleton(Source.create(main)), new UserTask() {
@@ -233,21 +274,7 @@ public class YiiUtils {
             themeName = theme;
             break;
         }
-        String themePath = ""; // NOI18N
-        if (!themeName.isEmpty()) {
-            themePath = String.format(THEME_PATH, themeName);
-        }
-
-        // create relative path from controller to view file
-        String pathToView = String.format(VIEW_RELATIVE_PATH_FORMAT, themePath, controllerId, actionId);
-
-        FileObject view = controller.getFileObject(pathToView);
-
-        // use "Create a new view file automatically" option
-        if (view == null && YiiPreferences.useAutoCreateView(phpModule)) {
-            view = createViewFileAuto(controller, pathToView);
-        }
-        return view;
+        return themeName;
     }
 
     /**
@@ -257,7 +284,7 @@ public class YiiUtils {
      * @param pathToView
      * @return
      */
-    private static FileObject createViewFileAuto(FileObject controller, String pathToView) {
+    public static FileObject createViewFileAuto(FileObject controller, String pathToView) {
         String viewPath = FileUtil.normalizePath(controller.getParent().getPath() + pathToView);
         File file = new File(viewPath);
         FileObject view = null;

@@ -43,6 +43,7 @@ package org.nbphpcouncil.modules.php.yii.editor;
 
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.Document;
+import org.nbphpcouncil.modules.php.yii.preferences.YiiPreferences;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.lexer.Token;
@@ -51,6 +52,7 @@ import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkProvider;
 import org.netbeans.modules.csl.api.UiUtils;
 import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.php.api.phpmodule.PhpModule;
 import org.netbeans.modules.php.editor.lexer.PHPTokenId;
 import org.openide.filesystems.FileObject;
 
@@ -66,6 +68,9 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
     private String target = ""; // NOI18N
     private int targetStart;
     private int targetEnd;
+    private boolean useAutoCreate = false;
+    private String relativeViewPath;
+    private FileObject controller;
 
     @Override
     public boolean isHyperlinkPoint(Document doc, int offset) {
@@ -74,7 +79,7 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
 
     @Override
     public int[] getHyperlinkSpan(Document doc, int offset) {
-        if (view != null) {
+        if (view != null || useAutoCreate) {
             return new int[]{targetStart, targetEnd};
         }
         return null;
@@ -82,6 +87,11 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
 
     @Override
     public void performClickAction(Document doc, int offset) {
+        // use "create view file automatically"
+        if (view == null && useAutoCreate) {
+            view = YiiUtils.createViewFileAuto(controller, relativeViewPath);
+        }
+
         // Open view file
         if (view != null) {
             UiUtils.open(view, DEFAULT_OFFSET);
@@ -99,14 +109,14 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
     private boolean verifyState(Document doc, int offset) {
         // get FileObject
         Source source = Source.create(doc);
-        FileObject targetFile = source.getFileObject();
+        controller = source.getFileObject();
 
         // check whether target file is view
-        if (YiiUtils.isView(targetFile)) {
-            targetFile = YiiUtils.getController(targetFile);
+        if (YiiUtils.isView(controller)) {
+            controller = YiiUtils.getController(controller);
         }
 
-        if (!YiiUtils.isController(targetFile)) {
+        if (!YiiUtils.isController(controller)) {
             return false;
         }
         AbstractDocument abstractDoc = (AbstractDocument) doc;
@@ -128,8 +138,10 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
                 return false;
             }
             // set view file
-            view = YiiUtils.getView(targetFile, target);
-            if (view != null) {
+            relativeViewPath = YiiUtils.getRelativePathToView(controller, target);
+            view = controller.getFileObject(relativeViewPath);
+            useAutoCreate = YiiPreferences.useAutoCreateView(PhpModule.forFileObject(controller));
+            if (view != null || useAutoCreate) {
                 targetStart = newOffset + 1;
                 targetEnd = targetStart + target.length();
                 return true;
