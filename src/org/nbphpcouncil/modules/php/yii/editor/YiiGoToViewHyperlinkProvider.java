@@ -41,6 +41,8 @@
  */
 package org.nbphpcouncil.modules.php.yii.editor;
 
+import java.util.EnumSet;
+import java.util.Set;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.Document;
 import org.nbphpcouncil.modules.php.yii.preferences.YiiPreferences;
@@ -49,19 +51,22 @@ import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.lib.editor.hyperlink.spi.HyperlinkProvider;
+import org.netbeans.lib.editor.hyperlink.spi.HyperlinkProviderExt;
+import org.netbeans.lib.editor.hyperlink.spi.HyperlinkType;
 import org.netbeans.modules.csl.api.UiUtils;
 import org.netbeans.modules.parsing.api.Source;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
 import org.netbeans.modules.php.editor.lexer.PHPTokenId;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
+import org.openide.util.NbBundle;
 
 /**
  *
  * @author junichi11
  */
-@MimeRegistration(mimeType = "text/x-php5", service = HyperlinkProvider.class)
-public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
+@MimeRegistration(mimeType = "text/x-php5", service = HyperlinkProviderExt.class)
+public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
 
     private static final int DEFAULT_OFFSET = 0;
     private FileObject view = null;
@@ -73,12 +78,17 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
     private FileObject controller;
 
     @Override
-    public boolean isHyperlinkPoint(Document doc, int offset) {
+    public Set<HyperlinkType> getSupportedHyperlinkTypes() {
+        return EnumSet.of(HyperlinkType.GO_TO_DECLARATION);
+    }
+
+    @Override
+    public boolean isHyperlinkPoint(Document doc, int offset, HyperlinkType type) {
         return verifyState(doc, offset);
     }
 
     @Override
-    public int[] getHyperlinkSpan(Document doc, int offset) {
+    public int[] getHyperlinkSpan(Document doc, int offset, HyperlinkType type) {
         if (view != null || useAutoCreate) {
             return new int[]{targetStart, targetEnd};
         }
@@ -86,7 +96,7 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
     }
 
     @Override
-    public void performClickAction(Document doc, int offset) {
+    public void performClickAction(Document doc, int offset, HyperlinkType type) {
         // use "create view file automatically"
         if (view == null && useAutoCreate) {
             view = YiiUtils.createViewFileAuto(controller, relativeViewPath);
@@ -188,5 +198,25 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
         } else {
             target = ""; // NOI18N
         }
+    }
+
+    @NbBundle.Messages("LBL_NotFoundViewFileMessage=Doesn't exist a file yet. If you click this link, a new empty view file will be created.")
+    @Override
+    public String getTooltipText(Document doc, int offset, HyperlinkType type) {
+        String viewPath = ""; // NOI18N
+        if (view != null) {
+            PhpModule phpModule = PhpModule.forFileObject(view);
+            FileObject sourceDirectory = phpModule.getSourceDirectory();
+            if (sourceDirectory != null) {
+                viewPath = FileUtil.getRelativePath(sourceDirectory, view);
+            } else {
+                viewPath = view.getPath();
+            }
+        } else {
+            if (useAutoCreate) {
+                viewPath = Bundle.LBL_NotFoundViewFileMessage();
+            }
+        }
+        return viewPath;
     }
 }
