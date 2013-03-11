@@ -128,7 +128,7 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
             controller = YiiUtils.getController(controller);
         }
 
-        if (!YiiUtils.isController(controller)) {
+        if (controller == null || !YiiUtils.isController(controller)) {
             return false;
         }
         AbstractDocument abstractDoc = (AbstractDocument) doc;

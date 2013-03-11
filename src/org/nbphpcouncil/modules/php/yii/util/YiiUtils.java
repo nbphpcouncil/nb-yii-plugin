@@ -322,8 +322,28 @@ public class YiiUtils {
         if (!isView(view)) {
             return null;
         }
-        String controllerName = getControllerFileName(view.getParent().getNameExt());
+
         PhpModule phpModule = getPhpModule(view);
+        // view is in subdirectory
+        YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+        FileObject webroot = yiiModule.getWebroot();
+        String relativePath = ""; // NOI18N
+        FileObject parent = view.getParent();
+        String name = parent.getNameExt();
+        do {
+            parent = parent.getParent();
+            if (parent.getNameExt().equals("views")) { // NOI18N
+                break;
+            }
+            name = parent.getNameExt();
+            relativePath = FileUtil.getRelativePath(webroot, parent);
+        } while (!StringUtils.isEmpty(relativePath));
+
+        if (StringUtils.isEmpty(name)) {
+            return null;
+        }
+
+        String controllerName = getControllerFileName(name);
         FileObject controllersDirectory = getControllersDirectory(phpModule);
         if (controllersDirectory != null) {
             return controllersDirectory.getFileObject(controllerName + ".php"); //NOI18N
