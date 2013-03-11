@@ -41,26 +41,49 @@
  */
 package org.nbphpcouncil.modules.php.yii.ui.actions;
 
+import java.awt.Dialog;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.SwingUtilities;
+import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
+import org.nbphpcouncil.modules.php.yii.ui.wizards.YiiRunActionPanel;
 import org.nbphpcouncil.modules.php.yii.util.YiiDocUtils;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.netbeans.api.editor.EditorRegistry;
+import org.netbeans.modules.csl.spi.ParserResult;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
+import org.netbeans.modules.parsing.spi.ParseException;
 import org.netbeans.modules.php.api.editor.EditorSupport;
 import org.netbeans.modules.php.api.editor.PhpBaseElement;
 import org.netbeans.modules.php.api.editor.PhpClass;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
 import org.netbeans.modules.php.api.phpmodule.PhpModuleProperties;
 import org.netbeans.modules.php.api.util.StringUtils;
+import org.netbeans.modules.php.editor.CodeUtils;
+import org.netbeans.modules.php.editor.parser.api.Utils;
+import org.netbeans.modules.php.editor.parser.astnodes.FormalParameter;
+import org.netbeans.modules.php.editor.parser.astnodes.FunctionDeclaration;
+import org.netbeans.modules.php.editor.parser.astnodes.MethodDeclaration;
+import org.netbeans.modules.php.editor.parser.astnodes.visitors.DefaultVisitor;
 import org.netbeans.modules.php.spi.framework.actions.BaseAction;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
 import org.openide.awt.HtmlBrowser;
 import org.openide.filesystems.FileObject;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 
-@Messages("CTL_YiiRunActionAction=Run Action")
+@Messages("LBL_YiiRunActionAction=Run Action")
 public final class YiiRunActionAction extends BaseAction {
 
     private static final long serialVersionUID = -379960760560724305L;
@@ -86,8 +109,9 @@ public final class YiiRunActionAction extends BaseAction {
             return;
         }
 
+        Document document = editor.getDocument();
         // get current file
-        FileObject controller = YiiDocUtils.getFileObject(editor.getDocument());
+        FileObject controller = YiiDocUtils.getFileObject(document);
         if (controller == null || !YiiUtils.isController(controller)) {
             return;
         }
@@ -98,14 +122,35 @@ public final class YiiRunActionAction extends BaseAction {
         PhpBaseElement element = editorSupport.getElement(controller, caretPosition);
 
         // get actionId, controllerId
-        String actionId = getActionId(element);
-        String controllerId = getControllerId(controller);
+        final String actionId = getActionId(element);
+        final String controllerId = getControllerId(controller);
         if (StringUtils.isEmpty(actionId) || StringUtils.isEmpty(controllerId)) {
             return;
         }
-        // TODO when more parameters exist
-        // open browser
-        openBrowser(phpModule, controllerId, actionId);
+
+        // when more parameters exist
+        final String methodName = getMethodName(element);
+        final List<FormalParameter> params = new ArrayList<FormalParameter>();
+        try {
+            ParserManager.parse(Collections.singleton(Source.create(document)), new UserTask() {
+                @Override
+                public void run(ResultIterator resultIterator) throws Exception {
+                    if (resultIterator == null) {
+                        return;
+                    }
+                    ParserResult parserResult = (ParserResult) resultIterator.getParserResult();
+                    ControllerMethodVisitor visitor = new ControllerMethodVisitor(methodName);
+                    visitor.scan(Utils.getRoot(parserResult));
+                    params.addAll(visitor.getParams());
+                }
+            });
+        } catch (ParseException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+
+        final PhpModule pm = phpModule;
+        runAction(params, pm, controllerId, actionId);
+
     }
 
     @Override
@@ -115,7 +160,16 @@ public final class YiiRunActionAction extends BaseAction {
 
     @Override
     protected String getPureName() {
-        return Bundle.CTL_YiiRunActionAction();
+        return Bundle.LBL_YiiRunActionAction();
+    }
+
+    private String getMethodName(PhpBaseElement element) {
+        String methodName = ""; // NOI18N
+        if (element instanceof PhpClass.Method) {
+            PhpClass.Method method = (PhpClass.Method) element;
+            methodName = method.getName();
+        }
+        return methodName;
     }
 
     /**
@@ -151,6 +205,18 @@ public final class YiiRunActionAction extends BaseAction {
      * @param actionId
      */
     private void openBrowser(PhpModule phpModule, String controllerId, String actionId) {
+        openBrowser(phpModule, controllerId, actionId, new HashMap<String, String>());
+    }
+
+    /**
+     * Open Browser.
+     *
+     * @param phpModule
+     * @param controllerId
+     * @param actionId
+     * @param getRequests
+     */
+    private void openBrowser(PhpModule phpModule, String controllerId, String actionId, Map<String, String> getRequests) {
         // build url
         StringBuilder sb = new StringBuilder();
         PhpModuleProperties properties = phpModule.getProperties();
@@ -161,12 +227,72 @@ public final class YiiRunActionAction extends BaseAction {
                 .append("/") // NOI18N
                 .append(actionId);
 
+        // add GET requests
+        for (String key : getRequests.keySet()) {
+            String value = getRequests.get(key);
+            sb.append("&") // NOI18N
+                    .append(key)
+                    .append("=") // NOI18N
+                    .append(value);
+        }
+
         // open URL
         try {
             URL url = new URL(sb.toString());
             HtmlBrowser.URLDisplayer.getDefault().showURL(url);
         } catch (MalformedURLException ex) {
             Exceptions.printStackTrace(ex);
+        }
+    }
+
+    private void runAction(final List<FormalParameter> params, final PhpModule pm, final String controllerId, final String actionId) {
+        if (params.isEmpty()) {
+            openBrowser(pm, controllerId, actionId);
+        } else {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    // create dialog
+                    YiiRunActionPanel panel = new YiiRunActionPanel(params);
+                    DialogDescriptor descriptor = new DialogDescriptor(panel, Bundle.LBL_YiiRunActionAction(), true, null);
+                    Dialog dialog = DialogDisplayer.getDefault().createDialog(descriptor);
+
+                    dialog.pack();
+                    dialog.validate();
+                    dialog.setVisible(true);
+                    // open browser
+                    if (descriptor.getValue() == DialogDescriptor.OK_OPTION) {
+                        Map<String, String> requests = panel.getGetRequest();
+                        openBrowser(pm, controllerId, actionId, requests);
+                    }
+                }
+            });
+        }
+    }
+
+    private static class ControllerMethodVisitor extends DefaultVisitor {
+
+        private String targetMethodName;
+        private final List<FormalParameter> params = new ArrayList<FormalParameter>();
+
+        public ControllerMethodVisitor(String targetMethodName) {
+            this.targetMethodName = targetMethodName;
+        }
+
+        @Override
+        public void visit(MethodDeclaration node) {
+            super.visit(node);
+            String methodName = CodeUtils.extractMethodName(node);
+            if (!methodName.equals(targetMethodName)) {
+                return;
+            }
+            FunctionDeclaration function = node.getFunction();
+            List<FormalParameter> formalParameters = function.getFormalParameters();
+            params.addAll(formalParameters);
+        }
+
+        public List<FormalParameter> getParams() {
+            return params;
         }
     }
 }
