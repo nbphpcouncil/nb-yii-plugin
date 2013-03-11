@@ -101,14 +101,16 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
     }
 
     /**
-     * Check whether project is Yii Framework. Find WebRoot/appname/protected/yiic.
+     * Check whether project is Yii Framework. Find
+     * WebRoot/appname/protected/yiic.
      *
      * @param pm PhpModule
      * @return boolean true if exist yiic file, otherwise false
      */
     @Override
     public boolean isInPhpModule(PhpModule pm) {
-        FileObject sourceDirectory = pm.getSourceDirectory();
+        YiiModule yiiModule = YiiModuleFactory.create(pm);
+        FileObject sourceDirectory = yiiModule.getWebroot();
         if (sourceDirectory == null) {
             return false;
         }
@@ -121,23 +123,27 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
     }
 
     /**
-     * Get configuration files. Files is displayed on Important Files node. appname/protected/config
+     * Get configuration files. Files is displayed on Important Files node.
+     * appname/protected/config
      *
      * @param pm PhpModule
      * @return File[]
      */
     @Override
     public File[] getConfigurationFiles(PhpModule pm) {
-        FileObject sourceDirectory = pm.getSourceDirectory();
+        YiiModule yiiModule = YiiModuleFactory.create(pm);
+        FileObject applicationDirectory = yiiModule.getApplication();
         List<File> configs = new LinkedList<File>();
-        if (sourceDirectory == null) {
+        if (applicationDirectory == null) {
             return configs.toArray(new File[configs.size()]);
         }
-        FileObject config = sourceDirectory.getFileObject("protected/config"); // NOI18N
+        FileObject config = applicationDirectory.getFileObject("config"); // NOI18N
         for (FileObject child : config.getChildren()) {
             configs.add(FileUtil.toFile(child));
         }
 
+        // sort
+        Collections.sort(configs);
         return configs.toArray(new File[configs.size()]);
     }
 
@@ -147,8 +153,8 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
     }
 
     /**
-     * Get PhpModuleProperties. This method is called when only creating new project. Please, notice that properties
-     * setXXX() method has return value.
+     * Get PhpModuleProperties. This method is called when only creating new
+     * project. Please, notice that properties setXXX() method has return value.
      *
      * @param pm
      * @return

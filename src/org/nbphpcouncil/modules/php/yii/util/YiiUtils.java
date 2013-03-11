@@ -54,6 +54,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.nbphpcouncil.modules.php.yii.Yii;
+import org.nbphpcouncil.modules.php.yii.YiiModule;
+import org.nbphpcouncil.modules.php.yii.YiiModuleFactory;
 import org.nbphpcouncil.modules.php.yii.YiiPhpFrameworkProvider;
 import org.nbphpcouncil.modules.php.yii.preferences.YiiPreferences;
 import org.netbeans.modules.csl.spi.ParserResult;
@@ -222,7 +224,8 @@ public class YiiUtils {
             return null;
         }
         PhpModule phpModule = PhpModule.forFileObject(controller);
-        FileObject sourceDirectory = phpModule.getSourceDirectory();
+        YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+        FileObject sourceDirectory = yiiModule.getWebroot();
 
         // get main.php
         FileObject main = null;
@@ -522,7 +525,8 @@ public class YiiUtils {
      * @return
      */
     public static FileObject getDirectory(PhpModule phpModule, String path) {
-        FileObject sourceDirectory = phpModule.getSourceDirectory();
+        YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+        FileObject sourceDirectory = yiiModule.getWebroot();
         if (sourceDirectory == null) {
             return null;
         }

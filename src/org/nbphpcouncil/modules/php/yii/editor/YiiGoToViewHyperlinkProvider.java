@@ -45,6 +45,8 @@ import java.util.EnumSet;
 import java.util.Set;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.Document;
+import org.nbphpcouncil.modules.php.yii.YiiModule;
+import org.nbphpcouncil.modules.php.yii.YiiModuleFactory;
 import org.nbphpcouncil.modules.php.yii.preferences.YiiPreferences;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
@@ -206,7 +208,8 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
         String viewPath = ""; // NOI18N
         if (view != null) {
             PhpModule phpModule = PhpModule.forFileObject(view);
-            FileObject sourceDirectory = phpModule.getSourceDirectory();
+            YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+            FileObject sourceDirectory = yiiModule.getWebroot();
             if (sourceDirectory != null) {
                 viewPath = FileUtil.getRelativePath(sourceDirectory, view);
             } else {
