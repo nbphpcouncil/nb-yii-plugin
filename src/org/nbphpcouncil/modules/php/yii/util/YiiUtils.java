@@ -158,6 +158,10 @@ public class YiiUtils {
             return false;
         }
         PhpModule phpModule = getPhpModule(fo);
+        // return null if use external files #11
+        if (phpModule == null) {
+            return false;
+        }
         FileObject viewsDirectory = getViewsDirectory(phpModule);
         FileObject themesDirestory = getThemesDirectory(phpModule);
         List<FileObject> directories = Arrays.asList(viewsDirectory, themesDirestory);
