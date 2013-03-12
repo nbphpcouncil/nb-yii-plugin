@@ -11,11 +11,12 @@ Download a nbm file or create it yourself. And please, install it.
 
 ### Existing Source
 
-Project directory : Please, specify the webapp directory
+Source directory : Please, specify the webroot directory  
+Webroot directory : Please, keep default (Source directory)
 
 e.g.
 
-    testdrive (webapp directory)
+    testdrive (webroot directory)
     ├── assets
     ├── css
     ├── images
@@ -24,6 +25,28 @@ e.g.
     ├── nbproject
     ├── protected
     └── themes
+
+### Existing Source (Source Directory has other directories)
+
+Please set webroot directory(yii path alias named "webroot" i.e. webroot is testdrive on the below tree) to webroot of project properties.
+
+`Right-click project > properties > Source > Webroot`
+
+e.g.
+
+    my_source (source directory)
+    ├── testdrive (webroot directory)
+    │   ├── assets
+    │   ├── css
+    │   ├── images
+    │   ├── index-test.php
+    │   ├── index.php
+    │   ├── protected
+    │   └── themes
+    │ 
+    ├── ...
+    ├── foo
+    └── bar
 
 ## Features
 
@@ -34,6 +57,7 @@ e.g.
 - Init Action
 - PHPUnit Test Init Action
 - New Yii Project Wizard
+- Run Action Action
 
 
 ### Go To Action
@@ -68,7 +92,8 @@ array(
 
 ### Hyper link to view file
 
-You can open the view file from parameter of render method.
+You can open the view file from parameter of render and renderPartial methods.
+This is available on the Controller or View files.
 
 e.g.
 ```php
@@ -76,6 +101,7 @@ public actionIndex() {
     // something ...
 
     $this->render('foo', array('bar' => $bar));
+    $this->renderPartial('bar');
 }
 ```
 When you use the render method like above, if foo.php exists, you do the following.
@@ -83,6 +109,8 @@ When you use the render method like above, if foo.php exists, you do the followi
 1. Hold down Ctrl key on the first parameter (foo)
 2. Wait to be changed string color to blue
 3. Click (foo)
+
+It will go to theme file if you use theme.
 
 ### Code Completion on the view file
 Provide support for code completion on the View file.
@@ -143,6 +171,10 @@ Run the followings:
 - If you check PHPUnit settings, Run PHPUnit Test Init Action.
 - Create a file for code completion.
 - Set include path.
+
+### Run Action Action
+Run action for current caret position. i.e. Open the browser.
+If the action has some arguments, you have to set some arguments.(#9)
 
 ## License
 [Common Development and Distribution License (CDDL) v1.0 and GNU General Public License (GPL) v2](http://netbeans.org/cddl-gplv2.html)
