@@ -46,6 +46,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import org.nbphpcouncil.modules.php.yii.YiiModule;
+import org.nbphpcouncil.modules.php.yii.YiiModuleFactory;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectManager;
@@ -95,7 +97,8 @@ public class ProjectPropertiesSupport {
                     List<String> includePaths = new LinkedList<String>();
                     boolean isAdded = false;
                     for (String path : paths) {
-                        FileObject sourceDirectory = phpModule.getSourceDirectory();
+                        YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+                        FileObject sourceDirectory = yiiModule.getWebroot();
                         FileObject target = null;
                         if (sourceDirectory != null) {
                             target = sourceDirectory.getFileObject(path);
@@ -163,7 +166,8 @@ public class ProjectPropertiesSupport {
      * @param phpModule
      */
     public static void setYiiIncludePath(PhpModule phpModule) {
-        FileObject sourceDirectory = phpModule.getSourceDirectory();
+        YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+        FileObject sourceDirectory = yiiModule.getWebroot();
         if (sourceDirectory == null) {
             return;
         }

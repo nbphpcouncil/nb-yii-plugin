@@ -55,6 +55,7 @@ import org.netbeans.modules.php.api.phpmodule.PhpModuleProperties;
 import org.netbeans.modules.php.spi.editor.EditorExtender;
 import org.netbeans.modules.php.spi.framework.PhpFrameworkProvider;
 import org.netbeans.modules.php.spi.framework.PhpModuleActionsExtender;
+import org.netbeans.modules.php.spi.framework.PhpModuleCustomizerExtender;
 import org.netbeans.modules.php.spi.framework.PhpModuleExtender;
 import org.netbeans.modules.php.spi.framework.PhpModuleIgnoredFilesExtender;
 import org.netbeans.modules.php.spi.framework.commands.FrameworkCommandSupport;
@@ -108,7 +109,8 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
      */
     @Override
     public boolean isInPhpModule(PhpModule pm) {
-        FileObject sourceDirectory = pm.getSourceDirectory();
+        YiiModule yiiModule = YiiModuleFactory.create(pm);
+        FileObject sourceDirectory = yiiModule.getWebroot();
         if (sourceDirectory == null) {
             return false;
         }
@@ -129,16 +131,19 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
      */
     @Override
     public File[] getConfigurationFiles(PhpModule pm) {
-        FileObject sourceDirectory = pm.getSourceDirectory();
+        YiiModule yiiModule = YiiModuleFactory.create(pm);
+        FileObject applicationDirectory = yiiModule.getApplication();
         List<File> configs = new LinkedList<File>();
-        if (sourceDirectory == null) {
+        if (applicationDirectory == null) {
             return configs.toArray(new File[configs.size()]);
         }
-        FileObject config = sourceDirectory.getFileObject("protected/config"); // NOI18N
+        FileObject config = applicationDirectory.getFileObject("config"); // NOI18N
         for (FileObject child : config.getChildren()) {
             configs.add(FileUtil.toFile(child));
         }
 
+        // sort
+        Collections.sort(configs);
         return configs.toArray(new File[configs.size()]);
     }
 
@@ -195,5 +200,10 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
     @Override
     public EditorExtender getEditorExtender(PhpModule phpModule) {
         return new YiiEditorExtender();
+    }
+
+    @Override
+    public PhpModuleCustomizerExtender createPhpModuleCustomizerExtender(PhpModule phpModule) {
+        return new YiiPhpModuleCustomizerExtender(phpModule);
     }
 }

@@ -41,47 +41,69 @@
  */
 package org.nbphpcouncil.modules.php.yii.editor;
 
+import java.util.EnumSet;
+import java.util.Set;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.Document;
+import org.nbphpcouncil.modules.php.yii.YiiModule;
+import org.nbphpcouncil.modules.php.yii.YiiModuleFactory;
+import org.nbphpcouncil.modules.php.yii.preferences.YiiPreferences;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.lib.editor.hyperlink.spi.HyperlinkProvider;
+import org.netbeans.lib.editor.hyperlink.spi.HyperlinkProviderExt;
+import org.netbeans.lib.editor.hyperlink.spi.HyperlinkType;
 import org.netbeans.modules.csl.api.UiUtils;
 import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.php.api.phpmodule.PhpModule;
 import org.netbeans.modules.php.editor.lexer.PHPTokenId;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
+import org.openide.util.NbBundle;
 
 /**
  *
  * @author junichi11
  */
-@MimeRegistration(mimeType = "text/x-php5", service = HyperlinkProvider.class)
-public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
+@MimeRegistration(mimeType = "text/x-php5", service = HyperlinkProviderExt.class)
+public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
 
     private static final int DEFAULT_OFFSET = 0;
     private FileObject view = null;
     private String target = ""; // NOI18N
     private int targetStart;
     private int targetEnd;
+    private boolean useAutoCreate = false;
+    private String relativeViewPath;
+    private FileObject controller;
 
     @Override
-    public boolean isHyperlinkPoint(Document doc, int offset) {
+    public Set<HyperlinkType> getSupportedHyperlinkTypes() {
+        return EnumSet.of(HyperlinkType.GO_TO_DECLARATION);
+    }
+
+    @Override
+    public boolean isHyperlinkPoint(Document doc, int offset, HyperlinkType type) {
         return verifyState(doc, offset);
     }
 
     @Override
-    public int[] getHyperlinkSpan(Document doc, int offset) {
-        if (view != null) {
+    public int[] getHyperlinkSpan(Document doc, int offset, HyperlinkType type) {
+        if (view != null || useAutoCreate) {
             return new int[]{targetStart, targetEnd};
         }
         return null;
     }
 
     @Override
-    public void performClickAction(Document doc, int offset) {
+    public void performClickAction(Document doc, int offset, HyperlinkType type) {
+        // use "create view file automatically"
+        if (view == null && useAutoCreate) {
+            view = YiiUtils.createViewFileAuto(controller, relativeViewPath);
+        }
+
         // Open view file
         if (view != null) {
             UiUtils.open(view, DEFAULT_OFFSET);
@@ -99,8 +121,14 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
     private boolean verifyState(Document doc, int offset) {
         // get FileObject
         Source source = Source.create(doc);
-        FileObject targetFile = source.getFileObject();
-        if (!YiiUtils.isController(targetFile)) {
+        controller = source.getFileObject();
+
+        // check whether target file is view
+        if (YiiUtils.isView(controller)) {
+            controller = YiiUtils.getController(controller);
+        }
+
+        if (controller == null || !YiiUtils.isController(controller)) {
             return false;
         }
         AbstractDocument abstractDoc = (AbstractDocument) doc;
@@ -122,8 +150,10 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
                 return false;
             }
             // set view file
-            view = YiiUtils.getView(targetFile, target);
-            if (view != null) {
+            relativeViewPath = YiiUtils.getRelativePathToView(controller, target);
+            view = controller.getFileObject(relativeViewPath);
+            useAutoCreate = YiiPreferences.useAutoCreateView(PhpModule.forFileObject(controller));
+            if (view != null || useAutoCreate) {
                 targetStart = newOffset + 1;
                 targetEnd = targetStart + target.length();
                 return true;
@@ -136,7 +166,7 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
     }
 
     /**
-     * Verify whether method name is "render".
+     * Verify whether method name is "render" or "renderPartial".
      *
      * @param ts TokenSequence
      * @return true if render method, otherwise false
@@ -145,7 +175,8 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
         ts.movePrevious();
         ts.movePrevious();
         Token<PHPTokenId> render = ts.token();
-        if (render.text().toString().equals("render")) { // NOI18N
+        String text = render.text().toString();
+        if (text.equals("render") || text.equals("renderPartial")) { // NOI18N
             return true;
         }
         return false;
@@ -169,5 +200,26 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProvider {
         } else {
             target = ""; // NOI18N
         }
+    }
+
+    @NbBundle.Messages("LBL_NotFoundViewFileMessage=Doesn't exist a file yet. If you click this link, a new empty view file will be created.")
+    @Override
+    public String getTooltipText(Document doc, int offset, HyperlinkType type) {
+        String viewPath = ""; // NOI18N
+        if (view != null) {
+            PhpModule phpModule = PhpModule.forFileObject(view);
+            YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+            FileObject sourceDirectory = yiiModule.getWebroot();
+            if (sourceDirectory != null) {
+                viewPath = FileUtil.getRelativePath(sourceDirectory, view);
+            } else {
+                viewPath = view.getPath();
+            }
+        } else {
+            if (useAutoCreate) {
+                viewPath = Bundle.LBL_NotFoundViewFileMessage();
+            }
+        }
+        return viewPath;
     }
 }
