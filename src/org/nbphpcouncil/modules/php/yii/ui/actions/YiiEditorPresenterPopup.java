@@ -66,7 +66,7 @@ import org.openide.util.actions.Presenter;
 @ActionRegistration(
         lazy = false,
         displayName = "#LBL_Yii")
-@ActionReference(path = "Editors/text/x-php5/Popup", position = 0)
+@ActionReference(path = "Editors/text/x-php5/Popup", position = 550)
 @NbBundle.Messages("LBL_Yii=Yii")
 public class YiiEditorPresenterPopup extends BaseAction implements Presenter.Popup {
 
