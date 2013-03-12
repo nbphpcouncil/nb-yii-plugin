@@ -159,4 +159,18 @@ public class YiiUtilsTest extends NbTestCase {
         assertEquals(null, YiiUtils.toFirstUpperCase(""));
         assertEquals(null, YiiUtils.toFirstUpperCase(null));
     }
+
+    /**
+     * Test of toFirstCharUpperCase method, of class YiiUtils.
+     */
+    @Test
+    public void testToFirstCharUpperCase() {
+        assertEquals("Site", YiiUtils.toFirstCharUpperCase("site"));
+        assertEquals("Demo", YiiUtils.toFirstCharUpperCase("demo"));
+        assertEquals("BLOG", YiiUtils.toFirstCharUpperCase("BLOG"));
+        assertEquals("SomeAction", YiiUtils.toFirstCharUpperCase("someAction"));
+        assertEquals("A", YiiUtils.toFirstCharUpperCase("a"));
+        assertEquals(null, YiiUtils.toFirstCharUpperCase(""));
+        assertEquals(null, YiiUtils.toFirstCharUpperCase(null));
+    }
 }

@@ -44,16 +44,19 @@ package org.nbphpcouncil.modules.php.yii.ui.actions;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.text.JTextComponent;
-import org.nbphpcouncil.modules.php.yii.util.YiiDocUtils;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.netbeans.api.editor.EditorRegistry;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
 import org.netbeans.modules.php.spi.framework.actions.BaseAction;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
+import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionRegistration;
 import org.openide.filesystems.FileObject;
+import org.openide.loaders.DataObject;
+import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
+import org.openide.util.Utilities;
 import org.openide.util.actions.Presenter;
 
 /**
@@ -66,31 +69,38 @@ import org.openide.util.actions.Presenter;
 @ActionRegistration(
         lazy = false,
         displayName = "#LBL_Yii")
-@ActionReference(path = "Editors/text/x-php5/Popup", position = 550)
+@ActionReferences({
+    @ActionReference(path = "Editors/text/x-php5/Popup", position = 550),
+    @ActionReference(path = "Loaders/text/x-php5/Actions", position = 1150)
+})
 @NbBundle.Messages("LBL_Yii=Yii")
-public class YiiEditorPresenterPopup extends BaseAction implements Presenter.Popup {
+public class YiiActionPresenterPopup extends BaseAction implements Presenter.Popup {
 
     private static final long serialVersionUID = 274389136242107099L;
-    private static YiiEditorPresenterPopup INSTANCE = new YiiEditorPresenterPopup();
+    private static YiiActionPresenterPopup INSTANCE = new YiiActionPresenterPopup();
 
-    private YiiEditorPresenterPopup() {
+    private YiiActionPresenterPopup() {
     }
 
-    public static YiiEditorPresenterPopup getInstance() {
+    public static YiiActionPresenterPopup getInstance() {
         return INSTANCE;
     }
 
     @Override
     public JMenuItem getPopupPresenter() {
-        // get current editor
-        JTextComponent editor = EditorRegistry.lastFocusedComponent();
-        if (editor != null) {
-            FileObject fileObject = YiiDocUtils.getFileObject(editor.getDocument());
-            PhpModule phpModule = PhpModule.forFileObject(fileObject);
+        Lookup context = Utilities.actionsGlobalContext();
+        JTextComponent editor = EditorRegistry.focusedComponent();
+        DataObject dataObject = context.lookup(DataObject.class);
+        FileObject currentFile = dataObject.getPrimaryFile();
+        if (currentFile != null) {
+            PhpModule phpModule = PhpModule.forFileObject(currentFile);
             if (YiiUtils.isYii(phpModule)) {
                 // set menu
                 JMenu menu = new JMenu(Bundle.LBL_Yii());
-                menu.add(new JMenuItem(YiiRunActionAction.getInstance()));
+                if (editor != null) {
+                    menu.add(new JMenuItem(YiiRunActionAction.getInstance()));
+                }
+                menu.add(new JMenuItem(YiiCreateTestAction.getInstance()));
                 return menu;
             }
         }

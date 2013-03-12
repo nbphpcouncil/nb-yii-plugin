@@ -48,6 +48,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -456,6 +457,22 @@ public class YiiUtils {
     }
 
     /**
+     * Converts the first of characters to upper case.
+     *
+     * Examples: "apple" -> "Apple", "Banana" -> "Banana", "ORANGE" -> "ORANGE",
+     * "someAction" -> SomeAction
+     *
+     * @param string
+     * @return the converted string
+     */
+    public static String toFirstCharUpperCase(String string) {
+        if (StringUtils.isEmpty(string)) {
+            return null;
+        }
+        return string.substring(0, 1).toUpperCase(Locale.ENGLISH) + string.substring(1);
+    }
+
+    /**
      * Create code completion file
      *
      * @param phpModule
@@ -525,6 +542,16 @@ public class YiiUtils {
      */
     public static FileObject getTestsDirectory(PhpModule phpModule) {
         return getDirectory(phpModule, TESTS_PATH);
+    }
+
+    /**
+     * Get unit test directory (protected/tests/unit).
+     *
+     * @param phpModule
+     * @return
+     */
+    public static FileObject getUnitTestDirectory(PhpModule phpModule) {
+        return getDirectory(phpModule, TESTS_PATH + "/unit"); // NOI18N
     }
 
     /**
