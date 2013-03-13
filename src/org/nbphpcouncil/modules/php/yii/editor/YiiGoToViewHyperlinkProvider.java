@@ -123,6 +123,11 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
         Source source = Source.create(doc);
         controller = source.getFileObject();
 
+        // check Yii
+        if (controller == null || !YiiUtils.isYii(PhpModule.forFileObject(controller))) {
+            return false;
+        }
+
         // check whether target file is view
         if (YiiUtils.isView(controller)) {
             controller = YiiUtils.getController(controller);
