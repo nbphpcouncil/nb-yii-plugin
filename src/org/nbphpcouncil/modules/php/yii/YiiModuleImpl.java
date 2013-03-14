@@ -112,7 +112,16 @@ public class YiiModuleImpl extends YiiModule {
         if (webroot == null) {
             return null;
         }
+        if(systemPath == null){
+            // try again
+            systemPath = getSystemPath();
+        }
+        if(systemPath == null) {
+            return null;
+        }
+
         FileObject system = webroot.getFileObject(systemPath);
+
         if (system == null) {
             // is path changed?
             systemPath = getSystemPath();
