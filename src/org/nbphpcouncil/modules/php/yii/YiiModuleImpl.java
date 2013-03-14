@@ -70,9 +70,11 @@ public class YiiModuleImpl extends YiiModule {
 
     private String getSystemPath() {
         index = getIndexFile();
-        List<String> includePath = YiiUtils.getIncludePath(index);
-        for (String system : includePath) {
-            return system;
+        if (index != null) {
+            List<String> includePath = YiiUtils.getIncludePath(index);
+            for (String system : includePath) {
+                return system;
+            }
         }
         return null;
     }
