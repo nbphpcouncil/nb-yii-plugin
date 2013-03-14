@@ -166,6 +166,13 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
         if (sourceDirectory == null) {
             return properties;
         }
+
+        // set index file
+        FileObject index = sourceDirectory.getFileObject("index.php"); // NOI18N
+        if (index != null) {
+            properties = properties.setIndexFile(index);
+        }
+
         // set include path
         String path = YiiOptions.getInstance().getYiiScript();
         if (path != null && !path.isEmpty()) {
