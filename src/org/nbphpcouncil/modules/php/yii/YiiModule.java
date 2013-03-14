@@ -47,15 +47,53 @@ import org.openide.filesystems.FileObject;
  *
  * @author junichi11
  */
-public interface YiiModule {
+public abstract class YiiModule {
 
-    FileObject getWebroot();
+    public enum PATH_ALIAS {
 
-    FileObject getSystem();
+        SYSTEM("system"),
+        ZII("zii"),
+        APPLICATION("application"),
+        WEBROOT("webroot"),
+        EXT("ext"),
+        NONE("");
+        private String name;
 
-    FileObject getZii();
+        private PATH_ALIAS(String name) {
+            this.name = name;
+        }
 
-    FileObject getApplication();
+        public String getName() {
+            return name;
+        }
+    }
 
-    FileObject getExt();
+    public abstract FileObject getWebroot();
+
+    public abstract FileObject getSystem();
+
+    public abstract FileObject getZii();
+
+    public abstract FileObject getApplication();
+
+    public abstract FileObject getExt();
+
+    public FileObject getDirectory(PATH_ALIAS alias) {
+        switch (alias) {
+            case SYSTEM:
+                return getSystem();
+            case ZII:
+                return getZii();
+            case APPLICATION:
+                return getApplication();
+            case WEBROOT:
+                return getWebroot();
+            case EXT:
+                return getExt();
+            case NONE:
+                return null;
+            default:
+                throw new AssertionError();
+        }
+    }
 }
