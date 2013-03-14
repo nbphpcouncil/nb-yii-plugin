@@ -71,6 +71,7 @@ public class YiiGoToFileHyperlinkProvider extends YiiHyperlinkProviderExt {
     private FileObject targetFile;
 
     static {
+        methods.add("widget"); // NOI18N
         methods.add("beginWidget"); // NOI18N
         methods.add("endWidget"); // NOI18N
         methods.add("createWidget"); // NOI18N
