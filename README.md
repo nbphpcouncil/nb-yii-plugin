@@ -58,6 +58,7 @@ e.g.
 - PHPUnit Test Init Action
 - New Yii Project Wizard
 - Run Action Action
+- Navigation for path alias (Hyperlink to file)
 
 
 ### Go To Action
@@ -111,6 +112,30 @@ When you use the render method like above, if foo.php exists, you do the followi
 3. Click (foo)
 
 It will go to theme file if you use theme.
+
+### Navigation for path alias (Hyperlink to file)
+Usage is the same as hyperlink to view file.
+
+This feature is available for the followings:
+
+- Yii::import()
+- CBaseController::widget()
+- CBaseController::beginWidget()
+- CBaseController::endWidget()
+- CBaseController::createWidget()
+- CBaseController::beginCache()
+
+1. Hold down `Ctrl` on target path
+2. string color is changed to blue if file exists(file path is displeyed as tooltip)
+3. Click > open file
+
+e.g.
+```php
+$this->widget('application.components.MyComponent', array());
+// Hold down Ctrl on application.components.MyComponent
+```
+#### Notice
+This feature works with default path alias name.
 
 ### Code Completion on the view file
 Provide support for code completion on the View file.

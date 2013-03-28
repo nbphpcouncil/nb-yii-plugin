@@ -220,9 +220,13 @@ public final class YiiRunActionAction extends BaseAction {
         // build url
         StringBuilder sb = new StringBuilder();
         PhpModuleProperties properties = phpModule.getProperties();
+        FileObject indexFile = properties.getIndexFile();
         String urlPath = properties.getUrl();
-        sb.append(urlPath)
-                .append("?r=") // NOI18N
+        sb.append(urlPath);
+        if (indexFile != null) {
+            sb.append(indexFile.getNameExt());
+        }
+        sb.append("?r=") // NOI18N
                 .append(controllerId)
                 .append("/") // NOI18N
                 .append(actionId);

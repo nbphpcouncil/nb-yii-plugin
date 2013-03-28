@@ -41,51 +41,47 @@
  */
 package org.nbphpcouncil.modules.php.yii.util;
 
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.Document;
-import org.netbeans.api.lexer.TokenHierarchy;
-import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.modules.parsing.api.Source;
-import org.netbeans.modules.php.editor.lexer.PHPTokenId;
-import org.openide.filesystems.FileObject;
+import java.util.Arrays;
+import org.junit.Test;
+import org.nbphpcouncil.modules.php.yii.YiiModule.PATH_ALIAS;
+import org.netbeans.junit.NbTestCase;
 
 /**
  *
  * @author junichi11
  */
-public class YiiDocUtils {
+public class YiiPathAliasSupportTest extends NbTestCase {
 
-    /**
-     * Get FileObject from Document.
-     *
-     * @param doc
-     * @return FileObject
-     */
-    public static FileObject getFileObject(Document doc) {
-        if (doc == null) {
-            return null;
-        }
-        Source source = Source.create(doc);
-        return source.getFileObject();
+    public YiiPathAliasSupportTest(String name) {
+        super(name);
     }
 
     /**
-     * Get TokenSequence.
-     *
-     * @param doc document
-     * @return TokenSequence
+     * Test of splitAliasPath method, of class YiiPathAliasSupport.
      */
-    @SuppressWarnings("unchecked")
-    public static TokenSequence<PHPTokenId> getTokenSequence(Document doc) {
-        AbstractDocument abstractDoc = (AbstractDocument) doc;
-        abstractDoc.readLock();
-        TokenSequence<PHPTokenId> ts;
-        try {
-            TokenHierarchy hierarchy = TokenHierarchy.get(doc);
-            ts = hierarchy.tokenSequence(PHPTokenId.language());
-        } finally {
-            abstractDoc.readUnlock();
-        }
-        return ts;
+    @Test
+    public void testSplitAliasPath() {
+        String[] expResult1 = {"application", "component", "MyClass"};
+        assertEquals(Arrays.asList(expResult1), Arrays.asList(YiiPathAliasSupport.splitAliasPath("application.component.MyClass")));
+        String[] expResult2 = {"system"};
+        assertEquals(Arrays.asList(expResult2), Arrays.asList(YiiPathAliasSupport.splitAliasPath("system")));
+        assertEquals(1, YiiPathAliasSupport.splitAliasPath("").length);
+        assertEquals("", YiiPathAliasSupport.splitAliasPath("")[0]);
+        assertEquals(null, YiiPathAliasSupport.splitAliasPath(null));
+    }
+
+    /**
+     * Test of toPathAlias method, of class YiiPathAliasSupport.
+     */
+    @Test
+    public void testToPathAlias() {
+        assertEquals(PATH_ALIAS.APPLICATION, YiiPathAliasSupport.toPathAlias("application"));
+        assertEquals(PATH_ALIAS.EXT, YiiPathAliasSupport.toPathAlias("ext"));
+        assertEquals(PATH_ALIAS.SYSTEM, YiiPathAliasSupport.toPathAlias("system"));
+        assertEquals(PATH_ALIAS.WEBROOT, YiiPathAliasSupport.toPathAlias("webroot"));
+        assertEquals(PATH_ALIAS.ZII, YiiPathAliasSupport.toPathAlias("zii"));
+        assertEquals(PATH_ALIAS.NONE, YiiPathAliasSupport.toPathAlias("test"));
+        assertEquals(PATH_ALIAS.NONE, YiiPathAliasSupport.toPathAlias(""));
+        assertEquals(PATH_ALIAS.NONE, YiiPathAliasSupport.toPathAlias(null));
     }
 }

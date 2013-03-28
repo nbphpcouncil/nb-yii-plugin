@@ -41,51 +41,89 @@
  */
 package org.nbphpcouncil.modules.php.yii.util;
 
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.Document;
-import org.netbeans.api.lexer.TokenHierarchy;
-import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.modules.parsing.api.Source;
-import org.netbeans.modules.php.editor.lexer.PHPTokenId;
+import org.nbphpcouncil.modules.php.yii.YiiModule;
+import org.nbphpcouncil.modules.php.yii.YiiModule.PATH_ALIAS;
+import org.nbphpcouncil.modules.php.yii.YiiModuleFactory;
+import org.netbeans.modules.php.api.phpmodule.PhpModule;
 import org.openide.filesystems.FileObject;
 
 /**
  *
  * @author junichi11
  */
-public class YiiDocUtils {
+public class YiiPathAliasSupport {
 
     /**
-     * Get FileObject from Document.
+     * Get FileObject for path alias. e.g. application.component.MyComponent
      *
-     * @param doc
-     * @return FileObject
+     * @param phpModule
+     * @param aliasPath
+     * @return
      */
-    public static FileObject getFileObject(Document doc) {
-        if (doc == null) {
+    public static FileObject getFileObject(PhpModule phpModule, String aliasPath) {
+        String[] paths = splitAliasPath(aliasPath);
+        if (paths == null || paths.length < 1) {
             return null;
         }
-        Source source = Source.create(doc);
-        return source.getFileObject();
+
+        YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+        FileObject baseDirectory = null;
+        StringBuilder sb = new StringBuilder();
+        for (String path : paths) {
+            // first time
+            if (baseDirectory == null) {
+                baseDirectory = yiiModule.getDirectory(toPathAlias(path));
+                if (baseDirectory == null) {
+                    return null;
+                }
+                continue;
+            }
+
+            // create relative path
+            sb.append("/").append(path); // NOI18N
+        }
+        if (paths.length > 1) {
+            sb.deleteCharAt(0);
+            sb.append(".php"); // NOI18N
+        }
+
+        return baseDirectory.getFileObject(sb.toString());
     }
 
     /**
-     * Get TokenSequence.
+     * Split alias path.
      *
-     * @param doc document
-     * @return TokenSequence
+     * @param pathAlias
+     * @return
      */
-    @SuppressWarnings("unchecked")
-    public static TokenSequence<PHPTokenId> getTokenSequence(Document doc) {
-        AbstractDocument abstractDoc = (AbstractDocument) doc;
-        abstractDoc.readLock();
-        TokenSequence<PHPTokenId> ts;
-        try {
-            TokenHierarchy hierarchy = TokenHierarchy.get(doc);
-            ts = hierarchy.tokenSequence(PHPTokenId.language());
-        } finally {
-            abstractDoc.readUnlock();
+    public static String[] splitAliasPath(String pathAlias) {
+        if (pathAlias == null) {
+            return null;
         }
-        return ts;
+        return pathAlias.split("\\."); // NOI18N
+    }
+
+    /**
+     * Convert from String to PATH_ALIAS.
+     *
+     * @param name
+     * @return
+     */
+    public static PATH_ALIAS toPathAlias(String name) {
+        if (name == null) {
+            return PATH_ALIAS.NONE;
+        }
+        if (name.equals(PATH_ALIAS.SYSTEM.getName())) {
+            return PATH_ALIAS.SYSTEM;
+        } else if (name.equals(PATH_ALIAS.ZII.getName())) {
+            return PATH_ALIAS.ZII;
+        } else if (name.equals(PATH_ALIAS.APPLICATION.getName())) {
+            return PATH_ALIAS.APPLICATION;
+        } else if (name.equals(PATH_ALIAS.WEBROOT.getName())) {
+            return PATH_ALIAS.WEBROOT;
+        } else if (name.equals(PATH_ALIAS.EXT.getName())) {
+            return PATH_ALIAS.EXT;
+        }
+        return PATH_ALIAS.NONE;
     }
 }

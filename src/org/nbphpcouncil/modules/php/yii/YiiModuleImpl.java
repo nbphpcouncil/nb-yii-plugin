@@ -41,6 +41,8 @@
  */
 package org.nbphpcouncil.modules.php.yii;
 
+import java.util.List;
+import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
 import org.netbeans.modules.php.api.phpmodule.PhpModuleProperties;
 import org.openide.filesystems.FileObject;
@@ -49,14 +51,49 @@ import org.openide.filesystems.FileObject;
  *
  * @author junichi11
  */
-public class YiiModuleImpl implements YiiModule {
+public class YiiModuleImpl extends YiiModule {
 
+    // default path
     private static final String APPLICATION = "protected"; // NOI18N
     private static final String EXT = APPLICATION + "/extensions"; // NOI18N
+    private static final String ZII = "zii"; // NOI18N
+    private static final String ENTRY_SCRIPT = "index.php"; // NOI18N
     private final PhpModule phpModule;
+    protected String systemPath;
+    protected FileObject index;
+    protected FileObject config;
 
     public YiiModuleImpl(PhpModule phpModule) {
         this.phpModule = phpModule;
+        systemPath = getSystemPath();
+    }
+
+    private String getSystemPath() {
+        index = getIndexFile();
+        if (index != null) {
+            List<String> includePath = YiiUtils.getIncludePath(index);
+            for (String system : includePath) {
+                return system;
+            }
+        }
+        return null;
+    }
+
+    private FileObject getIndexFile() {
+        PhpModuleProperties properties = phpModule.getProperties();
+
+        // get index (entry script)
+        FileObject indexFile = properties.getIndexFile();
+        FileObject webroot = getWebroot();
+        if (webroot == null) {
+            return null;
+        }
+
+        // default
+        if (indexFile == null) {
+            indexFile = webroot.getFileObject(ENTRY_SCRIPT);
+        }
+        return indexFile;
     }
 
     @Override
@@ -71,17 +108,40 @@ public class YiiModuleImpl implements YiiModule {
 
     @Override
     public FileObject getSystem() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        FileObject webroot = getWebroot();
+        if (webroot == null) {
+            return null;
+        }
+        if(systemPath == null){
+            // try again
+            systemPath = getSystemPath();
+        }
+        if(systemPath == null) {
+            return null;
+        }
+
+        FileObject system = webroot.getFileObject(systemPath);
+
+        if (system == null) {
+            // is path changed?
+            systemPath = getSystemPath();
+            system = webroot.getFileObject(systemPath);
+        }
+        return system;
     }
 
     @Override
     public FileObject getZii() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        FileObject system = getSystem();
+        if (system != null) {
+            return system.getFileObject(ZII);
+        }
+        return null;
     }
 
     @Override
     public FileObject getApplication() {
-        return getWebroot().getFileObject(APPLICATION); // NOI18N
+        return getWebroot().getFileObject(APPLICATION);
     }
 
     @Override
