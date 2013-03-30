@@ -83,10 +83,10 @@ import org.openide.util.Exceptions;
 public class YiiUtils {
 
     private static final String YII_INCLUDE_PATH_REGEX = "^\\$yii *=.+'(.+/framework)/yii\\.php';$"; // NOI18N
-    private static final String CONTROLLER_SUFIX = "Controller"; // NOI18N
+    private static final String CONTROLLER_SUFFIX = "Controller"; // NOI18N
     private static final String CONTROLLERS_DIRECTORY_NAME = "controllers"; // NOI18N
     private static final String ACTION_METHOD_PREFIX = "action"; // NOI18N
-    private static final String VIEW_RELATIVE_PATH_FORMAT = "../..%s/views/%s/%s.php"; // NOI18N
+    private static final String VIEW_RELATIVE_PATH_FORMAT = "../..%s%s/views/%s%s/%s.php"; // NOI18N
     private static final String THEME_PATH = "/../themes/%s"; // NOI18N
     private static final String NBPROJECT = "nbproject"; // NOI18N
     private static final String PROTECTED_PATH = "protected/"; // NOI18N
@@ -187,7 +187,11 @@ public class YiiUtils {
     public static FileObject getView(FileObject controller, PhpClass.Method method) {
         String viewFolderName = getViewFolderName(controller.getName());
         String viewName = getViewName(method);
-        String pathToView = getRelativePathToView(controller, viewFolderName, viewName);
+        String subPath = getSubDirectoryPathForController(controller);
+        if (subPath == null) {
+            return null;
+        }
+        String pathToView = getRelativePathToView(controller, subPath, viewFolderName, viewName);
         if (pathToView == null) {
             return null;
         }
@@ -212,7 +216,29 @@ public class YiiUtils {
      */
     public static String getRelativePathToView(FileObject controller, String actionId) {
         String controllerId = getViewFolderName(controller.getName());
-        return getRelativePathToView(controller, controllerId, actionId);
+        String subPath = getSubDirectoryPathForController(controller);
+        if (subPath == null) {
+            return null;
+        }
+        return getRelativePathToView(controller, subPath, controllerId, actionId);
+    }
+
+    /**
+     * Get sub directory path for controller file. If file doesn't exist within
+     * protected/controllers, return null. Otherwise return empty string "" or
+     * path. For example : protected/controllers/subdir/SiteController.php ->
+     * subdir/
+     *
+     * @param controller
+     * @return sub directory path from controllers dir to file.
+     */
+    private static String getSubDirectoryPathForController(FileObject controller) {
+        String filePath = controller.getPath();
+        if (!filePath.contains("/controllers/")) { // NOI18N
+            return null;
+        }
+        String subPath = filePath.replaceAll(".+/controllers/", ""); // NOI18N
+        return subPath.replace(controller.getNameExt(), ""); // NOI18N
     }
 
     /**
@@ -223,7 +249,7 @@ public class YiiUtils {
      * @param actionId
      * @return
      */
-    private static String getRelativePathToView(FileObject controller, String controllerId, String actionId) {
+    private static String getRelativePathToView(FileObject controller, String subPath, String controllerId, String actionId) {
         if (controller == null) {
             return null;
         }
@@ -248,8 +274,19 @@ public class YiiUtils {
             themePath = String.format(THEME_PATH, themeName);
         }
 
+        // add depth for sub path
+        StringBuilder sb = new StringBuilder();
+        int startIndex = 0;
+        while (startIndex != -1) {
+            startIndex++;
+            startIndex = subPath.indexOf("/", startIndex); // NOI18N
+            if (startIndex > 0) {
+                sb.append("/.."); // NOI18N
+            }
+        }
+
         // create relative path from controller to view file
-        return String.format(VIEW_RELATIVE_PATH_FORMAT, themePath, controllerId, actionId);
+        return String.format(VIEW_RELATIVE_PATH_FORMAT, sb.toString(), themePath, subPath, controllerId, actionId);
     }
 
     /**
@@ -296,12 +333,17 @@ public class YiiUtils {
         File file = new File(viewPath);
         FileObject view = null;
         try {
+            // create sub directories
+            File parentFile = file.getParentFile();
+            if (!parentFile.exists()) {
+                parentFile.mkdirs();
+            }
             // create file
             if (file.createNewFile()) {
                 view = FileUtil.toFileObject(file);
             }
         } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "view file path : {0}", viewPath);
+            LOGGER.log(Level.WARNING, "Can't create view file : {0}", viewPath);
         }
         return view;
     }
@@ -313,7 +355,11 @@ public class YiiUtils {
      * @return true if file is controller file, otherwise false.
      */
     public static boolean isController(FileObject fo) {
-        return fo.isData() && FileUtils.isPhpFile(fo) && fo.getParent().getNameExt().equals(CONTROLLERS_DIRECTORY_NAME);
+        String subPath = getSubDirectoryPathForController(fo);
+        if (subPath == null) {
+            return false;
+        }
+        return fo.isData() && FileUtils.isPhpFile(fo) && fo.getName().endsWith(CONTROLLER_SUFFIX);
     }
 
     /**
@@ -366,7 +412,7 @@ public class YiiUtils {
         if (viewFolderName == null) {
             return null;
         }
-        return viewFolderName + CONTROLLER_SUFIX;
+        return viewFolderName + CONTROLLER_SUFFIX;
     }
 
     /**
@@ -379,7 +425,7 @@ public class YiiUtils {
         if (controller == null) {
             return false;
         }
-        return controller.endsWith(CONTROLLER_SUFIX);
+        return controller.endsWith(CONTROLLER_SUFFIX);
     }
 
     /**
@@ -405,7 +451,7 @@ public class YiiUtils {
         if (!isControllerName(controllerName)) {
             return null;
         }
-        String name = controllerName.replace(CONTROLLER_SUFIX, ""); // NOI18N
+        String name = controllerName.replace(CONTROLLER_SUFFIX, ""); // NOI18N
         name = name.toLowerCase();
         return name;
     }
