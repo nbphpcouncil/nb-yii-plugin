@@ -44,7 +44,6 @@ package org.nbphpcouncil.modules.php.yii.util;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -87,6 +86,7 @@ public class YiiUtils {
     private static final String CONTROLLERS_DIRECTORY_NAME = "controllers"; // NOI18N
     private static final String ACTION_METHOD_PREFIX = "action"; // NOI18N
     private static final String VIEW_RELATIVE_PATH_FORMAT = "../..%s%s/views/%s%s/%s.php"; // NOI18N
+    private static final String CONTROLLER_RELATIVE_PATH_FORMAT = "../../..%s%s/controllers/%s%s.php"; // NOI18N
     private static final String THEME_PATH = "/../themes/%s"; // NOI18N
     private static final String NBPROJECT = "nbproject"; // NOI18N
     private static final String PROTECTED_PATH = "protected/"; // NOI18N
@@ -156,25 +156,35 @@ public class YiiUtils {
                 || !FileUtils.isPhpFile(fo)) {
             return false;
         }
-        PhpModule phpModule = getPhpModule(fo);
-        // return null if use external files #11
-        if (phpModule == null) {
+
+        String subpath = getPathFromWebroot(fo);
+        if (StringUtils.isEmpty(subpath)) {
             return false;
         }
-        FileObject viewsDirectory = getViewsDirectory(phpModule);
-        FileObject themesDirestory = getThemesDirectory(phpModule);
-        List<FileObject> directories = Arrays.asList(viewsDirectory, themesDirestory);
-        for (FileObject directory : directories) {
-            // #3
-            if (directory != null) {
-                String relativePath = FileUtil.getRelativePath(directory, fo);
-                if (!StringUtils.isEmpty(relativePath)) {
-                    return true;
-                }
-            }
+        if (subpath.contains("/views/")) { // NOI18N
+            return true;
         }
 
         return false;
+    }
+
+    /**
+     * Get path from webroot directory.
+     *
+     * @param fo
+     * @return
+     */
+    private static String getPathFromWebroot(FileObject fo) {
+        PhpModule phpModule = getPhpModule(fo);
+        // return null if use external files #11
+        if (phpModule == null) {
+            return null;
+        }
+        String path = fo.getPath();
+        YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+        FileObject webroot = yiiModule.getWebroot();
+        String webrootPath = webroot.getPath();
+        return path.replace(webrootPath, ""); // NOI18N
     }
 
     /**
@@ -275,18 +285,10 @@ public class YiiUtils {
         }
 
         // add depth for sub path
-        StringBuilder sb = new StringBuilder();
-        int startIndex = 0;
-        while (startIndex != -1) {
-            startIndex++;
-            startIndex = subPath.indexOf("/", startIndex); // NOI18N
-            if (startIndex > 0) {
-                sb.append("/.."); // NOI18N
-            }
-        }
+        String subpathDepth = toSubpathDepth(subPath);
 
         // create relative path from controller to view file
-        return String.format(VIEW_RELATIVE_PATH_FORMAT, sb.toString(), themePath, subPath, controllerId, actionId);
+        return String.format(VIEW_RELATIVE_PATH_FORMAT, subpathDepth, themePath, subPath, controllerId, actionId);
     }
 
     /**
@@ -373,32 +375,55 @@ public class YiiUtils {
             return null;
         }
 
-        PhpModule phpModule = getPhpModule(view);
-        // view is in subdirectory
-        YiiModule yiiModule = YiiModuleFactory.create(phpModule);
-        FileObject webroot = yiiModule.getWebroot();
-        String relativePath = ""; // NOI18N
-        FileObject parent = view.getParent();
-        String name = parent.getNameExt();
-        do {
-            parent = parent.getParent();
-            if (parent.getNameExt().equals("views")) { // NOI18N
-                break;
+        // get relative path
+        String subpathFromWebroot = getPathFromWebroot(view);
+
+        // themes
+        String themeDepth = ""; // NOI18N
+        if (subpathFromWebroot.contains("/themes/")) { // NOI18N
+            themeDepth = "/../../protected"; // NOI18N
+        }
+
+        // views
+        String subpath = ""; // NOI18N
+        String controllerId = ""; // NOI18N
+        if (subpathFromWebroot.contains("/views/")) { // NOI18N
+            subpath = subpathFromWebroot.replaceAll(".+/views/", ""); // NOI18N
+            subpath = subpath.replace("/" + view.getNameExt(), ""); // NOI18N
+            int lastSlash = subpath.lastIndexOf("/"); // NOI18N
+            if (lastSlash == -1) {
+                controllerId = subpath;
+                subpath = ""; // NOI18N
+            } else {
+                controllerId = subpath.substring(lastSlash + 1);
+                subpath = subpath.substring(0, lastSlash + 1);
             }
-            name = parent.getNameExt();
-            relativePath = FileUtil.getRelativePath(webroot, parent);
-        } while (!StringUtils.isEmpty(relativePath));
-
-        if (StringUtils.isEmpty(name)) {
-            return null;
         }
 
-        String controllerName = getControllerFileName(name);
-        FileObject controllersDirectory = getControllersDirectory(phpModule);
-        if (controllersDirectory != null) {
-            return controllersDirectory.getFileObject(controllerName + ".php"); //NOI18N
+        // add depth for sub path
+        String subpathDepth = toSubpathDepth(subpath);
+        String controllerName = getControllerFileName(controllerId);
+        String format = String.format(CONTROLLER_RELATIVE_PATH_FORMAT, subpathDepth, themeDepth, subpath, controllerName);
+        return view.getFileObject(format);
+    }
+
+    /**
+     * Get subpath depth.
+     *
+     * @param path
+     * @return
+     */
+    private static String toSubpathDepth(String path) {
+        StringBuilder sb = new StringBuilder();
+        int startIndex = 0;
+        while (startIndex != -1) {
+            startIndex++;
+            startIndex = path.indexOf("/", startIndex); // NOI18N
+            if (startIndex > 0) {
+                sb.append("/.."); // NOI18N
+            }
         }
-        return null;
+        return sb.toString();
     }
 
     /**
