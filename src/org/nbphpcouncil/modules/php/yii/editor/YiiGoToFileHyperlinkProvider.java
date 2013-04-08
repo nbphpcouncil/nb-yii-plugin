@@ -112,11 +112,17 @@ public class YiiGoToFileHyperlinkProvider extends YiiHyperlinkProviderExt {
         targetStart = ts.offset() + 1;
         targetEnd = targetStart + target.length();
 
+        PhpModule phpModule = PhpModule.inferPhpModule();
+        // check whether target is class name
+        targetFile = getClassFileObject(phpModule);
+        if (targetFile != null) {
+            return true;
+        }
+
         // get method name
         String methodName = getMethodName(ts);
         if (methods.contains(methodName)) {
             // get FileObject
-            PhpModule phpModule = PhpModule.inferPhpModule();
             if (YiiViewPathSupport.isAbsoluteViewPath(target)) {
                 // for application's view path
                 FileObject currentFile = NbEditorUtilities.getFileObject(doc);
@@ -177,11 +183,13 @@ public class YiiGoToFileHyperlinkProvider extends YiiHyperlinkProviderExt {
      * @return FileObject for class if file exists, otherwise null.
      */
     private FileObject getClassFileObject(PhpModule phpModule) {
-        ElementQuery.Index indexQuery = ElementQueryFactory.createIndexQuery(QuerySupportFactory.get(phpModule.getSourceDirectory()));
-        Set<ClassElement> classElements = indexQuery.getClasses(NameKind.create(target, QuerySupport.Kind.EXACT));
-        for (ClassElement element : classElements) {
-            if (element.getName().equals(target)) {
-                return element.getFileObject();
+        if (target != null && !target.contains(" ")) { // NOI18N
+            ElementQuery.Index indexQuery = ElementQueryFactory.createIndexQuery(QuerySupportFactory.get(phpModule.getSourceDirectory()));
+            Set<ClassElement> classElements = indexQuery.getClasses(NameKind.create(target, QuerySupport.Kind.EXACT));
+            for (ClassElement element : classElements) {
+                if (element.getName().equals(target)) {
+                    return element.getFileObject();
+                }
             }
         }
         return null;
