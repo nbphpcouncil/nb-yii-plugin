@@ -650,4 +650,66 @@ public class YiiUtils {
             return themeName;
         }
     }
+
+    /**
+     * Check whether file is within modules directory.
+     *
+     * @param fileObject current file
+     * @return true if file exists within modules directory, otherwise false.
+     */
+    public static boolean isInModules(FileObject fileObject) {
+        String pathFromWebroot = getPathFromWebroot(fileObject);
+        if (pathFromWebroot != null) {
+            return pathFromWebroot.contains("/modules/"); // NOI18N
+        }
+        return false;
+    }
+
+    /**
+     * Get module name.
+     *
+     * @param fileObject
+     * @return module name in current file. if file doesn't exist in modules,
+     * null.
+     */
+    public static String getModuleName(FileObject fileObject) {
+        if (fileObject == null || !isInModules(fileObject)) {
+            return null;
+        }
+        String path = getPathFromWebroot(fileObject);
+        if (path == null) {
+            return null;
+        }
+
+        path = path.replaceAll(".+/modules/", path); // NOI18N
+        return path.substring(0, path.indexOf("/")); // NOI18N
+    }
+
+    /**
+     * Get current module directory.
+     *
+     * @param fileObject current file
+     * @return current module directory.
+     */
+    public static FileObject getCurrentModuleDirectory(FileObject fileObject) {
+        if (fileObject == null || !isInModules(fileObject)) {
+            return null;
+        }
+        String path = getPathFromWebroot(fileObject);
+        if (path == null) {
+            return null;
+        }
+        String modules = "/modules/"; // NOI18N
+        int modulesIndex = path.lastIndexOf(modules);
+
+        // contains module name
+        int moduleIndex = path.indexOf("/", modulesIndex + modules.length()); // NOI18N
+        String modulePath = path.substring(0, moduleIndex);
+        YiiModule yiiModule = YiiModuleFactory.create(PhpModule.forFileObject(fileObject));
+        FileObject webroot = yiiModule.getWebroot();
+        if (webroot == null) {
+            return null;
+        }
+        return webroot.getFileObject(modulePath);
+    }
 }

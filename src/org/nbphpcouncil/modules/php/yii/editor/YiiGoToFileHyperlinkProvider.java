@@ -44,18 +44,24 @@ package org.nbphpcouncil.modules.php.yii.editor;
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.text.Document;
-import org.nbphpcouncil.modules.php.yii.YiiModule;
-import org.nbphpcouncil.modules.php.yii.YiiModuleFactory;
 import org.nbphpcouncil.modules.php.yii.util.YiiDocUtils;
 import org.nbphpcouncil.modules.php.yii.util.YiiPathAliasSupport;
+import org.nbphpcouncil.modules.php.yii.util.YiiViewPathSupport;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkProviderExt;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkType;
 import org.netbeans.modules.csl.api.UiUtils;
+import org.netbeans.modules.editor.NbEditorUtilities;
+import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
 import org.netbeans.modules.php.api.util.FileUtils;
+import org.netbeans.modules.php.editor.api.ElementQuery;
+import org.netbeans.modules.php.editor.api.ElementQueryFactory;
+import org.netbeans.modules.php.editor.api.NameKind;
+import org.netbeans.modules.php.editor.api.QuerySupportFactory;
+import org.netbeans.modules.php.editor.api.elements.ClassElement;
 import org.netbeans.modules.php.editor.lexer.PHPTokenId;
 import org.openide.filesystems.FileObject;
 import org.openide.util.NbBundle;
@@ -77,6 +83,7 @@ public class YiiGoToFileHyperlinkProvider extends YiiHyperlinkProviderExt {
         methods.add("createWidget"); // NOI18N
         methods.add("import"); // NOI18N
         methods.add("beginCache"); // NOI18N
+        methods.add("beginContent"); // NOI18N
     }
 
     @Override
@@ -110,9 +117,18 @@ public class YiiGoToFileHyperlinkProvider extends YiiHyperlinkProviderExt {
         if (methods.contains(methodName)) {
             // get FileObject
             PhpModule phpModule = PhpModule.inferPhpModule();
+            if (YiiViewPathSupport.isAbsoluteViewPath(target)) {
+                // for application's view path
+                FileObject currentFile = NbEditorUtilities.getFileObject(doc);
+                targetFile = YiiViewPathSupport.getAbsoluteViewFile(target, currentFile);
+                return true;
+            }
+
+            // for path alias
             targetFile = YiiPathAliasSupport.getFileObject(phpModule, target);
             if (targetFile == null) {
-                targetFile = getDefaultFileObject(methodName, phpModule);
+                // for only class name
+                targetFile = getClassFileObject(phpModule);
             }
             if (targetFile != null && targetFile.isData()) {
                 return true;
@@ -155,18 +171,17 @@ public class YiiGoToFileHyperlinkProvider extends YiiHyperlinkProviderExt {
     }
 
     /**
-     * Get default file.
+     * Get class file if target is class name.
      *
-     * @param methodName method name
      * @param phpModule PhpModule
-     * @return FileObject
+     * @return FileObject for class if file exists, otherwise null.
      */
-    private FileObject getDefaultFileObject(String methodName, PhpModule phpModule) {
-        YiiModule yiiModule = YiiModuleFactory.create(phpModule);
-        if (methodName.contains("widget") || methodName.contains("Widget")) { // NOI18N
-            FileObject system = yiiModule.getSystem();
-            if (system != null) {
-                return system.getFileObject("web/widgets/" + target + ".php"); // NOI18N
+    private FileObject getClassFileObject(PhpModule phpModule) {
+        ElementQuery.Index indexQuery = ElementQueryFactory.createIndexQuery(QuerySupportFactory.get(phpModule.getSourceDirectory()));
+        Set<ClassElement> classElements = indexQuery.getClasses(NameKind.create(target, QuerySupport.Kind.EXACT));
+        for (ClassElement element : classElements) {
+            if (element.getName().equals(target)) {
+                return element.getFileObject();
             }
         }
         return null;

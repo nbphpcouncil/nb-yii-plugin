@@ -49,6 +49,7 @@ import org.nbphpcouncil.modules.php.yii.YiiModule;
 import org.nbphpcouncil.modules.php.yii.YiiModuleFactory;
 import org.nbphpcouncil.modules.php.yii.preferences.YiiPreferences;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
+import org.nbphpcouncil.modules.php.yii.util.YiiViewPathSupport;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
@@ -101,7 +102,12 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
     public void performClickAction(Document doc, int offset, HyperlinkType type) {
         // use "create view file automatically"
         if (view == null && useAutoCreate) {
-            view = YiiUtils.createViewFileAuto(controller, relativeViewPath);
+            if (YiiViewPathSupport.isAbsoluteViewPath(target)) {
+                // absolute view
+                view = YiiViewPathSupport.createAbsoluteViewFile(target, controller);
+            } else {
+                view = YiiUtils.createViewFileAuto(controller, relativeViewPath);
+            }
         }
 
         // Open view file
@@ -155,8 +161,13 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
                 return false;
             }
             // set view file
-            relativeViewPath = YiiUtils.getRelativePathToView(controller, target);
-            view = controller.getFileObject(relativeViewPath);
+            if (YiiViewPathSupport.isAbsoluteViewPath(target)) {
+                // absolute view
+                view = YiiViewPathSupport.getAbsoluteViewFile(target, controller);
+            } else {
+                relativeViewPath = YiiUtils.getRelativePathToView(controller, target);
+                view = controller.getFileObject(relativeViewPath);
+            }
             useAutoCreate = YiiPreferences.useAutoCreateView(PhpModule.forFileObject(controller));
             if (view != null || useAutoCreate) {
                 targetStart = newOffset + 1;
