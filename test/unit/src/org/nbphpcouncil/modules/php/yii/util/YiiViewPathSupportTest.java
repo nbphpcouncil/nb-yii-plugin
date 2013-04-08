@@ -39,79 +39,54 @@
  *
  * Portions Copyrighted 2013 Sun Microsystems, Inc.
  */
-package org.nbphpcouncil.modules.php.yii;
+package org.nbphpcouncil.modules.php.yii.util;
 
-import org.openide.filesystems.FileObject;
+import static junit.framework.Assert.assertTrue;
+import org.junit.Test;
+import org.netbeans.junit.NbTestCase;
 
 /**
  *
  * @author junichi11
  */
-public abstract class YiiModule {
+public class YiiViewPathSupportTest extends NbTestCase {
 
-    public enum PATH_ALIAS {
-
-        SYSTEM("system"),
-        ZII("zii"),
-        APPLICATION("application"),
-        WEBROOT("webroot"),
-        EXT("ext"),
-        NONE("");
-        private String name;
-
-        private PATH_ALIAS(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-    }
-
-    public abstract FileObject getWebroot();
-
-    public abstract FileObject getSystem();
-
-    public abstract FileObject getZii();
-
-    public abstract FileObject getApplication();
-
-    public abstract FileObject getExt();
-
-    public FileObject getDirectory(PATH_ALIAS alias) {
-        switch (alias) {
-            case SYSTEM:
-                return getSystem();
-            case ZII:
-                return getZii();
-            case APPLICATION:
-                return getApplication();
-            case WEBROOT:
-                return getWebroot();
-            case EXT:
-                return getExt();
-            case NONE:
-                return null;
-            default:
-                throw new AssertionError();
-        }
+    public YiiViewPathSupportTest(String name) {
+        super(name);
     }
 
     /**
-     * Get FileObject for specified path alias and relativepath.
-     *
-     * @param alias path alias
-     * @param relativePath relative path
-     * @return FileObject if file exists, otherwise null.
+     * Test of getAbsoluteViewFile method, of class YiiViewPathSupport.
      */
-    public FileObject getFileObject(PATH_ALIAS alias, String relativePath) {
-        FileObject directory = getDirectory(alias);
-        if (directory == null) {
-            return null;
-        }
-        if (relativePath == null) {
-            return directory;
-        }
-        return directory.getFileObject(relativePath);
+    @Test
+    public void testGetAbsoluteViewFile() {
+    }
+
+    /**
+     * Test of createAbsoluteViewFile method, of class YiiViewPathSupport.
+     */
+    @Test
+    public void testCreateAbsoluteViewFile() {
+    }
+
+    /**
+     * Test of isAbsoluteViewPath method, of class YiiViewPathSupport.
+     */
+    @Test
+    public void testIsAbsoluteViewPath() {
+        // true
+        assertTrue(YiiViewPathSupport.isAbsoluteViewPath("/sample/index"));
+        assertTrue(YiiViewPathSupport.isAbsoluteViewPath("//sample/index"));
+        assertTrue(YiiViewPathSupport.isAbsoluteViewPath("/"));
+        assertTrue(YiiViewPathSupport.isAbsoluteViewPath("//"));
+
+        // false
+        assertFalse(YiiViewPathSupport.isAbsoluteViewPath("///"));
+        assertFalse(YiiViewPathSupport.isAbsoluteViewPath("////"));
+        assertFalse(YiiViewPathSupport.isAbsoluteViewPath("sample/index"));
+        assertFalse(YiiViewPathSupport.isAbsoluteViewPath(" /sample/index"));
+        assertFalse(YiiViewPathSupport.isAbsoluteViewPath(" //sample/index"));
+        assertFalse(YiiViewPathSupport.isAbsoluteViewPath(""));
+        assertFalse(YiiViewPathSupport.isAbsoluteViewPath(null));
     }
 }

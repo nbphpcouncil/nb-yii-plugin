@@ -124,18 +124,41 @@ This feature is available for the followings:
 - CBaseController::endWidget()
 - CBaseController::createWidget()
 - CBaseController::beginCache()
+- CBaseController::beginContent()
 
 1. Hold down `Ctrl` on target path
 2. string color is changed to blue if file exists(file path is displeyed as tooltip)
 3. Click > open file
 
 e.g.
+
 ```php
 $this->widget('application.components.MyComponent', array());
 // Hold down Ctrl on application.components.MyComponent
+
+// support for the path that starts with '/' and '//'
+$this->beginContent('//layouts/main');
+$this->renderPartial('/users/foo');
+
+// support for the class name
+$this->widget('MyWidget');
 ```
+
+Furthermore... Class name is also valid at the other places.  
+e.g.
+
+```php
+return array(
+    'some'=>array(
+        // Hold-down Ctrl key on 'ClassName'
+        'class'=>'SomeAction',
+    ),
+);
+```
+
 #### Notice
-This feature works with default path alias name.
+- This feature works with default path alias name.
+- Automatically file creation is valid with only render and renderPartial methods.
 
 ### Code Completion on the view file
 Provide support for code completion on the View file.
