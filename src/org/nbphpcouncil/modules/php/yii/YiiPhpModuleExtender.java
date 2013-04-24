@@ -109,7 +109,7 @@ public class YiiPhpModuleExtender extends PhpModuleExtender {
     public Set<FileObject> extend(PhpModule phpModule) throws ExtendingException {
         boolean isSuccess = false;
         try {
-            YiiScript script = YiiScript.forPhpModule(phpModule, true);
+            YiiScript script = YiiScript.forPhpModule(phpModule, true, true);
             isSuccess = script.initProject(phpModule);
         } catch (InvalidPhpExecutableException ex) {
             Exceptions.printStackTrace(ex);
