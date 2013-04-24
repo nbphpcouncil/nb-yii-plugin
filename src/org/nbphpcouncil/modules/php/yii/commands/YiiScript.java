@@ -42,26 +42,46 @@
 package org.nbphpcouncil.modules.php.yii.commands;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.nbphpcouncil.modules.php.yii.YiiModule;
+import org.nbphpcouncil.modules.php.yii.YiiModule.PATH_ALIAS;
+import org.nbphpcouncil.modules.php.yii.YiiModuleFactory;
 import org.nbphpcouncil.modules.php.yii.ui.options.YiiOptions;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.netbeans.api.extexecution.ExecutionDescriptor;
+import org.netbeans.api.extexecution.input.InputProcessor;
+import org.netbeans.api.extexecution.input.InputProcessors;
+import org.netbeans.api.extexecution.input.LineProcessor;
+import org.netbeans.modules.php.api.editor.EditorSupport;
+import org.netbeans.modules.php.api.editor.PhpClass;
 import org.netbeans.modules.php.api.executable.InvalidPhpExecutableException;
 import org.netbeans.modules.php.api.executable.PhpExecutable;
 import org.netbeans.modules.php.api.executable.PhpExecutableValidator;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
+import org.netbeans.modules.php.api.util.FileUtils;
 import org.netbeans.modules.php.api.util.UiUtils;
+import org.netbeans.modules.php.spi.framework.commands.FrameworkCommand;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
@@ -75,10 +95,20 @@ public class YiiScript {
 
     public static final String YII_SCRIPT_NAME = "yiic"; // NOI18N
     public static final String YII_SCRIPT_NAME_LONG = YII_SCRIPT_NAME + ".php"; // NOI18N
-    private static final String WEBAPP_COMMAND = "webapp"; // NOI18N
     private String yiicPath;
     public static final String OPTIONS_SUB_PATH = "Yii"; // NOI18N
     private static final Logger LOGGER = Logger.getLogger(YiiScript.class.getName());
+    // commands
+    private static final String SUBCOMMAND_PREFIX = "action"; // NOI18N
+    private static final String COMMAND_SUFFIX = "Command"; // NOI18N
+    private static final String HELP_COMMAND = "help"; // NOI18N
+    private static final String MESSAGE_COMMAND = "message"; // NOI18N
+    private static final String MIGRATE_COMMAND = "migrate"; // NOI18N
+    private static final String SHELL_COMMAND = "shell"; // NOI18N
+    private static final String WEBAPP_COMMAND = "webapp"; // NOI18N
+    private static final List<String> DEFAULT_COMMANDS = Arrays.asList(MESSAGE_COMMAND, MIGRATE_COMMAND, SHELL_COMMAND, WEBAPP_COMMAND);
+    // default params
+    private static final List<String> DEFAULT_PARAMS = Collections.emptyList();
 
     private YiiScript(String yiicPath) {
         this.yiicPath = yiicPath;
@@ -89,18 +119,250 @@ public class YiiScript {
         "YiiScript.script.invalid=<html>Project''s Yii script is not valid.<br>({0})"
     })
     public static YiiScript forPhpModule(PhpModule phpModule, boolean warn) throws InvalidPhpExecutableException {
-        String yiiPath = YiiOptions.getInstance().getYiiScript();
+        return forPhpModule(phpModule, warn, false);
+    }
+
+    /**
+     * Create instance.
+     *
+     * @param phpModule
+     * @param warn
+     * @param useProjectOption whether plguin uses the path of options panel
+     * @return
+     * @throws InvalidPhpExecutableException
+     */
+    public static YiiScript forPhpModule(PhpModule phpModule, boolean warn, boolean useProjectOption) throws InvalidPhpExecutableException {
+        String yiiPath = ""; // NOI18N
+        if (useProjectOption) {
+            yiiPath = YiiOptions.getInstance().getYiiScript();
+        } else {
+            YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+            FileObject webroot = yiiModule.getWebroot();
+            if (webroot != null) {
+                FileObject yiic = webroot.getFileObject("protected/" + YII_SCRIPT_NAME_LONG);
+                if (yiic != null) {
+                    try {
+                        yiiPath = FileUtil.toFile(yiic).getCanonicalPath();
+                    } catch (IOException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                }
+            }
+        }
         String error = validate(yiiPath);
         if (error == null) {
             return new YiiScript(yiiPath);
         }
         if (warn) {
             NotifyDescriptor.Message message = new NotifyDescriptor.Message(
-                    Bundle.YiiScript_script_invalid(error),
-                    NotifyDescriptor.WARNING_MESSAGE);
+                Bundle.YiiScript_script_invalid(error),
+                NotifyDescriptor.WARNING_MESSAGE);
             DialogDisplayer.getDefault().notify(message);
         }
         throw new InvalidPhpExecutableException(error);
+    }
+
+    /**
+     * Run command.
+     *
+     * @param phpModule
+     * @param parameters
+     * @param postExecution
+     */
+    public void runCommand(PhpModule phpModule, List<String> parameters, Runnable postExecution) {
+        createPhpExecutable(phpModule)
+            .displayName(getDisplayName(phpModule, parameters.get(0)))
+            .additionalParameters(getAllParams(parameters))
+            .run(getDescriptor(postExecution));
+    }
+
+    /**
+     * Get commands.
+     *
+     * @param phpModule
+     * @return command list
+     */
+    public List<FrameworkCommand> getCommands(PhpModule phpModule) {
+        List<FrameworkCommand> commands = new ArrayList<FrameworkCommand>();
+        commands.add(new YiiFrameworkCommand(phpModule, HELP_COMMAND, HELP_COMMAND, HELP_COMMAND));
+        YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+        List<FileObject> commandFiles = new LinkedList<FileObject>();
+
+        // get core commands
+        FileObject coreCommandsDirectory = yiiModule.getFileObject(PATH_ALIAS.SYSTEM, "cli/commands"); // NOI18N
+        if (coreCommandsDirectory != null) {
+            addCommands(coreCommandsDirectory, commandFiles);
+        } else {
+            // add default commands
+            for (String command : DEFAULT_COMMANDS) {
+                commands.add(new YiiFrameworkCommand(phpModule, command, command, command));
+            }
+        }
+
+        // get application commands
+        FileObject appCommandsDirectory = yiiModule.getFileObject(PATH_ALIAS.APPLICATION, "commands"); // NOI18N
+        if (appCommandsDirectory != null) {
+            addCommands(appCommandsDirectory, commandFiles);
+        }
+
+        // sort
+        YiiUtils.sort(commandFiles);
+        EditorSupport editorSupport = Lookup.getDefault().lookup(EditorSupport.class);
+        for (FileObject commandFile : commandFiles) {
+            // add command
+            String commandName = commandFile.getName().replace(COMMAND_SUFFIX, "").toLowerCase(); // NOI18N
+            commands.add(new YiiFrameworkCommand(phpModule, commandName, commandName, commandName));
+
+            // add sub commands
+            Collection<PhpClass> phpClasses = editorSupport.getClasses(commandFile);
+            for (PhpClass phpClass : phpClasses) {
+                Collection<PhpClass.Method> methods = phpClass.getMethods();
+                PhpClass.Method[] methodArray = methods.toArray(new PhpClass.Method[]{});
+                Arrays.sort(methodArray, new Comparator<PhpClass.Method>() {
+                    @Override
+                    public int compare(PhpClass.Method m1, PhpClass.Method m2) {
+                        return m1.getName().compareToIgnoreCase(m2.getName());
+                    }
+                });
+                for (PhpClass.Method method : methodArray) {
+                    String methodName = method.getName();
+                    if (!methodName.startsWith(SUBCOMMAND_PREFIX)) {
+                        continue;
+                    }
+                    String subCommand = methodName.replace(SUBCOMMAND_PREFIX, "").toLowerCase(); // NOI18N
+                    String fullCommand = commandName + " " + subCommand; // NOI18N
+                    commands.add(new YiiFrameworkCommand(phpModule, new String[]{commandName, subCommand}, fullCommand, fullCommand));
+                }
+                break;
+            }
+
+        }
+
+        return commands;
+    }
+
+    /**
+     * Add command files of commands directory to list.
+     *
+     * @param folder
+     * @param commandFiles
+     */
+    private void addCommands(FileObject folder, List<FileObject> commandFiles) {
+        if (!folder.isFolder()) {
+            return;
+        }
+        for (FileObject child : folder.getChildren()) {
+            if (!child.isFolder() && FileUtils.isPhpFile(child) && child.getName().endsWith(COMMAND_SUFFIX)) {
+                commandFiles.add(child);
+            }
+        }
+    }
+
+    /**
+     * Get descriptor.
+     *
+     * @param postExecution
+     * @return ExecutionDescriptor
+     */
+    private ExecutionDescriptor getDescriptor(Runnable postExecution) {
+        ExecutionDescriptor executionDescriptor = PhpExecutable.DEFAULT_EXECUTION_DESCRIPTOR
+            .optionsPath(getOptionsPath());
+        if (postExecution != null) {
+            executionDescriptor = executionDescriptor.postExecution(postExecution);
+        }
+        return executionDescriptor;
+    }
+
+    /**
+     * Get help.
+     *
+     * @param phpModule
+     * @param params
+     * @return help text
+     */
+    public String getHelp(PhpModule phpModule, String[] params) {
+        assert phpModule != null;
+
+        // no help commands
+        if (params.length < 1) {
+            return ""; // NOI18N
+        }
+
+        List<String> allParams = new ArrayList<String>();
+        allParams.add(HELP_COMMAND);
+        allParams.add(params[0]);
+
+        HelpLineProcessor lineProcessor = new HelpLineProcessor();
+        Future<Integer> result = createPhpExecutable(phpModule)
+            .displayName(getDisplayName(phpModule, allParams.get(0)))
+            .additionalParameters(getAllParams(allParams))
+            .run(getSilentDescriptor(), getOutProcessorFactory(lineProcessor));
+        try {
+            if (result != null) {
+                result.get();
+            }
+        } catch (CancellationException ex) {
+            // canceled
+        } catch (ExecutionException ex) {
+            UiUtils.processExecutionException(ex, OPTIONS_SUB_PATH);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+        return lineProcessor.getHelp();
+    }
+
+    /**
+     * Get all params.
+     *
+     * @param params
+     * @return
+     */
+    private List<String> getAllParams(List<String> params) {
+        List<String> allParams = new ArrayList<String>();
+        allParams.addAll(DEFAULT_PARAMS);
+        allParams.addAll(params);
+        return allParams;
+    }
+
+    /**
+     * Get display name.
+     *
+     * @param phpModule
+     * @param command
+     * @return
+     */
+    @NbBundle.Messages({
+        "# {0} - project name",
+        "# {1} - command",
+        "YiiScript.command.title={0} ({1})"
+    })
+    private String getDisplayName(PhpModule phpModule, String command) {
+        return Bundle.YiiScript_command_title(phpModule.getDisplayName(), command);
+    }
+
+    /**
+     * Get InputProcessFactory.
+     *
+     * @param lineProcessor
+     * @return
+     */
+    private ExecutionDescriptor.InputProcessorFactory getOutProcessorFactory(final LineProcessor lineProcessor) {
+        return new ExecutionDescriptor.InputProcessorFactory() {
+            @Override
+            public InputProcessor newInputProcessor(InputProcessor defaultProcessor) {
+                return InputProcessors.ansiStripping(InputProcessors.bridge(lineProcessor));
+            }
+        };
+    }
+
+    /**
+     * Get silent descriptor.
+     *
+     * @return ExecutionDescriptor
+     */
+    private ExecutionDescriptor getSilentDescriptor() {
+        return new ExecutionDescriptor()
+            .inputOutput(InputOutput.NULL);
     }
 
     /**
@@ -120,9 +382,9 @@ public class YiiScript {
         params.add(WEBAPP_COMMAND);
         params.add(sourceDirectory.getName());
         try {
-            createPhpExecutable(phpModule)
-                    .additionalParameters(params)
-                    .runAndWait(getInitProjectDescriptor(), PhpExecutable.ANSI_STRIPPING_FACTORY, WEBAPP_COMMAND);
+            createPhpExecutableForNewProject(phpModule)
+                .additionalParameters(params)
+                .runAndWait(getInitProjectDescriptor(), PhpExecutable.ANSI_STRIPPING_FACTORY, WEBAPP_COMMAND);
         } catch (ExecutionException ex) {
             LOGGER.log(Level.WARNING, "Failed to excute php, please check yiic path or php interpriter on option panel");
         }
@@ -149,15 +411,27 @@ public class YiiScript {
 
     /**
      * Create PhpExecutable. working directory is parent directory of project
-     * directory.
+     * directory. Use when user creates new project.
      *
      * @param phpModule
      * @return PhpExecutable
      */
-    private PhpExecutable createPhpExecutable(PhpModule phpModule) {
+    private PhpExecutable createPhpExecutableForNewProject(PhpModule phpModule) {
         return new PhpExecutable(yiicPath)
-                .workDir(FileUtil.toFile(phpModule.getSourceDirectory().getParent()));
+            .workDir(FileUtil.toFile(phpModule.getSourceDirectory().getParent()));
+    }
 
+    /**
+     * Create PhpExecutable. working directory is webroot directory.
+     *
+     * @param phpModule
+     * @return
+     */
+    private PhpExecutable createPhpExecutable(PhpModule phpModule) {
+        YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+        FileObject webroot = yiiModule.getWebroot();
+        return new PhpExecutable(yiicPath)
+            .workDir(FileUtil.toFile(webroot));
     }
 
     /**
@@ -178,7 +452,7 @@ public class YiiScript {
         return OPTIONS_SUB_PATH;
     }
 
-    //~ Inner class
+    //~ Inner classes
     private class YiiScriptInputOutput implements InputOutput {
 
         private final InputOutput io;
@@ -264,6 +538,29 @@ public class YiiScript {
 
         public void setIn(Reader in) {
             this.in = in;
+        }
+    }
+
+    private static class HelpLineProcessor implements LineProcessor {
+
+        private StringBuilder sb = new StringBuilder();
+
+        @Override
+        public void processLine(String line) {
+            sb.append(line);
+            sb.append("\n"); // NOI18N
+        }
+
+        @Override
+        public void reset() {
+        }
+
+        @Override
+        public void close() {
+        }
+
+        public String getHelp() {
+            return sb.toString();
         }
     }
 }

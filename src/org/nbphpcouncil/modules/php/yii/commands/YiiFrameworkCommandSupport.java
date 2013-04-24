@@ -39,65 +39,67 @@
  *
  * Portions Copyrighted 2013 Sun Microsystems, Inc.
  */
-package org.nbphpcouncil.modules.php.yii;
+package org.nbphpcouncil.modules.php.yii.commands;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import javax.swing.Action;
-import org.nbphpcouncil.modules.php.yii.ui.actions.PHPUnitInitAction;
-import org.nbphpcouncil.modules.php.yii.ui.actions.YiiGoToActionAction;
-import org.nbphpcouncil.modules.php.yii.ui.actions.YiiGoToViewAction;
-import org.nbphpcouncil.modules.php.yii.ui.actions.YiiInitAction;
-import org.nbphpcouncil.modules.php.yii.ui.actions.YiiRunCommandAction;
-import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
-import org.netbeans.modules.php.spi.framework.PhpModuleActionsExtender;
-import org.netbeans.modules.php.spi.framework.actions.GoToActionAction;
-import org.netbeans.modules.php.spi.framework.actions.GoToViewAction;
-import org.netbeans.modules.php.spi.framework.actions.RunCommandAction;
-import org.openide.filesystems.FileObject;
+import org.netbeans.modules.php.api.executable.InvalidPhpExecutableException;
+import org.netbeans.modules.php.api.phpmodule.PhpModule;
+import org.netbeans.modules.php.api.util.UiUtils;
+import org.netbeans.modules.php.spi.framework.commands.FrameworkCommand;
+import org.netbeans.modules.php.spi.framework.commands.FrameworkCommandSupport;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 /**
  *
  * @author junichi11
  */
-public class YiiActionsExtender extends PhpModuleActionsExtender {
+public class YiiFrameworkCommandSupport extends FrameworkCommandSupport {
 
+    public YiiFrameworkCommandSupport(PhpModule phpModule) {
+        super(phpModule);
+    }
+
+    @NbBundle.Messages("YiiFrameworkCommandSupport.name=Yii")
     @Override
-    public String getMenuName() {
-        return NbBundle.getMessage(YiiActionsExtender.class, "LBL_MenuName");
+    public String getFrameworkName() {
+        return Bundle.YiiFrameworkCommandSupport_name();
     }
 
     @Override
-    public List<? extends Action> getActions() {
-        List<Action> actions = new ArrayList<Action>();
-        actions.add(YiiInitAction.getInstance());
-        actions.add(PHPUnitInitAction.getInstance());
-        return actions;
+    public void runCommand(CommandDescriptor commandDescriptor, Runnable postExecution) {
+        String[] commands = commandDescriptor.getFrameworkCommand().getCommands();
+        String[] commandParams = commandDescriptor.getCommandParams();
+        List<String> params = new ArrayList<String>(commands.length + commandParams.length);
+        params.addAll(Arrays.asList(commands));
+        params.addAll(Arrays.asList(commandParams));
+        try {
+            YiiScript.forPhpModule(phpModule, false).runCommand(phpModule, params, postExecution);
+        } catch (InvalidPhpExecutableException ex) {
+            UiUtils.invalidScriptProvided(ex.getLocalizedMessage(), YiiScript.OPTIONS_SUB_PATH);
+        }
     }
 
     @Override
-    public RunCommandAction getRunCommandAction() {
-        return YiiRunCommandAction.getInstance();
+    protected String getOptionsPath() {
+        return YiiScript.getOptionsPath();
     }
 
     @Override
-    public boolean isViewWithAction(FileObject fo) {
-        return YiiUtils.isView(fo);
+    protected File getPluginsDirectory() {
+        return null;
     }
 
     @Override
-    public boolean isActionWithView(FileObject fo) {
-        return YiiUtils.isController(fo);
-    }
-
-    @Override
-    public GoToActionAction getGoToActionAction(FileObject fo, int offset) {
-        return new YiiGoToActionAction(fo);
-    }
-
-    @Override
-    public GoToViewAction getGoToViewAction(FileObject fo, int offset) {
-        return new YiiGoToViewAction(fo, offset);
+    protected List<FrameworkCommand> getFrameworkCommandsInternal() {
+        try {
+            return YiiScript.forPhpModule(phpModule, true).getCommands(phpModule);
+        } catch (InvalidPhpExecutableException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return null;
     }
 }
