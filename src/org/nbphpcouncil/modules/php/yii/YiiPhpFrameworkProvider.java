@@ -45,6 +45,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import org.nbphpcouncil.modules.php.yii.commands.YiiFrameworkCommandSupport;
 import org.nbphpcouncil.modules.php.yii.commands.YiiScript;
 import org.nbphpcouncil.modules.php.yii.editor.YiiEditorExtender;
 import org.nbphpcouncil.modules.php.yii.ui.options.YiiOptions;
@@ -81,8 +82,8 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
     private YiiPhpFrameworkProvider() {
         super("Yii PHP Web Framework", Bundle.LBL_FrameworkName(), Bundle.LBL_FrameworkDescription()); // NOI18N
         badgeIcon = new BadgeIcon(
-                ImageUtilities.loadImage(ICON_PATH),
-                YiiPhpFrameworkProvider.class.getResource("/" + ICON_PATH)); // NOI18N
+            ImageUtilities.loadImage(ICON_PATH),
+            YiiPhpFrameworkProvider.class.getResource("/" + ICON_PATH)); // NOI18N
     }
 
     @PhpFrameworkProvider.Registration(position = 800)
@@ -201,7 +202,7 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
 
     @Override
     public FrameworkCommandSupport getFrameworkCommandSupport(PhpModule pm) {
-        return null;
+        return new YiiFrameworkCommandSupport(pm);
     }
 
     @Override

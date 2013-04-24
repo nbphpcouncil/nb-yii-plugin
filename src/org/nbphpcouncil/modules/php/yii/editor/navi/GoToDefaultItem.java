@@ -39,65 +39,36 @@
  *
  * Portions Copyrighted 2013 Sun Microsystems, Inc.
  */
-package org.nbphpcouncil.modules.php.yii;
+package org.nbphpcouncil.modules.php.yii.editor.navi;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.swing.Action;
-import org.nbphpcouncil.modules.php.yii.ui.actions.PHPUnitInitAction;
-import org.nbphpcouncil.modules.php.yii.ui.actions.YiiGoToActionAction;
-import org.nbphpcouncil.modules.php.yii.ui.actions.YiiGoToViewAction;
-import org.nbphpcouncil.modules.php.yii.ui.actions.YiiInitAction;
-import org.nbphpcouncil.modules.php.yii.ui.actions.YiiRunCommandAction;
-import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
-import org.netbeans.modules.php.spi.framework.PhpModuleActionsExtender;
-import org.netbeans.modules.php.spi.framework.actions.GoToActionAction;
-import org.netbeans.modules.php.spi.framework.actions.GoToViewAction;
-import org.netbeans.modules.php.spi.framework.actions.RunCommandAction;
 import org.openide.filesystems.FileObject;
-import org.openide.util.NbBundle;
 
 /**
  *
  * @author junichi11
  */
-public class YiiActionsExtender extends PhpModuleActionsExtender {
+public class GoToDefaultItem implements GoToItem {
 
-    @Override
-    public String getMenuName() {
-        return NbBundle.getMessage(YiiActionsExtender.class, "LBL_MenuName");
+    private final int offset;
+    private final FileObject fileObject;
+
+    public GoToDefaultItem(FileObject fileObject, int offset) {
+        this.fileObject = fileObject;
+        this.offset = offset;
     }
 
     @Override
-    public List<? extends Action> getActions() {
-        List<Action> actions = new ArrayList<Action>();
-        actions.add(YiiInitAction.getInstance());
-        actions.add(PHPUnitInitAction.getInstance());
-        return actions;
+    public FileObject getFileObject() {
+        return fileObject;
     }
 
     @Override
-    public RunCommandAction getRunCommandAction() {
-        return YiiRunCommandAction.getInstance();
+    public int getOffset() {
+        return offset;
     }
 
     @Override
-    public boolean isViewWithAction(FileObject fo) {
-        return YiiUtils.isView(fo);
-    }
-
-    @Override
-    public boolean isActionWithView(FileObject fo) {
-        return YiiUtils.isController(fo);
-    }
-
-    @Override
-    public GoToActionAction getGoToActionAction(FileObject fo, int offset) {
-        return new YiiGoToActionAction(fo);
-    }
-
-    @Override
-    public GoToViewAction getGoToViewAction(FileObject fo, int offset) {
-        return new YiiGoToViewAction(fo, offset);
+    public String toString() {
+        return fileObject.getName();
     }
 }
