@@ -59,6 +59,7 @@ e.g.
 - New Yii Project Wizard
 - Run Action Action
 - Navigation for path alias (Hyperlink to file)
+- Run Command Action
 
 
 ### Go To Action
@@ -223,6 +224,11 @@ Run the followings:
 ### Run Action Action
 Run action for current caret position. i.e. Open the browser.
 If the action has some arguments, you have to set some arguments.(#9)
+
+### Run Command Action
+Support for yiic command.
+
+- Right-click project > Yii > Run Command... or `Alt + Shift + X`
 
 ## License
 [Common Development and Distribution License (CDDL) v1.0 and GNU General Public License (GPL) v2](http://netbeans.org/cddl-gplv2.html)
