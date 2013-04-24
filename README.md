@@ -120,6 +120,7 @@ Usage is the same as hyperlink to view file.
 This feature is available for the followings:
 
 - Yii::import()
+- Yii::t()
 - CBaseController::widget()
 - CBaseController::beginWidget()
 - CBaseController::endWidget()
@@ -155,6 +156,13 @@ return array(
         'class'=>'SomeAction',
     ),
 );
+```
+
+i18n
+```php
+Yii::t('Xyz.categoryName', 'message to be translated');
+// on the first parameter : open the message file for LanguageID
+// on the second parameter :  open the message file for LanguageID, and caret position is moved to specified message
 ```
 
 #### Notice
