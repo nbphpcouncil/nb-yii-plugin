@@ -44,7 +44,9 @@ package org.nbphpcouncil.modules.php.yii.util;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -152,8 +154,8 @@ public class YiiUtils {
      */
     public static boolean isView(FileObject fo) {
         if (fo == null
-                || !fo.isData()
-                || !FileUtils.isPhpFile(fo)) {
+            || !fo.isData()
+            || !FileUtils.isPhpFile(fo)) {
             return false;
         }
 
@@ -711,5 +713,60 @@ public class YiiUtils {
             return null;
         }
         return webroot.getFileObject(modulePath);
+    }
+
+    /**
+     * Sort files.
+     *
+     * @param files
+     * @param desc true if order by desc, false if asc.
+     */
+    public static void sort(FileObject[] files, final boolean desc) {
+        Arrays.sort(files, new ComparatorImpl(desc));
+    }
+
+    /**
+     * Sort files order by asc.
+     *
+     * @param files
+     */
+    public static void sort(FileObject[] files) {
+        sort(files, false);
+    }
+
+    /**
+     * Sort files.
+     *
+     * @param files
+     * @param desc
+     */
+    public static void sort(List<FileObject> files, final boolean desc) {
+        Collections.sort(files, new ComparatorImpl(desc));
+    }
+
+    /**
+     * Sort files order by asc.
+     *
+     * @param files
+     */
+    public static void sort(List<FileObject> files) {
+        sort(files, false);
+    }
+
+    private static class ComparatorImpl implements Comparator<FileObject> {
+
+        private final boolean desc;
+
+        public ComparatorImpl(boolean desc) {
+            this.desc = desc;
+        }
+
+        @Override
+        public int compare(FileObject o1, FileObject o2) {
+            if (desc) {
+                return o2.getName().compareToIgnoreCase(o1.getName());
+            }
+            return o1.getName().compareToIgnoreCase(o2.getName());
+        }
     }
 }
