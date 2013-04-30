@@ -155,8 +155,8 @@ public class YiiScript {
         }
         if (warn) {
             NotifyDescriptor.Message message = new NotifyDescriptor.Message(
-                Bundle.YiiScript_script_invalid(error),
-                NotifyDescriptor.WARNING_MESSAGE);
+                    Bundle.YiiScript_script_invalid(error),
+                    NotifyDescriptor.WARNING_MESSAGE);
             DialogDisplayer.getDefault().notify(message);
         }
         throw new InvalidPhpExecutableException(error);
@@ -171,9 +171,9 @@ public class YiiScript {
      */
     public void runCommand(PhpModule phpModule, List<String> parameters, Runnable postExecution) {
         createPhpExecutable(phpModule)
-            .displayName(getDisplayName(phpModule, parameters.get(0)))
-            .additionalParameters(getAllParams(parameters))
-            .run(getDescriptor(postExecution));
+                .displayName(getDisplayName(phpModule, parameters.get(0)))
+                .additionalParameters(getAllParams(parameters))
+                .run(getDescriptor(postExecution));
     }
 
     /**
@@ -266,7 +266,7 @@ public class YiiScript {
      */
     private ExecutionDescriptor getDescriptor(Runnable postExecution) {
         ExecutionDescriptor executionDescriptor = PhpExecutable.DEFAULT_EXECUTION_DESCRIPTOR
-            .optionsPath(getOptionsPath());
+                .optionsPath(getOptionsPath());
         if (postExecution != null) {
             executionDescriptor = executionDescriptor.postExecution(postExecution);
         }
@@ -294,9 +294,9 @@ public class YiiScript {
 
         HelpLineProcessor lineProcessor = new HelpLineProcessor();
         Future<Integer> result = createPhpExecutable(phpModule)
-            .displayName(getDisplayName(phpModule, allParams.get(0)))
-            .additionalParameters(getAllParams(allParams))
-            .run(getSilentDescriptor(), getOutProcessorFactory(lineProcessor));
+                .displayName(getDisplayName(phpModule, allParams.get(0)))
+                .additionalParameters(getAllParams(allParams))
+                .run(getSilentDescriptor(), getOutProcessorFactory(lineProcessor));
         try {
             if (result != null) {
                 result.get();
@@ -362,7 +362,7 @@ public class YiiScript {
      */
     private ExecutionDescriptor getSilentDescriptor() {
         return new ExecutionDescriptor()
-            .inputOutput(InputOutput.NULL);
+                .inputOutput(InputOutput.NULL);
     }
 
     /**
@@ -383,8 +383,8 @@ public class YiiScript {
         params.add(sourceDirectory.getName());
         try {
             createPhpExecutableForNewProject(phpModule)
-                .additionalParameters(params)
-                .runAndWait(getInitProjectDescriptor(), PhpExecutable.ANSI_STRIPPING_FACTORY, WEBAPP_COMMAND);
+                    .additionalParameters(params)
+                    .runAndWait(getInitProjectDescriptor(), PhpExecutable.ANSI_STRIPPING_FACTORY, WEBAPP_COMMAND);
         } catch (ExecutionException ex) {
             LOGGER.log(Level.WARNING, "Failed to excute php, please check yiic path or php interpriter on option panel");
         }
@@ -418,7 +418,7 @@ public class YiiScript {
      */
     private PhpExecutable createPhpExecutableForNewProject(PhpModule phpModule) {
         return new PhpExecutable(yiicPath)
-            .workDir(FileUtil.toFile(phpModule.getSourceDirectory().getParent()));
+                .workDir(FileUtil.toFile(phpModule.getSourceDirectory().getParent()));
     }
 
     /**
@@ -431,7 +431,7 @@ public class YiiScript {
         YiiModule yiiModule = YiiModuleFactory.create(phpModule);
         FileObject webroot = yiiModule.getWebroot();
         return new PhpExecutable(yiicPath)
-            .workDir(FileUtil.toFile(webroot));
+                .workDir(FileUtil.toFile(webroot));
     }
 
     /**
