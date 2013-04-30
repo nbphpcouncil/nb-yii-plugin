@@ -380,7 +380,9 @@ public class YiiScript {
 
         List<String> params = new ArrayList<String>();
         params.add(WEBAPP_COMMAND);
-        params.add(sourceDirectory.getName());
+
+        // #28 Source directory name has the dot(.)
+        params.add(sourceDirectory.getNameExt());
         try {
             createPhpExecutableForNewProject(phpModule)
                     .additionalParameters(params)
