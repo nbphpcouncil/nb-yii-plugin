@@ -41,6 +41,7 @@
  */
 package org.nbphpcouncil.modules.php.yii.ui.options;
 
+import java.io.File;
 import java.util.List;
 import java.util.prefs.Preferences;
 import org.nbphpcouncil.modules.php.yii.commands.YiiScript;
@@ -74,6 +75,12 @@ public class YiiOptions {
             }
         }
 
+        // check whether yiic file is valid #29
+        File yiic = new File(yiiScript);
+        if (!yiic.exists()) {
+            yiiScript = ""; // NOI18N
+            setYiiScript(yiiScript);
+        }
         return yiiScript;
     }
 
