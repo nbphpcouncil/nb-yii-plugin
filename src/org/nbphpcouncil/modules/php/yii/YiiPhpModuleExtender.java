@@ -48,6 +48,7 @@ import java.util.logging.Logger;
 import javax.swing.JComponent;
 import javax.swing.event.ChangeListener;
 import org.nbphpcouncil.modules.php.yii.commands.YiiScript;
+import org.nbphpcouncil.modules.php.yii.preferences.YiiPreferences;
 import org.nbphpcouncil.modules.php.yii.ui.options.YiiOptions;
 import org.nbphpcouncil.modules.php.yii.ui.wizards.NewProjectConfigurationPanel;
 import org.nbphpcouncil.modules.php.yii.util.ProjectPropertiesSupport;
@@ -140,6 +141,8 @@ public class YiiPhpModuleExtender extends PhpModuleExtender {
             if (config != null) {
                 files.add(config);
             }
+            // set enabled
+            YiiPreferences.setEnabled(phpModule, true);
         }
         return files;
     }

@@ -56,6 +56,14 @@ public class YiiCustomizerPanel extends javax.swing.JPanel {
         initComponents();
     }
 
+    public boolean isEnabledPlugin() {
+        return enabledCheckBox.isSelected();
+    }
+
+    public void setEnabledPlugin(boolean isEnabled) {
+        enabledCheckBox.setSelected(isEnabled);
+    }
+
     public boolean useAutoCreateView() {
         return useAutoCreateViewCheckBox.isSelected();
     }
@@ -83,10 +91,13 @@ public class YiiCustomizerPanel extends javax.swing.JPanel {
 
         useAutoCreateViewCheckBox = new javax.swing.JCheckBox();
         fallbackToDefaultViewsCheckBox = new javax.swing.JCheckBox();
+        enabledCheckBox = new javax.swing.JCheckBox();
 
         org.openide.awt.Mnemonics.setLocalizedText(useAutoCreateViewCheckBox, org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.useAutoCreateViewCheckBox.text")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(fallbackToDefaultViewsCheckBox, org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.fallbackToDefaultViewsCheckBox.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(enabledCheckBox, org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.enabledCheckBox.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -95,21 +106,25 @@ public class YiiCustomizerPanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(useAutoCreateViewCheckBox)
-                    .addComponent(fallbackToDefaultViewsCheckBox))
+                    .addComponent(fallbackToDefaultViewsCheckBox)
+                    .addComponent(enabledCheckBox)
+                    .addComponent(useAutoCreateViewCheckBox))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(enabledCheckBox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(useAutoCreateViewCheckBox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(fallbackToDefaultViewsCheckBox)
-                .addContainerGap(234, Short.MAX_VALUE))
+                .addContainerGap(204, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox enabledCheckBox;
     private javax.swing.JCheckBox fallbackToDefaultViewsCheckBox;
     private javax.swing.JCheckBox useAutoCreateViewCheckBox;
     // End of variables declaration//GEN-END:variables

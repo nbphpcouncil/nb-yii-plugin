@@ -48,6 +48,7 @@ import java.util.List;
 import org.nbphpcouncil.modules.php.yii.commands.YiiFrameworkCommandSupport;
 import org.nbphpcouncil.modules.php.yii.commands.YiiScript;
 import org.nbphpcouncil.modules.php.yii.editor.YiiEditorExtender;
+import org.nbphpcouncil.modules.php.yii.preferences.YiiPreferences;
 import org.nbphpcouncil.modules.php.yii.ui.options.YiiOptions;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.netbeans.modules.php.api.framework.BadgeIcon;
@@ -82,8 +83,8 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
     private YiiPhpFrameworkProvider() {
         super("Yii PHP Web Framework", Bundle.LBL_FrameworkName(), Bundle.LBL_FrameworkDescription()); // NOI18N
         badgeIcon = new BadgeIcon(
-            ImageUtilities.loadImage(ICON_PATH),
-            YiiPhpFrameworkProvider.class.getResource("/" + ICON_PATH)); // NOI18N
+                ImageUtilities.loadImage(ICON_PATH),
+                YiiPhpFrameworkProvider.class.getResource("/" + ICON_PATH)); // NOI18N
     }
 
     @PhpFrameworkProvider.Registration(position = 800)
@@ -110,6 +111,12 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
      */
     @Override
     public boolean isInPhpModule(PhpModule pm) {
+        // check user settings
+        if (YiiPreferences.isEnabled(pm)) {
+            return true;
+        }
+
+        // automatic search
         YiiModule yiiModule = YiiModuleFactory.create(pm);
         FileObject sourceDirectory = yiiModule.getWebroot();
         if (sourceDirectory == null) {
@@ -139,8 +146,10 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
             return configs.toArray(new File[configs.size()]);
         }
         FileObject config = applicationDirectory.getFileObject("config"); // NOI18N
-        for (FileObject child : config.getChildren()) {
-            configs.add(FileUtil.toFile(child));
+        if (config != null) {
+            for (FileObject child : config.getChildren()) {
+                configs.add(FileUtil.toFile(child));
+            }
         }
 
         // sort
