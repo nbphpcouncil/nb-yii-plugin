@@ -72,6 +72,8 @@ public class YiiOptions {
             if (!scripts.isEmpty()) {
                 yiiScript = scripts.get(0);
                 setYiiScript(yiiScript);
+            } else {
+                yiiScript = ""; // NOI18N
             }
         }
 
