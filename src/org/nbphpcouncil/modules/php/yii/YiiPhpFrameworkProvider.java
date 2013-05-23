@@ -48,6 +48,7 @@ import java.util.List;
 import org.nbphpcouncil.modules.php.yii.commands.YiiFrameworkCommandSupport;
 import org.nbphpcouncil.modules.php.yii.commands.YiiScript;
 import org.nbphpcouncil.modules.php.yii.editor.YiiEditorExtender;
+import org.nbphpcouncil.modules.php.yii.preferences.YiiPreferences;
 import org.nbphpcouncil.modules.php.yii.ui.options.YiiOptions;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.netbeans.modules.php.api.framework.BadgeIcon;
@@ -110,6 +111,12 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
      */
     @Override
     public boolean isInPhpModule(PhpModule pm) {
+        // check user settings
+        if (YiiPreferences.isEnabled(pm)) {
+            return true;
+        }
+
+        // automatic search
         YiiModule yiiModule = YiiModuleFactory.create(pm);
         FileObject sourceDirectory = yiiModule.getWebroot();
         if (sourceDirectory == null) {
