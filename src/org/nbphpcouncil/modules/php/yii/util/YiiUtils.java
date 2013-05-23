@@ -281,7 +281,7 @@ public class YiiUtils {
             return null;
         }
         String themePath = ""; // NOI18N
-        if (!themeName.isEmpty()) {
+        if (!StringUtils.isEmpty(themeName)) {
             themePath = String.format(THEME_PATH, themeName);
         }
 
