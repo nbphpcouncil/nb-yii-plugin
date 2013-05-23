@@ -82,8 +82,8 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
     private YiiPhpFrameworkProvider() {
         super("Yii PHP Web Framework", Bundle.LBL_FrameworkName(), Bundle.LBL_FrameworkDescription()); // NOI18N
         badgeIcon = new BadgeIcon(
-            ImageUtilities.loadImage(ICON_PATH),
-            YiiPhpFrameworkProvider.class.getResource("/" + ICON_PATH)); // NOI18N
+                ImageUtilities.loadImage(ICON_PATH),
+                YiiPhpFrameworkProvider.class.getResource("/" + ICON_PATH)); // NOI18N
     }
 
     @PhpFrameworkProvider.Registration(position = 800)
@@ -139,8 +139,10 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
             return configs.toArray(new File[configs.size()]);
         }
         FileObject config = applicationDirectory.getFileObject("config"); // NOI18N
-        for (FileObject child : config.getChildren()) {
-            configs.add(FileUtil.toFile(child));
+        if (config != null) {
+            for (FileObject child : config.getChildren()) {
+                configs.add(FileUtil.toFile(child));
+            }
         }
 
         // sort
