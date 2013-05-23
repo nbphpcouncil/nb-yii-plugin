@@ -51,6 +51,7 @@ import org.netbeans.modules.php.api.phpmodule.PhpModule;
 public class YiiPreferences {
 
     private static final String USE_AUTO_CREATE_VIEW = "use-auto-create-view"; // NOI18N
+    private static final String FALLBACK_TO_DEFAULT_VIEWS = "fallback-to-default-views"; // NOI18N
 
     public static boolean useAutoCreateView(PhpModule phpModule) {
         return getPreferences(phpModule).getBoolean(USE_AUTO_CREATE_VIEW, false);
@@ -58,6 +59,14 @@ public class YiiPreferences {
 
     public static void setAutoCreateViewFile(PhpModule phpModule, boolean use) {
         getPreferences(phpModule).putBoolean(USE_AUTO_CREATE_VIEW, use);
+    }
+
+    public static boolean isFallbackToDefaultViews(PhpModule phpModule) {
+        return getPreferences(phpModule).getBoolean(FALLBACK_TO_DEFAULT_VIEWS, false);
+    }
+
+    public static void setFallbackToDefaultViews(PhpModule phpModule, boolean fallback) {
+        getPreferences(phpModule).putBoolean(FALLBACK_TO_DEFAULT_VIEWS, fallback);
     }
 
     private static Preferences getPreferences(PhpModule phpModule) {
