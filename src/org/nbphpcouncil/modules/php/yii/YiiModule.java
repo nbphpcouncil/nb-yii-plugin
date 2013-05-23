@@ -78,6 +78,8 @@ public abstract class YiiModule {
 
     public abstract FileObject getExt();
 
+    public abstract String getThemeName();
+
     public FileObject getDirectory(PATH_ALIAS alias) {
         switch (alias) {
             case SYSTEM:

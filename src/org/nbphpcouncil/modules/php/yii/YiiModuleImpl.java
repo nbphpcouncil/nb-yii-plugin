@@ -42,9 +42,13 @@
 package org.nbphpcouncil.modules.php.yii;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
 import org.netbeans.modules.php.api.phpmodule.PhpModuleProperties;
+import org.openide.filesystems.FileChangeAdapter;
+import org.openide.filesystems.FileEvent;
 import org.openide.filesystems.FileObject;
 
 /**
@@ -58,10 +62,14 @@ public class YiiModuleImpl extends YiiModule {
     private static final String EXT = APPLICATION + "/extensions"; // NOI18N
     private static final String ZII = "zii"; // NOI18N
     private static final String ENTRY_SCRIPT = "index.php"; // NOI18N
+    private static final String CONFIG = APPLICATION + "/config"; // NOI18N
     private final PhpModule phpModule;
+    private String themeName;
     protected String systemPath;
     protected FileObject index;
     protected FileObject config;
+    protected FileObject main;
+    private static final Logger LOGGER = Logger.getLogger(YiiModuleImpl.class.getName());
 
     public YiiModuleImpl(PhpModule phpModule) {
         this.phpModule = phpModule;
@@ -112,11 +120,11 @@ public class YiiModuleImpl extends YiiModule {
         if (webroot == null) {
             return null;
         }
-        if(systemPath == null){
+        if (systemPath == null) {
             // try again
             systemPath = getSystemPath();
         }
-        if(systemPath == null) {
+        if (systemPath == null) {
             return null;
         }
 
@@ -147,5 +155,53 @@ public class YiiModuleImpl extends YiiModule {
     @Override
     public FileObject getExt() {
         return getWebroot().getFileObject(EXT);
+    }
+
+    @Override
+    public String getThemeName() {
+        if (themeName != null) {
+            return themeName;
+        }
+        if (main == null) {
+            main = getMain();
+        }
+
+        if (main == null) {
+            return null;
+        }
+
+        // get theme
+        themeName = YiiUtils.getThemeName(main);
+        return themeName;
+    }
+
+    /**
+     * Get main file.
+     *
+     * @return main file if it exists, otherwise null
+     */
+    private FileObject getMain() {
+        // get main.php
+        if (main != null) {
+            return main;
+        }
+        FileObject webroot = getWebroot();
+        if (webroot != null) {
+            main = webroot.getFileObject(CONFIG + "/main.php"); // NOI18N
+        }
+        if (main == null) {
+            LOGGER.log(Level.INFO, "Not found main.php");
+        } else {
+            main.addFileChangeListener(new FileChangeAdapter() {
+                @Override
+                public void fileChanged(FileEvent fe) {
+                    FileObject file = fe.getFile();
+                    if (file != null) {
+                        themeName = YiiUtils.getThemeName(main);
+                    }
+                }
+            });
+        }
+        return main;
     }
 }

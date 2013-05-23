@@ -16,9 +16,12 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="0" attributes="0">
+          <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="useAutoCreateViewCheckBox" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="useAutoCreateViewCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="fallbackToDefaultViewsCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
+              </Group>
               <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
@@ -28,7 +31,9 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Component id="useAutoCreateViewCheckBox" min="-2" max="-2" attributes="0"/>
-              <EmptySpace pref="264" max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="fallbackToDefaultViewsCheckBox" min="-2" max="-2" attributes="0"/>
+              <EmptySpace pref="234" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -38,6 +43,13 @@
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="org/nbphpcouncil/modules/php/yii/ui/options/Bundle.properties" key="YiiCustomizerPanel.useAutoCreateViewCheckBox.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="fallbackToDefaultViewsCheckBox">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/nbphpcouncil/modules/php/yii/ui/options/Bundle.properties" key="YiiCustomizerPanel.fallbackToDefaultViewsCheckBox.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>

@@ -59,9 +59,11 @@ public class YiiPhpModuleCustomizerExtender extends PhpModuleCustomizerExtender 
 
     private YiiCustomizerPanel component;
     private boolean useAutoCreateView;
+    private boolean isFallbackToDefaultViews;
 
     public YiiPhpModuleCustomizerExtender(PhpModule phpModule) {
         useAutoCreateView = YiiPreferences.useAutoCreateView(phpModule);
+        isFallbackToDefaultViews = YiiPreferences.isFallbackToDefaultViews(phpModule);
     }
 
     @NbBundle.Messages("LBL_Yii=Yii")
@@ -104,6 +106,10 @@ public class YiiPhpModuleCustomizerExtender extends PhpModuleCustomizerExtender 
         if (useAutoCreateView != useAutoCreateViewForPanel) {
             YiiPreferences.setAutoCreateViewFile(phpModule, useAutoCreateViewForPanel);
         }
+        boolean isFallbackToDefaultViewsForPanel = getPanel().isFallbackToDefaultViews();
+        if (isFallbackToDefaultViews != isFallbackToDefaultViewsForPanel) {
+            YiiPreferences.setFallbackToDefaultViews(phpModule, isFallbackToDefaultViewsForPanel);
+        }
         return null;
     }
 
@@ -111,6 +117,7 @@ public class YiiPhpModuleCustomizerExtender extends PhpModuleCustomizerExtender 
         if (component == null) {
             component = new YiiCustomizerPanel();
             component.setAutoCreateView(useAutoCreateView);
+            component.setFallbackToDefaultViews(isFallbackToDefaultViews);
         }
         return component;
     }
