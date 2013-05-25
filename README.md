@@ -256,7 +256,7 @@ If it doesn't also exist, you can't run `Run Command`.
 ## Notice
 
 We assume that yii project is used default directory structure. So some features don't work if you change directory names and structure.
-For example, If you use `protected/configuration` instead of `protected/config`, Navigation for theme wil be invalid.
+For example, If you use `protected/configuration` instead of `protected/config`, Navigation for theme will be invalid.
 
 ## License
 [Common Development and Distribution License (CDDL) v1.0 and GNU General Public License (GPL) v2](http://netbeans.org/cddl-gplv2.html)
