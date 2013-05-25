@@ -249,7 +249,7 @@ Support for yiic command.
 
 - Right-click project > Yii > Run Command... or `Alt + Shift + X`
 
-### yiic.php
+#### yiic.php
 This action uses `protected/yiic.php`. If it doesn't exist, `Tools > Options > PHP > Yii > yii script` is used.
 If it doesn't also exist, you can't run `Run Command`.
 
