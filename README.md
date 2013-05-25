@@ -7,7 +7,12 @@ Yii Framework plugin for NetBeans 7.3+
 
 ### Install Plugin
 
-Download a nbm file or create it yourself. And please, install it.
+Download a nbm file or create it by yourself. And please, install it.
+
+### How to enable
+
+- Use default directory structure (don't delete yiic* files)
+- project properties > Framework > Yii, check `enabled` (You don't have to check this if you use plugin with default app)
 
 ### Existing Source
 
@@ -107,6 +112,12 @@ public actionIndex() {
 }
 ```
 When you use the render method like above, if foo.php exists, you do the following.
+
+#### fallback to default views
+
+You can fallback to default views if view file for your theme doesn't exist when you use the theme.
+If you would like to this feature, please, check "Fallback to ..." on project properties for Yii.
+
 
 1. Hold down Ctrl key on the first parameter (foo)
 2. Wait to be changed string color to blue
@@ -237,6 +248,15 @@ If the action has some arguments, you have to set some arguments.(#9)
 Support for yiic command.
 
 - Right-click project > Yii > Run Command... or `Alt + Shift + X`
+
+### yiic.php
+This action uses `protected/yiic.php`. If it doesn't exist, `Tools > Options > PHP > Yii > yii script` is used.
+If it doesn't also exist, you can't run `Run Command`.
+
+## Notice
+
+We assume that yii project is used default directory structure. So some features don't work if you change directory names and structure.
+For example, If you use `protected/configuration` instead of `protected/config`, Navigation for theme will be invalid.
 
 ## License
 [Common Development and Distribution License (CDDL) v1.0 and GNU General Public License (GPL) v2](http://netbeans.org/cddl-gplv2.html)

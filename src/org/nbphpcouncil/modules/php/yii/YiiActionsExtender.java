@@ -49,7 +49,10 @@ import org.nbphpcouncil.modules.php.yii.ui.actions.YiiGoToActionAction;
 import org.nbphpcouncil.modules.php.yii.ui.actions.YiiGoToViewAction;
 import org.nbphpcouncil.modules.php.yii.ui.actions.YiiInitAction;
 import org.nbphpcouncil.modules.php.yii.ui.actions.YiiRunCommandAction;
+import org.nbphpcouncil.modules.php.yii.ui.options.YiiOptions;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
+import org.netbeans.modules.php.api.phpmodule.PhpModule;
+import org.netbeans.modules.php.api.util.StringUtils;
 import org.netbeans.modules.php.spi.framework.PhpModuleActionsExtender;
 import org.netbeans.modules.php.spi.framework.actions.GoToActionAction;
 import org.netbeans.modules.php.spi.framework.actions.GoToViewAction;
@@ -78,6 +81,19 @@ public class YiiActionsExtender extends PhpModuleActionsExtender {
 
     @Override
     public RunCommandAction getRunCommandAction() {
+        // check whether yiic.php exists
+        // if it doesn't exist, doesn't add this action
+        PhpModule phpModule = PhpModule.inferPhpModule();
+        YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+        FileObject webroot = yiiModule.getWebroot();
+        if (webroot == null) {
+            return null;
+        }
+
+        FileObject yiic = webroot.getFileObject("protected/yiic.php"); // NOI18N
+        if (yiic == null && StringUtils.isEmpty(YiiOptions.getInstance().getYiiScript())) {
+            return null;
+        }
         return YiiRunCommandAction.getInstance();
     }
 

@@ -57,8 +57,9 @@ import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkProviderExt;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkType;
 import org.netbeans.modules.csl.api.UiUtils;
-import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.editor.NbEditorUtilities;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
+import org.netbeans.modules.php.api.util.StringUtils;
 import org.netbeans.modules.php.editor.lexer.PHPTokenId;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -126,8 +127,7 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
     @SuppressWarnings("unchecked")
     private boolean verifyState(Document doc, int offset) {
         // get FileObject
-        Source source = Source.create(doc);
-        controller = source.getFileObject();
+        controller = NbEditorUtilities.getFileObject(doc);
 
         // check Yii
         if (controller == null || !YiiUtils.isYii(PhpModule.forFileObject(controller))) {
@@ -165,8 +165,21 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
                 // absolute view
                 view = YiiViewPathSupport.getAbsoluteViewFile(target, controller);
             } else {
-                relativeViewPath = YiiUtils.getRelativePathToView(controller, target);
+                // get theme name
+                PhpModule phpModule = PhpModule.forFileObject(controller);
+                YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+                String themeName = yiiModule.getThemeName();
+
+                relativeViewPath = YiiUtils.getRelativePathToView(controller, target, themeName);
                 view = controller.getFileObject(relativeViewPath);
+
+                // fall back to default views
+                if (view == null
+                        && !StringUtils.isEmpty(themeName)
+                        && YiiPreferences.isFallbackToDefaultViews(phpModule)) {
+                    String defaultViewPath = YiiUtils.getRelativePathToView(controller, target, ""); // NOI18N
+                    view = controller.getFileObject(defaultViewPath);
+                }
             }
             useAutoCreate = YiiPreferences.useAutoCreateView(PhpModule.forFileObject(controller));
             if (view != null || useAutoCreate) {

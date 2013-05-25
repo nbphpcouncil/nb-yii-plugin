@@ -42,6 +42,7 @@
 package org.nbphpcouncil.modules.php.yii.commands;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -140,6 +141,10 @@ public class YiiScript {
             FileObject webroot = yiiModule.getWebroot();
             if (webroot != null) {
                 FileObject yiic = webroot.getFileObject("protected/" + YII_SCRIPT_NAME_LONG);
+                // use options path
+                if (yiic == null) {
+                    yiic = FileUtil.toFileObject(new File(YiiOptions.getInstance().getYiiScript()));
+                }
                 if (yiic != null) {
                     try {
                         yiiPath = FileUtil.toFile(yiic).getCanonicalPath();

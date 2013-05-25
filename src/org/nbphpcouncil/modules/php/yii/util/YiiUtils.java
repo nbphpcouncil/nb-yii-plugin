@@ -154,8 +154,8 @@ public class YiiUtils {
      */
     public static boolean isView(FileObject fo) {
         if (fo == null
-            || !fo.isData()
-            || !FileUtils.isPhpFile(fo)) {
+                || !fo.isData()
+                || !FileUtils.isPhpFile(fo)) {
             return false;
         }
 
@@ -203,13 +203,26 @@ public class YiiUtils {
         if (subPath == null) {
             return null;
         }
-        String pathToView = getRelativePathToView(controller, subPath, viewFolderName, viewName);
+
+        // get theme name
+        YiiModule yiiModule = YiiModuleFactory.create(PhpModule.forFileObject(controller));
+        String themeName = yiiModule.getThemeName();
+
+        String pathToView = getRelativePathToView(controller, subPath, viewFolderName, viewName, themeName);
         if (pathToView == null) {
             return null;
         }
 
         // get view file
         FileObject view = controller.getFileObject(pathToView);
+
+        // fall back to default views
+        if (view == null
+                && !StringUtils.isEmpty(themeName)
+                && YiiPreferences.isFallbackToDefaultViews(PhpModule.forFileObject(controller))) {
+            String defaultViewPath = getRelativePathToView(controller, subPath, viewFolderName, viewName, ""); // NOI18N
+            view = controller.getFileObject(defaultViewPath);
+        }
 
         // use "Create a new view file automatically" option
         PhpModule phpModule = PhpModule.forFileObject(controller);
@@ -224,15 +237,16 @@ public class YiiUtils {
      *
      * @param controller
      * @param actionId action name(view file name). e.g actionIndex -> index
+     * @param themeName theme name
      * @return view file object
      */
-    public static String getRelativePathToView(FileObject controller, String actionId) {
+    public static String getRelativePathToView(FileObject controller, String actionId, String themeName) {
         String controllerId = getViewFolderName(controller.getName());
         String subPath = getSubDirectoryPathForController(controller);
         if (subPath == null) {
             return null;
         }
-        return getRelativePathToView(controller, subPath, controllerId, actionId);
+        return getRelativePathToView(controller, subPath, controllerId, actionId, themeName);
     }
 
     /**
@@ -259,30 +273,15 @@ public class YiiUtils {
      * @param controller
      * @param controllerId
      * @param actionId
+     * @param themeName
      * @return
      */
-    private static String getRelativePathToView(FileObject controller, String subPath, String controllerId, String actionId) {
+    private static String getRelativePathToView(FileObject controller, String subPath, String controllerId, String actionId, String themeName) {
         if (controller == null) {
             return null;
         }
-        PhpModule phpModule = PhpModule.forFileObject(controller);
-        YiiModule yiiModule = YiiModuleFactory.create(phpModule);
-        FileObject sourceDirectory = yiiModule.getWebroot();
-
-        // get main.php
-        FileObject main = null;
-        if (sourceDirectory != null) {
-            main = sourceDirectory.getFileObject(CONFIG_PATH + "/main.php"); // NOI18N
-        }
-        if (main == null) {
-            LOGGER.log(Level.INFO, "Not found main.php");
-            return null;
-        }
-
-        // get theme
-        String themeName = getThemeName(main);
         String themePath = ""; // NOI18N
-        if (!themeName.isEmpty()) {
+        if (!StringUtils.isEmpty(themeName)) {
             themePath = String.format(THEME_PATH, themeName);
         }
 

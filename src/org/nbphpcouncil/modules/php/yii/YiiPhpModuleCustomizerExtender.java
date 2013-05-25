@@ -58,10 +58,14 @@ import org.openide.util.NbBundle;
 public class YiiPhpModuleCustomizerExtender extends PhpModuleCustomizerExtender {
 
     private YiiCustomizerPanel component;
+    private boolean isEnabled;
     private boolean useAutoCreateView;
+    private boolean isFallbackToDefaultViews;
 
     public YiiPhpModuleCustomizerExtender(PhpModule phpModule) {
+        isEnabled = YiiPreferences.isEnabled(phpModule);
         useAutoCreateView = YiiPreferences.useAutoCreateView(phpModule);
+        isFallbackToDefaultViews = YiiPreferences.isFallbackToDefaultViews(phpModule);
     }
 
     @NbBundle.Messages("LBL_Yii=Yii")
@@ -100,17 +104,29 @@ public class YiiPhpModuleCustomizerExtender extends PhpModuleCustomizerExtender 
 
     @Override
     public EnumSet<Change> save(PhpModule phpModule) {
+        EnumSet<Change> change = null;
         boolean useAutoCreateViewForPanel = getPanel().useAutoCreateView();
         if (useAutoCreateView != useAutoCreateViewForPanel) {
             YiiPreferences.setAutoCreateViewFile(phpModule, useAutoCreateViewForPanel);
         }
-        return null;
+        boolean isFallbackToDefaultViewsForPanel = getPanel().isFallbackToDefaultViews();
+        if (isFallbackToDefaultViews != isFallbackToDefaultViewsForPanel) {
+            YiiPreferences.setFallbackToDefaultViews(phpModule, isFallbackToDefaultViewsForPanel);
+        }
+        boolean isEnabledForPanel = getPanel().isEnabledPlugin();
+        if (isEnabled != isEnabledForPanel) {
+            YiiPreferences.setEnabled(phpModule, isEnabledForPanel);
+            change = EnumSet.of(Change.FRAMEWORK_CHANGE);
+        }
+        return change;
     }
 
     private YiiCustomizerPanel getPanel() {
         if (component == null) {
             component = new YiiCustomizerPanel();
+            component.setEnabledPlugin(isEnabled);
             component.setAutoCreateView(useAutoCreateView);
+            component.setFallbackToDefaultViews(isFallbackToDefaultViews);
         }
         return component;
     }
