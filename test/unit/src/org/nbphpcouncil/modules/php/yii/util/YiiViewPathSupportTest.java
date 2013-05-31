@@ -41,6 +41,7 @@
  */
 package org.nbphpcouncil.modules.php.yii.util;
 
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import org.junit.Test;
 import org.netbeans.junit.NbTestCase;
@@ -88,5 +89,43 @@ public class YiiViewPathSupportTest extends NbTestCase {
         assertFalse(YiiViewPathSupport.isAbsoluteViewPath(" //sample/index"));
         assertFalse(YiiViewPathSupport.isAbsoluteViewPath(""));
         assertFalse(YiiViewPathSupport.isAbsoluteViewPath(null));
+    }
+
+    /**
+     * Test of isAppPath method, of class YiiViewPathSupport.
+     */
+    @Test
+    public void testIsAppPath() {
+        assertTrue(YiiViewPathSupport.isAppPath("//"));
+        assertTrue(YiiViewPathSupport.isAppPath("//test"));
+
+        assertFalse(YiiViewPathSupport.isAppPath(null));
+        assertFalse(YiiViewPathSupport.isAppPath(""));
+        assertFalse(YiiViewPathSupport.isAppPath(" "));
+        assertFalse(YiiViewPathSupport.isAppPath("/"));
+        assertFalse(YiiViewPathSupport.isAppPath("///"));
+        assertFalse(YiiViewPathSupport.isAppPath("////"));
+        assertFalse(YiiViewPathSupport.isAppPath("///test"));
+        assertFalse(YiiViewPathSupport.isAppPath("/test/sub"));
+        assertFalse(YiiViewPathSupport.isAppPath("apppath"));
+    }
+
+    /**
+     * Test of isModulePath method, of class YiiViewPathSupport.
+     */
+    @Test
+    public void testIsModulePath() {
+        assertTrue(YiiViewPathSupport.isModulePath("/"));
+        assertTrue(YiiViewPathSupport.isModulePath("/test"));
+
+        assertFalse(YiiViewPathSupport.isModulePath(null));
+        assertFalse(YiiViewPathSupport.isModulePath(""));
+        assertFalse(YiiViewPathSupport.isModulePath(" "));
+        assertFalse(YiiViewPathSupport.isModulePath("//"));
+        assertFalse(YiiViewPathSupport.isModulePath("///"));
+        assertFalse(YiiViewPathSupport.isModulePath("////"));
+        assertFalse(YiiViewPathSupport.isModulePath("///test"));
+        assertFalse(YiiViewPathSupport.isModulePath("//test/sub"));
+        assertFalse(YiiViewPathSupport.isModulePath("apppath"));
     }
 }
