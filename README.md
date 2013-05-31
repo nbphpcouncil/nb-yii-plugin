@@ -59,6 +59,7 @@ e.g.
 - Go To Action
 - Go To View
 - Code Completion on the view file
+- Code Completion for the path
 - Init Action
 - PHPUnit Test Init Action
 - New Yii Project Wizard
@@ -204,6 +205,25 @@ e.g. webapp/protected/views/site/index.php
 $ // [Ctrl + Space] popup $var1, $var2, $this, ...
 $this-> // [Ctrl + Space] popup SiteController methods and fields
 ```
+### Code Completion for the path
+This is available the following methods:
+
+- render
+- renderPartial
+- beginContent
+- beginCache
+- import
+- *widget
+
+e.g.
+
+```php
+// type character or [Ctrl + Space]
+$this->render('i');
+
+// class or path alias
+$this->widget('application.[Ctrl + Space]');
+```
 
 ### Init Action
 Run the followings:
@@ -249,7 +269,7 @@ Support for yiic command.
 
 - Right-click project > Yii > Run Command... or `Alt + Shift + X`
 
-### yiic.php
+#### yiic.php
 This action uses `protected/yiic.php`. If it doesn't exist, `Tools > Options > PHP > Yii > yii script` is used.
 If it doesn't also exist, you can't run `Run Command`.
 
