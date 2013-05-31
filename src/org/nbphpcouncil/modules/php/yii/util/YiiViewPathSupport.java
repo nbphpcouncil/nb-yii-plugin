@@ -59,6 +59,8 @@ public class YiiViewPathSupport {
 
     private static final String VIEW_PATH_FORMAT = "views%s.php"; // NOI18N
     private static final Logger LOGGER = Logger.getLogger(YiiViewPathSupport.class.getName());
+    public static final String APP_PATH_PREFIX = "//"; // NOI18N
+    private static final String MODULE_PATH_PREFIX = "/"; // NOI18N
 
     /**
      * Get view file for absolute path. '/' the view will be searched for under
@@ -74,14 +76,14 @@ public class YiiViewPathSupport {
         PhpModule phpModule = PhpModule.forFileObject(currentFile);
         YiiModule yiiModule = YiiModuleFactory.create(phpModule);
         // get absolute view within the application
-        if (targetPath.startsWith("//")) { // NOI18N
-            targetPath = targetPath.replaceFirst("/", ""); // NOI18N
+        if (targetPath.startsWith(APP_PATH_PREFIX)) { // NOI18N
+            targetPath = targetPath.replaceFirst(MODULE_PATH_PREFIX, ""); // NOI18N
             targetPath = String.format(VIEW_PATH_FORMAT, targetPath);
             return yiiModule.getFileObject(YiiModule.PATH_ALIAS.APPLICATION, targetPath);
         }
 
         // get absolute view within a module
-        if (targetPath.startsWith("/")) { // NOI18N
+        if (targetPath.startsWith(MODULE_PATH_PREFIX)) { // NOI18N
             FileObject currentModuleDirectory = YiiUtils.getCurrentModuleDirectory(currentFile);
             targetPath = String.format(VIEW_PATH_FORMAT, targetPath);
             FileObject targetFile;
@@ -107,8 +109,8 @@ public class YiiViewPathSupport {
         YiiModule yiiModule = YiiModuleFactory.create(phpModule);
         FileObject application = yiiModule.getApplication();
         // get absolute view within the application
-        if (targetPath.startsWith("//")) { // NOI18N
-            targetPath = targetPath.replaceFirst("/", ""); // NOI18N
+        if (targetPath.startsWith(APP_PATH_PREFIX)) { // NOI18N
+            targetPath = targetPath.replaceFirst(MODULE_PATH_PREFIX, ""); // NOI18N
             targetPath = String.format(VIEW_PATH_FORMAT, targetPath);
             if (application == null) {
                 return null;
@@ -119,7 +121,7 @@ public class YiiViewPathSupport {
         }
 
         // get absolute view within a module
-        if (targetPath.startsWith("/")) { // NOI18N
+        if (targetPath.startsWith(MODULE_PATH_PREFIX)) { // NOI18N
             FileObject currentModuleDirectory = YiiUtils.getCurrentModuleDirectory(currentFile);
             targetPath = String.format(VIEW_PATH_FORMAT, targetPath);
             if (currentModuleDirectory != null) {
@@ -175,7 +177,37 @@ public class YiiViewPathSupport {
      */
     public static boolean isAbsoluteViewPath(String path) {
         if (path != null && !path.startsWith("///")) { // NOI18N
-            if (path.startsWith("//") || path.startsWith("/")) { // NOI18N
+            if (path.startsWith(APP_PATH_PREFIX) || path.startsWith(MODULE_PATH_PREFIX)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check whether path starts with "//".
+     *
+     * @param path
+     * @return true if starts with "//", otherwise false.
+     */
+    public static boolean isAppPath(String path) {
+        if (path != null && !path.startsWith("///")) { // NOI18N
+            if (path.startsWith(APP_PATH_PREFIX)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check whether path starts with "/".
+     *
+     * @param path
+     * @return true if starts with "/", otherwise false.
+     */
+    public static boolean isModulePath(String path) {
+        if (path != null && !path.startsWith(APP_PATH_PREFIX)) {
+            if (path.startsWith(MODULE_PATH_PREFIX)) {
                 return true;
             }
         }
