@@ -59,6 +59,7 @@ e.g.
 - Go To Action
 - Go To View
 - Code Completion on the view file
+- Code Completion for the path
 - Init Action
 - PHPUnit Test Init Action
 - New Yii Project Wizard
@@ -203,6 +204,25 @@ e.g. webapp/protected/views/site/index.php
 ```php
 $ // [Ctrl + Space] popup $var1, $var2, $this, ...
 $this-> // [Ctrl + Space] popup SiteController methods and fields
+```
+### Code Completion for the path
+This is available the following methods:
+
+- render
+- renderPartial
+- beginContent
+- beginCache
+- import
+- *widget
+
+e.g.
+
+```php
+// type character or [Ctrl + Space]
+$this->render('i');
+
+// class or path alias
+$this->widget('application.[Ctrl + Space]');
 ```
 
 ### Init Action
