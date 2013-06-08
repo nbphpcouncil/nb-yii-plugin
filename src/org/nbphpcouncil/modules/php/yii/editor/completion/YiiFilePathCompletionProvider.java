@@ -70,12 +70,17 @@ public class YiiFilePathCompletionProvider extends YiiCompletionProvider {
 
     @Override
     public CompletionTask createTask(int queryType, JTextComponent component, PhpModule phpModule) {
-        // get method name
         TokenSequence<PHPTokenId> ts = YiiDocUtils.getTokenSequence(component.getDocument());
+        if (ts == null) {
+            return null;
+        }
+
+        // get method name
         String methodName = getMethodName(ts, component.getCaretPosition());
         if (StringUtils.isEmpty(methodName)) {
             return null;
         }
+
         // create task
         FileObject currentFile = NbEditorUtilities.getFileObject(component.getDocument());
         Method method = MethodFactory.create(methodName, currentFile, phpModule);
