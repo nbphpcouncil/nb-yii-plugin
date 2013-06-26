@@ -74,6 +74,6 @@ public abstract class YiiCompletionProvider implements CompletionProvider {
 
     @Override
     public int getAutoQueryTypes(JTextComponent jtc, String string) {
-        return CompletionProvider.COMPLETION_QUERY_TYPE;
+        return 0;
     }
 }

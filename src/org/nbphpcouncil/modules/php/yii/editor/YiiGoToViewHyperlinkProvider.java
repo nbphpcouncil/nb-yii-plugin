@@ -43,16 +43,15 @@ package org.nbphpcouncil.modules.php.yii.editor;
 
 import java.util.EnumSet;
 import java.util.Set;
-import javax.swing.text.AbstractDocument;
 import javax.swing.text.Document;
 import org.nbphpcouncil.modules.php.yii.YiiModule;
 import org.nbphpcouncil.modules.php.yii.YiiModuleFactory;
 import org.nbphpcouncil.modules.php.yii.preferences.YiiPreferences;
+import org.nbphpcouncil.modules.php.yii.util.YiiDocUtils;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.nbphpcouncil.modules.php.yii.util.YiiViewPathSupport;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.lexer.Token;
-import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkProviderExt;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkType;
@@ -142,53 +141,48 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
         if (controller == null || !YiiUtils.isController(controller)) {
             return false;
         }
-        AbstractDocument abstractDoc = (AbstractDocument) doc;
-        abstractDoc.readLock();
-        try {
-            TokenHierarchy hierarchy = TokenHierarchy.get(doc);
-            TokenSequence<PHPTokenId> ts = hierarchy.tokenSequence(PHPTokenId.language());
-            if (ts == null) {
-                return false;
-            }
-            ts.move(offset);
-            ts.moveNext();
-            int newOffset = ts.offset();
 
-            Token<PHPTokenId> token = ts.token();
-            setTarget(token);
+        // get TokenSequence
+        TokenSequence<PHPTokenId> ts = YiiDocUtils.getTokenSequence(doc);
+        if (ts == null) {
+            return false;
+        }
+        ts.move(offset);
+        ts.moveNext();
+        int newOffset = ts.offset();
 
-            if (target.isEmpty() || !isRenderMethod(ts)) {
-                return false;
-            }
-            // set view file
-            if (YiiViewPathSupport.isAbsoluteViewPath(target)) {
-                // absolute view
-                view = YiiViewPathSupport.getAbsoluteViewFile(target, controller);
-            } else {
-                // get theme name
-                PhpModule phpModule = PhpModule.forFileObject(controller);
-                YiiModule yiiModule = YiiModuleFactory.create(phpModule);
-                String themeName = yiiModule.getThemeName();
+        Token<PHPTokenId> token = ts.token();
+        setTarget(token);
 
-                relativeViewPath = YiiUtils.getRelativePathToView(controller, target, themeName);
-                view = controller.getFileObject(relativeViewPath);
+        if (target.isEmpty() || !isRenderMethod(ts)) {
+            return false;
+        }
+        // set view file
+        if (YiiViewPathSupport.isAbsoluteViewPath(target)) {
+            // absolute view
+            view = YiiViewPathSupport.getAbsoluteViewFile(target, controller);
+        } else {
+            // get theme name
+            PhpModule phpModule = PhpModule.forFileObject(controller);
+            YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+            String themeName = yiiModule.getThemeName();
 
-                // fall back to default views
-                if (view == null
-                        && !StringUtils.isEmpty(themeName)
-                        && YiiPreferences.isFallbackToDefaultViews(phpModule)) {
-                    String defaultViewPath = YiiUtils.getRelativePathToView(controller, target, ""); // NOI18N
-                    view = controller.getFileObject(defaultViewPath);
-                }
+            relativeViewPath = YiiUtils.getRelativePathToView(controller, target, themeName);
+            view = controller.getFileObject(relativeViewPath);
+
+            // fall back to default views
+            if (view == null
+                    && !StringUtils.isEmpty(themeName)
+                    && YiiPreferences.isFallbackToDefaultViews(phpModule)) {
+                String defaultViewPath = YiiUtils.getRelativePathToView(controller, target, ""); // NOI18N
+                view = controller.getFileObject(defaultViewPath);
             }
-            useAutoCreate = YiiPreferences.useAutoCreateView(PhpModule.forFileObject(controller));
-            if (view != null || useAutoCreate) {
-                targetStart = newOffset + 1;
-                targetEnd = targetStart + target.length();
-                return true;
-            }
-        } finally {
-            abstractDoc.readUnlock();
+        }
+        useAutoCreate = YiiPreferences.useAutoCreateView(PhpModule.forFileObject(controller));
+        if (view != null || useAutoCreate) {
+            targetStart = newOffset + 1;
+            targetEnd = targetStart + target.length();
+            return true;
         }
 
         return false;
@@ -238,9 +232,9 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
         if (view != null) {
             PhpModule phpModule = PhpModule.forFileObject(view);
             YiiModule yiiModule = YiiModuleFactory.create(phpModule);
-            FileObject sourceDirectory = yiiModule.getWebroot();
-            if (sourceDirectory != null) {
-                viewPath = FileUtil.getRelativePath(sourceDirectory, view);
+            FileObject webrootDirectory = yiiModule.getWebroot();
+            if (webrootDirectory != null) {
+                viewPath = FileUtil.getRelativePath(webrootDirectory, view);
             } else {
                 viewPath = view.getPath();
             }
