@@ -61,8 +61,13 @@ public abstract class YiiCompletionProvider implements CompletionProvider {
         if (queryType != CompletionProvider.COMPLETION_QUERY_TYPE) {
             return null;
         }
+
         Document doc = component.getDocument();
         FileObject fileObject = NbEditorUtilities.getFileObject(doc);
+        if (fileObject == null) {
+            return null;
+        }
+
         PhpModule phpModule = PhpModule.forFileObject(fileObject);
         if (!YiiUtils.isYii(phpModule)) {
             return null;
