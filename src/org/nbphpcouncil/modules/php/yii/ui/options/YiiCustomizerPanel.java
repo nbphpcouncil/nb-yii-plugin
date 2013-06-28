@@ -80,6 +80,70 @@ public class YiiCustomizerPanel extends javax.swing.JPanel {
         fallbackToDefaultViewsCheckBox.setSelected(fallback);
     }
 
+    public String getApplicationPath() {
+        return applicationPathTextField.getText();
+    }
+
+    public void setApplicationPath(String path) {
+        applicationPathTextField.setText(path);
+    }
+
+    public String getControllersPath() {
+        return controllersPathTextField.getText();
+    }
+
+    public void setControllersPath(String path) {
+        controllersPathTextField.setText(path);
+    }
+
+    public String getExtPath() {
+        return extPathTextField.getText();
+    }
+
+    public void setExtPath(String path) {
+        extPathTextField.setText(path);
+    }
+
+    public String getMessagesPath() {
+        return messagesPathTextField.getText();
+    }
+
+    public void setMessagesPath(String path) {
+        messagesPathTextField.setText(path);
+    }
+
+    public String getSystemPath() {
+        return systemPathTextField.getText();
+    }
+
+    public void setSystemPath(String path) {
+        systemPathTextField.setText(path);
+    }
+
+    public String getThemesPath() {
+        return themesPathTextField.getText();
+    }
+
+    public void setThemesPath(String path) {
+        themesPathTextField.setText(path);
+    }
+
+    public String getViewsPath() {
+        return viewsPathTextField.getText();
+    }
+
+    public void setViewsPath(String path) {
+        viewsPathTextField.setText(path);
+    }
+
+    public String getZiiPath() {
+        return ziiPathTextField.getText();
+    }
+
+    public void setZiiPath(String path) {
+        ziiPathTextField.setText(path);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -92,12 +156,64 @@ public class YiiCustomizerPanel extends javax.swing.JPanel {
         useAutoCreateViewCheckBox = new javax.swing.JCheckBox();
         fallbackToDefaultViewsCheckBox = new javax.swing.JCheckBox();
         enabledCheckBox = new javax.swing.JCheckBox();
+        pathsLabel = new javax.swing.JLabel();
+        systemPathLabel = new javax.swing.JLabel();
+        pathsSeparator = new javax.swing.JSeparator();
+        applicationPathLabel = new javax.swing.JLabel();
+        ziiPathLabel = new javax.swing.JLabel();
+        extPathLabel = new javax.swing.JLabel();
+        controllersPathLabel = new javax.swing.JLabel();
+        viewsPathLabel = new javax.swing.JLabel();
+        controllersPathTextField = new javax.swing.JTextField();
+        extPathTextField = new javax.swing.JTextField();
+        ziiPathTextField = new javax.swing.JTextField();
+        applicationPathTextField = new javax.swing.JTextField();
+        systemPathTextField = new javax.swing.JTextField();
+        viewsPathTextField = new javax.swing.JTextField();
+        themesPathLabel = new javax.swing.JLabel();
+        themesPathTextField = new javax.swing.JTextField();
+        messagesPathLabel = new javax.swing.JLabel();
+        messagesPathTextField = new javax.swing.JTextField();
 
         org.openide.awt.Mnemonics.setLocalizedText(useAutoCreateViewCheckBox, org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.useAutoCreateViewCheckBox.text")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(fallbackToDefaultViewsCheckBox, org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.fallbackToDefaultViewsCheckBox.text")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(enabledCheckBox, org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.enabledCheckBox.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(pathsLabel, org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.pathsLabel.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(systemPathLabel, org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.systemPathLabel.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(applicationPathLabel, org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.applicationPathLabel.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(ziiPathLabel, org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.ziiPathLabel.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(extPathLabel, org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.extPathLabel.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(controllersPathLabel, org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.controllersPathLabel.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(viewsPathLabel, org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.viewsPathLabel.text")); // NOI18N
+
+        controllersPathTextField.setText(org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.controllersPathTextField.text")); // NOI18N
+
+        extPathTextField.setText(org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.extPathTextField.text")); // NOI18N
+
+        ziiPathTextField.setText(org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.ziiPathTextField.text")); // NOI18N
+
+        applicationPathTextField.setText(org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.applicationPathTextField.text")); // NOI18N
+
+        systemPathTextField.setText(org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.systemPathTextField.text")); // NOI18N
+
+        viewsPathTextField.setText(org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.viewsPathTextField.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(themesPathLabel, org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.themesPathLabel.text")); // NOI18N
+
+        themesPathTextField.setText(org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.themesPathTextField.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(messagesPathLabel, org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.messagesPathLabel.text")); // NOI18N
+
+        messagesPathTextField.setText(org.openide.util.NbBundle.getMessage(YiiCustomizerPanel.class, "YiiCustomizerPanel.messagesPathTextField.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -106,26 +222,105 @@ public class YiiCustomizerPanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(pathsLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(pathsSeparator))
                     .addComponent(fallbackToDefaultViewsCheckBox)
                     .addComponent(enabledCheckBox)
-                    .addComponent(useAutoCreateViewCheckBox))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(useAutoCreateViewCheckBox)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(ziiPathLabel)
+                            .addComponent(extPathLabel)
+                            .addComponent(systemPathLabel)
+                            .addComponent(applicationPathLabel)
+                            .addComponent(controllersPathLabel)
+                            .addComponent(viewsPathLabel)
+                            .addComponent(themesPathLabel)
+                            .addComponent(messagesPathLabel))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(systemPathTextField)
+                            .addComponent(ziiPathTextField)
+                            .addComponent(applicationPathTextField)
+                            .addComponent(extPathTextField)
+                            .addComponent(controllersPathTextField)
+                            .addComponent(viewsPathTextField)
+                            .addComponent(themesPathTextField)
+                            .addComponent(messagesPathTextField))))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(enabledCheckBox)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(enabledCheckBox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(useAutoCreateViewCheckBox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(fallbackToDefaultViewsCheckBox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(pathsLabel))
+                    .addComponent(pathsSeparator, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(useAutoCreateViewCheckBox)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(systemPathLabel)
+                    .addComponent(systemPathTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(fallbackToDefaultViewsCheckBox)
-                .addContainerGap(204, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(applicationPathLabel)
+                    .addComponent(applicationPathTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(ziiPathLabel)
+                    .addComponent(ziiPathTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(extPathLabel)
+                    .addComponent(extPathTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(controllersPathLabel)
+                    .addComponent(controllersPathTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(viewsPathLabel)
+                    .addComponent(viewsPathTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(themesPathLabel)
+                    .addComponent(themesPathTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(messagesPathLabel)
+                    .addComponent(messagesPathTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(17, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel applicationPathLabel;
+    private javax.swing.JTextField applicationPathTextField;
+    private javax.swing.JLabel controllersPathLabel;
+    private javax.swing.JTextField controllersPathTextField;
     private javax.swing.JCheckBox enabledCheckBox;
+    private javax.swing.JLabel extPathLabel;
+    private javax.swing.JTextField extPathTextField;
     private javax.swing.JCheckBox fallbackToDefaultViewsCheckBox;
+    private javax.swing.JLabel messagesPathLabel;
+    private javax.swing.JTextField messagesPathTextField;
+    private javax.swing.JLabel pathsLabel;
+    private javax.swing.JSeparator pathsSeparator;
+    private javax.swing.JLabel systemPathLabel;
+    private javax.swing.JTextField systemPathTextField;
+    private javax.swing.JLabel themesPathLabel;
+    private javax.swing.JTextField themesPathTextField;
     private javax.swing.JCheckBox useAutoCreateViewCheckBox;
+    private javax.swing.JLabel viewsPathLabel;
+    private javax.swing.JTextField viewsPathTextField;
+    private javax.swing.JLabel ziiPathLabel;
+    private javax.swing.JTextField ziiPathTextField;
     // End of variables declaration//GEN-END:variables
 }

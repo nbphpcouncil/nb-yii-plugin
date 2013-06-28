@@ -53,6 +53,14 @@ public class YiiPreferences {
     private static final String ENABLED = "enabled"; // NOI18N
     private static final String USE_AUTO_CREATE_VIEW = "use-auto-create-view"; // NOI18N
     private static final String FALLBACK_TO_DEFAULT_VIEWS = "fallback-to-default-views"; // NOI18N
+    private static final String VIEWS_PATH = "views-path"; // NOI18N
+    private static final String CONTROLLERS_PATH = "controllers-path"; // NOI18N
+    private static final String EXT_PATH = "ext-path"; // NOI18N
+    private static final String ZII_PATH = "zii-path"; // NOI18N
+    private static final String APPLICATION_PATH = "application-path"; // NOI18N
+    private static final String SYSTEM_PATH = "system-path"; // NOI18N
+    private static final String THEMES_PATH = "themes-path"; // NOI18N
+    private static final String MESSAGES_PATH = "messages-path"; // NOI18N
 
     public static boolean isEnabled(PhpModule phpModule) {
         return getPreferences(phpModule).getBoolean(ENABLED, false);
@@ -76,6 +84,70 @@ public class YiiPreferences {
 
     public static void setFallbackToDefaultViews(PhpModule phpModule, boolean fallback) {
         getPreferences(phpModule).putBoolean(FALLBACK_TO_DEFAULT_VIEWS, fallback);
+    }
+
+    public static String getSystemPath(PhpModule phpModule) {
+        return getPreferences(phpModule).get(SYSTEM_PATH, ""); // NOI18N
+    }
+
+    public static void setSystemPath(PhpModule phpModule, String path) {
+        getPreferences(phpModule).put(SYSTEM_PATH, path);
+    }
+
+    public static String getApplicationPath(PhpModule phpModule) {
+        return getPreferences(phpModule).get(APPLICATION_PATH, ""); // NOI18N
+    }
+
+    public static void setApplicationPath(PhpModule phpModule, String path) {
+        getPreferences(phpModule).put(APPLICATION_PATH, path);
+    }
+
+    public static String getZiiPath(PhpModule phpModule) {
+        return getPreferences(phpModule).get(ZII_PATH, ""); // NOI18N
+    }
+
+    public static void setZiiPath(PhpModule phpModule, String path) {
+        getPreferences(phpModule).put(ZII_PATH, path);
+    }
+
+    public static String getExtPath(PhpModule phpModule) {
+        return getPreferences(phpModule).get(EXT_PATH, ""); // NOI18N
+    }
+
+    public static void setExtPath(PhpModule phpModule, String path) {
+        getPreferences(phpModule).put(EXT_PATH, path);
+    }
+
+    public static String getControllersPath(PhpModule phpModule) {
+        return getPreferences(phpModule).get(CONTROLLERS_PATH, ""); // NOI18N
+    }
+
+    public static void setControllersPath(PhpModule phpModule, String path) {
+        getPreferences(phpModule).put(CONTROLLERS_PATH, path);
+    }
+
+    public static String getViewsPath(PhpModule phpModule) {
+        return getPreferences(phpModule).get(VIEWS_PATH, ""); // NOI18N
+    }
+
+    public static void setViewsPath(PhpModule phpModule, String path) {
+        getPreferences(phpModule).put(VIEWS_PATH, path);
+    }
+
+    public static String getThemesPath(PhpModule phpModule) {
+        return getPreferences(phpModule).get(THEMES_PATH, ""); // NOI18N
+    }
+
+    public static void setThemesPath(PhpModule phpModule, String path) {
+        getPreferences(phpModule).put(THEMES_PATH, path);
+    }
+
+    public static String getMessagesPath(PhpModule phpModule) {
+        return getPreferences(phpModule).get(MESSAGES_PATH, ""); // NOI18N
+    }
+
+    public static void setMessagesPath(PhpModule phpModule, String path) {
+        getPreferences(phpModule).put(MESSAGES_PATH, path);
     }
 
     private static Preferences getPreferences(PhpModule phpModule) {

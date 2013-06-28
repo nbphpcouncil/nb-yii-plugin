@@ -78,7 +78,17 @@ public abstract class YiiModule {
 
     public abstract FileObject getExt();
 
+    public abstract FileObject getControllers();
+
+    public abstract FileObject getViews();
+
+    public abstract FileObject getMessages();
+
+    public abstract FileObject getThemes();
+
     public abstract String getThemeName();
+
+    public abstract void initDirectories();
 
     public FileObject getDirectory(PATH_ALIAS alias) {
         switch (alias) {
