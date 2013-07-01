@@ -41,15 +41,11 @@
  */
 package org.nbphpcouncil.modules.php.yii.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.nbphpcouncil.modules.php.yii.YiiModule;
 import org.nbphpcouncil.modules.php.yii.YiiModuleFactory;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
 import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileUtil;
 
 /**
  *
@@ -117,7 +113,7 @@ public class YiiViewPathSupport {
             }
 
             // create directories and file
-            return createFile(application, targetPath);
+            return YiiUtils.createFile(application, targetPath);
         }
 
         // get absolute view within a module
@@ -125,47 +121,15 @@ public class YiiViewPathSupport {
             FileObject currentModuleDirectory = YiiUtils.getCurrentModuleDirectory(currentFile);
             targetPath = String.format(VIEW_PATH_FORMAT, targetPath);
             if (currentModuleDirectory != null) {
-                return createFile(currentModuleDirectory, targetPath);
+                return YiiUtils.createFile(currentModuleDirectory, targetPath);
             } else {
                 if (application != null) {
-                    return createFile(application, targetPath);
+                    return YiiUtils.createFile(application, targetPath);
                 }
             }
         }
 
         return null;
-    }
-
-    /**
-     * Create view file for target path.
-     *
-     * @param baseDirectory
-     * @param targetPath
-     * @return file if file was created, otherwise null.
-     */
-    private static FileObject createFile(FileObject baseDirectory, String targetPath) {
-        File file = new File(FileUtil.toFile(baseDirectory), targetPath);
-        createParents(file);
-        try {
-            if (file.createNewFile()) {
-                return baseDirectory.getFileObject(targetPath);
-            }
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Fail: can't create file {0}", targetPath);
-        }
-
-        return null;
-    }
-
-    /**
-     * Create parent directories if it doesn't exist.
-     *
-     * @param file
-     * @return true if create parents, otherwise false.
-     */
-    private static boolean createParents(File file) {
-        File parentFile = file.getParentFile();
-        return parentFile.mkdirs();
     }
 
     /**
