@@ -337,7 +337,7 @@ public class YiiGoToFileHyperlinkProvider extends YiiHyperlinkProviderExt {
         }
 
         if (className.isEmpty() && messagesDirectory == null) {
-            messagesDirectory = application.getFileObject(messagesDirectoryName);
+            messagesDirectory = yiiModule.getMessages();
         }
         if (messagesDirectory == null) {
             return items;

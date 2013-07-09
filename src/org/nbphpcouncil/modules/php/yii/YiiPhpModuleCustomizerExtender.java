@@ -61,11 +61,27 @@ public class YiiPhpModuleCustomizerExtender extends PhpModuleCustomizerExtender 
     private boolean isEnabled;
     private boolean useAutoCreateView;
     private boolean isFallbackToDefaultViews;
+    private String systemPath;
+    private String applicationPath;
+    private String ziiPath;
+    private String extPath;
+    private String controllersPath;
+    private String viewsPath;
+    private String themesPath;
+    private String messagesPath;
 
     public YiiPhpModuleCustomizerExtender(PhpModule phpModule) {
         isEnabled = YiiPreferences.isEnabled(phpModule);
         useAutoCreateView = YiiPreferences.useAutoCreateView(phpModule);
         isFallbackToDefaultViews = YiiPreferences.isFallbackToDefaultViews(phpModule);
+        systemPath = YiiPreferences.getSystemPath(phpModule);
+        applicationPath = YiiPreferences.getApplicationPath(phpModule);
+        ziiPath = YiiPreferences.getZiiPath(phpModule);
+        extPath = YiiPreferences.getExtPath(phpModule);
+        controllersPath = YiiPreferences.getControllersPath(phpModule);
+        viewsPath = YiiPreferences.getViewsPath(phpModule);
+        themesPath = YiiPreferences.getThemesPath(phpModule);
+        messagesPath = YiiPreferences.getMessagesPath(phpModule);
     }
 
     @NbBundle.Messages("LBL_Yii=Yii")
@@ -105,6 +121,46 @@ public class YiiPhpModuleCustomizerExtender extends PhpModuleCustomizerExtender 
     @Override
     public EnumSet<Change> save(PhpModule phpModule) {
         EnumSet<Change> change = null;
+        // paths
+        String systemPathForPanel = getPanel().getSystemPath();
+        if (!systemPath.equals(systemPathForPanel)) {
+            YiiPreferences.setSystemPath(phpModule, systemPathForPanel);
+        }
+        String applicationPathForPanel = getPanel().getApplicationPath();
+        if (!applicationPath.equals(applicationPathForPanel)) {
+            YiiPreferences.setApplicationPath(phpModule, applicationPathForPanel);
+        }
+        String ziiPathForPanel = getPanel().getZiiPath();
+        if (!ziiPath.equals(ziiPathForPanel)) {
+            YiiPreferences.setZiiPath(phpModule, ziiPathForPanel);
+        }
+        String extPathForPanel = getPanel().getExtPath();
+        if (!extPath.equals(extPathForPanel)) {
+            YiiPreferences.setExtPath(phpModule, extPathForPanel);
+        }
+        String controllerPathForPanel = getPanel().getControllersPath();
+        if (!controllersPath.equals(controllerPathForPanel)) {
+            YiiPreferences.setControllersPath(phpModule, controllerPathForPanel);
+        }
+        String viewsPathForPanel = getPanel().getViewsPath();
+        if (!viewsPath.equals(viewsPathForPanel)) {
+            YiiPreferences.setViewsPath(phpModule, viewsPathForPanel);
+        }
+        String themesPathForPanel = getPanel().getThemesPath();
+        if (!themesPath.equals(themesPathForPanel)) {
+            YiiPreferences.setThemesPath(phpModule, themesPathForPanel);
+        }
+        String messagesPathForPanel = getPanel().getMessagesPath();
+        if (!messagesPath.equals(messagesPathForPanel)) {
+            YiiPreferences.setMessagesPath(phpModule, messagesPathForPanel);
+        }
+
+        // init directories
+        YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+        if (yiiModule != null) {
+            yiiModule.initDirectories();
+        }
+
         boolean useAutoCreateViewForPanel = getPanel().useAutoCreateView();
         if (useAutoCreateView != useAutoCreateViewForPanel) {
             YiiPreferences.setAutoCreateViewFile(phpModule, useAutoCreateViewForPanel);
@@ -127,6 +183,14 @@ public class YiiPhpModuleCustomizerExtender extends PhpModuleCustomizerExtender 
             component.setEnabledPlugin(isEnabled);
             component.setAutoCreateView(useAutoCreateView);
             component.setFallbackToDefaultViews(isFallbackToDefaultViews);
+            component.setSystemPath(systemPath);
+            component.setApplicationPath(applicationPath);
+            component.setZiiPath(ziiPath);
+            component.setExtPath(extPath);
+            component.setControllersPath(controllersPath);
+            component.setViewsPath(viewsPath);
+            component.setThemesPath(themesPath);
+            component.setMessagesPath(messagesPath);
         }
         return component;
     }

@@ -47,9 +47,9 @@ import javax.swing.text.Document;
 import org.nbphpcouncil.modules.php.yii.YiiModule;
 import org.nbphpcouncil.modules.php.yii.YiiModuleFactory;
 import org.nbphpcouncil.modules.php.yii.preferences.YiiPreferences;
+import org.nbphpcouncil.modules.php.yii.ui.actions.YiiGoToViewSupport;
 import org.nbphpcouncil.modules.php.yii.util.YiiDocUtils;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
-import org.nbphpcouncil.modules.php.yii.util.YiiViewPathSupport;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenSequence;
@@ -58,7 +58,6 @@ import org.netbeans.lib.editor.hyperlink.spi.HyperlinkType;
 import org.netbeans.modules.csl.api.UiUtils;
 import org.netbeans.modules.editor.NbEditorUtilities;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
-import org.netbeans.modules.php.api.util.StringUtils;
 import org.netbeans.modules.php.editor.lexer.PHPTokenId;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -77,8 +76,8 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
     private int targetStart;
     private int targetEnd;
     private boolean useAutoCreate = false;
-    private String relativeViewPath;
     private FileObject controller;
+    private YiiGoToViewSupport support;
 
     @Override
     public Set<HyperlinkType> getSupportedHyperlinkTypes() {
@@ -101,13 +100,9 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
     @Override
     public void performClickAction(Document doc, int offset, HyperlinkType type) {
         // use "create view file automatically"
-        if (view == null && useAutoCreate) {
-            if (YiiViewPathSupport.isAbsoluteViewPath(target)) {
-                // absolute view
-                view = YiiViewPathSupport.createAbsoluteViewFile(target, controller);
-            } else {
-                view = YiiUtils.createViewFileAuto(controller, relativeViewPath);
-            }
+        boolean isFallback = YiiPreferences.isFallbackToDefaultViews(PhpModule.forFileObject(controller));
+        if (view == null && useAutoCreate && !isFallback) {
+            view = support.createView();
         }
 
         // Open view file
@@ -157,27 +152,11 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
         if (target.isEmpty() || !isRenderMethod(ts)) {
             return false;
         }
-        // set view file
-        if (YiiViewPathSupport.isAbsoluteViewPath(target)) {
-            // absolute view
-            view = YiiViewPathSupport.getAbsoluteViewFile(target, controller);
-        } else {
-            // get theme name
-            PhpModule phpModule = PhpModule.forFileObject(controller);
-            YiiModule yiiModule = YiiModuleFactory.create(phpModule);
-            String themeName = yiiModule.getThemeName();
 
-            relativeViewPath = YiiUtils.getRelativePathToView(controller, target, themeName);
-            view = controller.getFileObject(relativeViewPath);
+        // get view file
+        support = YiiGoToViewSupport.create(controller, target);
+        view = support.getView();
 
-            // fall back to default views
-            if (view == null
-                    && !StringUtils.isEmpty(themeName)
-                    && YiiPreferences.isFallbackToDefaultViews(phpModule)) {
-                String defaultViewPath = YiiUtils.getRelativePathToView(controller, target, ""); // NOI18N
-                view = controller.getFileObject(defaultViewPath);
-            }
-        }
         useAutoCreate = YiiPreferences.useAutoCreateView(PhpModule.forFileObject(controller));
         if (view != null || useAutoCreate) {
             targetStart = newOffset + 1;

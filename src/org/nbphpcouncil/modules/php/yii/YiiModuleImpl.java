@@ -44,9 +44,11 @@ package org.nbphpcouncil.modules.php.yii;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.nbphpcouncil.modules.php.yii.preferences.YiiPreferences;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
 import org.netbeans.modules.php.api.phpmodule.PhpModuleProperties;
+import org.netbeans.modules.php.api.util.StringUtils;
 import org.openide.filesystems.FileChangeAdapter;
 import org.openide.filesystems.FileEvent;
 import org.openide.filesystems.FileObject;
@@ -59,21 +61,31 @@ public class YiiModuleImpl extends YiiModule {
 
     // default path
     private static final String APPLICATION = "protected"; // NOI18N
-    private static final String EXT = APPLICATION + "/extensions"; // NOI18N
+    private static final String EXT = "extensions"; // NOI18N
     private static final String ZII = "zii"; // NOI18N
     private static final String ENTRY_SCRIPT = "index.php"; // NOI18N
-    private static final String CONFIG = APPLICATION + "/config"; // NOI18N
+    private static final String CONFIG = "config"; // NOI18N
     private final PhpModule phpModule;
     private String themeName;
     protected String systemPath;
     protected FileObject index;
     protected FileObject config;
     protected FileObject main;
+    private FileObject systemDirectory;
+    private FileObject applicationDirectory;
+    private FileObject ziiDirectory;
+    private FileObject extDirectory;
+    private FileObject webrootDirectory;
+    private FileObject controllersDirectory;
+    private FileObject viewsDirectory;
+    private FileObject themesDirectory;
+    private FileObject messagesDirectory;
     private static final Logger LOGGER = Logger.getLogger(YiiModuleImpl.class.getName());
 
     public YiiModuleImpl(PhpModule phpModule) {
         this.phpModule = phpModule;
         systemPath = getSystemPath();
+        initDirectories();
     }
 
     private String getSystemPath() {
@@ -106,26 +118,45 @@ public class YiiModuleImpl extends YiiModule {
 
     @Override
     public FileObject getWebroot() {
+        return webrootDirectory;
+    }
+
+    private void setWebroot() {
         PhpModuleProperties properties = phpModule.getProperties();
         FileObject webRoot = properties.getWebRoot();
         if (webRoot != null) {
-            return webRoot;
+            webrootDirectory = webRoot;
+            return;
         }
-        return phpModule.getSourceDirectory();
+        webrootDirectory = phpModule.getSourceDirectory();
     }
 
     @Override
     public FileObject getSystem() {
+        return systemDirectory;
+    }
+
+    private void setSystem() {
+        // from settings
+        String path = YiiPreferences.getSystemPath(phpModule);
+        if (!path.isEmpty()) {
+            systemDirectory = getDirectory(path);
+            if (systemDirectory != null) {
+                return;
+            }
+        }
+
+        // default
         FileObject webroot = getWebroot();
         if (webroot == null) {
-            return null;
+            return;
         }
         if (systemPath == null) {
             // try again
             systemPath = getSystemPath();
         }
         if (systemPath == null) {
-            return null;
+            return;
         }
 
         FileObject system = webroot.getFileObject(systemPath);
@@ -135,26 +166,158 @@ public class YiiModuleImpl extends YiiModule {
             systemPath = getSystemPath();
             system = webroot.getFileObject(systemPath);
         }
-        return system;
+        systemDirectory = system;
     }
 
     @Override
     public FileObject getZii() {
+        return ziiDirectory;
+    }
+
+    private void setZii() {
+        // from settings
+        String path = YiiPreferences.getZiiPath(phpModule);
+        if (!path.isEmpty()) {
+            ziiDirectory = getDirectory(path);
+            if (ziiDirectory != null) {
+                return;
+            }
+        }
+
+        // default
         FileObject system = getSystem();
         if (system != null) {
-            return system.getFileObject(ZII);
+            ziiDirectory = system.getFileObject(ZII);
         }
-        return null;
     }
 
     @Override
     public FileObject getApplication() {
-        return getWebroot().getFileObject(APPLICATION);
+        return applicationDirectory;
+    }
+
+    private void setApplication() {
+        // from settings
+        String path = YiiPreferences.getApplicationPath(phpModule);
+        if (!path.isEmpty()) {
+            applicationDirectory = getDirectory(path);
+            if (applicationDirectory != null) {
+                return;
+            }
+        }
+
+        // default
+        applicationDirectory = getWebroot().getFileObject(APPLICATION);
     }
 
     @Override
     public FileObject getExt() {
-        return getWebroot().getFileObject(EXT);
+        return extDirectory;
+    }
+
+    private void setExt() {
+        // from settings
+        String path = YiiPreferences.getExtPath(phpModule);
+        if (!path.isEmpty()) {
+            extDirectory = getDirectory(path);
+            if (extDirectory != null) {
+                return;
+            }
+        }
+
+        // default
+        FileObject application = getApplication();
+        if (application != null) {
+            extDirectory = application.getFileObject(EXT);
+        }
+    }
+
+    @Override
+    public FileObject getControllers() {
+        return controllersDirectory;
+    }
+
+    private void setControllers() {
+        // from settings
+        String path = YiiPreferences.getControllersPath(phpModule);
+        if (!path.isEmpty()) {
+            controllersDirectory = getDirectory(path);
+            if (controllersDirectory != null) {
+                return;
+            }
+        }
+
+        // default
+        FileObject application = getApplication();
+        if (application != null) {
+            controllersDirectory = application.getFileObject("controllers"); // NOI18N
+        }
+    }
+
+    @Override
+    public FileObject getViews() {
+        return viewsDirectory;
+    }
+
+    private void setViews() {
+        // from settings
+        String path = YiiPreferences.getViewsPath(phpModule);
+        if (!path.isEmpty()) {
+            viewsDirectory = getDirectory(path);
+            if (viewsDirectory != null) {
+                return;
+            }
+        }
+
+        // default
+        FileObject application = getApplication();
+        if (application != null) {
+            viewsDirectory = application.getFileObject("views"); // NOI18N
+        }
+    }
+
+    @Override
+    public FileObject getThemes() {
+        return themesDirectory;
+    }
+
+    private void setThemes() {
+        // from settings
+        String path = YiiPreferences.getThemesPath(phpModule);
+        if (!path.isEmpty()) {
+            themesDirectory = getDirectory(path);
+            if (themesDirectory != null) {
+                return;
+            }
+        }
+
+        // default
+        FileObject webroot = getWebroot();
+        if (webroot != null) {
+            themesDirectory = webroot.getFileObject("themes"); // NOI18N
+        }
+    }
+
+    @Override
+    public FileObject getMessages() {
+        return messagesDirectory;
+    }
+
+    private void setMessages() {
+        // from settings
+        String path = YiiPreferences.getMessagesPath(phpModule);
+        if (!path.isEmpty()) {
+            messagesDirectory = getDirectory(path);
+            if (messagesDirectory != null) {
+                return;
+            }
+        }
+
+        // default
+        FileObject application = getApplication();
+        if (application != null) {
+            messagesDirectory = application.getFileObject("messages"); // NOI18N
+        }
     }
 
     @Override
@@ -185,9 +348,9 @@ public class YiiModuleImpl extends YiiModule {
         if (main != null) {
             return main;
         }
-        FileObject webroot = getWebroot();
-        if (webroot != null) {
-            main = webroot.getFileObject(CONFIG + "/main.php"); // NOI18N
+        FileObject application = getApplication();
+        if (application != null) {
+            main = application.getFileObject(CONFIG + "/main.php"); // NOI18N
         }
         if (main == null) {
             LOGGER.log(Level.INFO, "Not found main.php");
@@ -203,5 +366,27 @@ public class YiiModuleImpl extends YiiModule {
             });
         }
         return main;
+    }
+
+    @Override
+    public final void initDirectories() {
+        // don't change order!
+        setWebroot();
+        setSystem();
+        setApplication();
+        setZii();
+        setExt();
+        setControllers();
+        setViews();
+        setThemes();
+        setMessages();
+    }
+
+    private FileObject getDirectory(String path) {
+        FileObject sourceDirectory = phpModule.getSourceDirectory();
+        if (sourceDirectory != null && !StringUtils.isEmpty(path)) {
+            return sourceDirectory.getFileObject(path);
+        }
+        return null;
     }
 }
