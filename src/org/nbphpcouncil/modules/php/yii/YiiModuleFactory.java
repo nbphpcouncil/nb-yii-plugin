@@ -49,7 +49,7 @@ import org.netbeans.modules.php.api.phpmodule.PhpModule;
  *
  * @author junichi11
  */
-public class YiiModuleFactory {
+public final class YiiModuleFactory {
 
     private static final Map<PhpModule, YiiModule> modules = new HashMap<PhpModule, YiiModule>();
 

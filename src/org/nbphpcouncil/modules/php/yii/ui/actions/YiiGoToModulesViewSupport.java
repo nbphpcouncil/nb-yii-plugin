@@ -41,60 +41,59 @@
  */
 package org.nbphpcouncil.modules.php.yii.ui.actions;
 
-import org.nbphpcouncil.modules.php.yii.preferences.YiiPreferences;
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
-import org.netbeans.modules.csl.api.UiUtils;
-import org.netbeans.modules.php.api.editor.EditorSupport;
-import org.netbeans.modules.php.api.editor.PhpBaseElement;
-import org.netbeans.modules.php.api.editor.PhpClass;
-import org.netbeans.modules.php.api.phpmodule.PhpModule;
-import org.netbeans.modules.php.spi.framework.actions.GoToViewAction;
+import org.netbeans.modules.php.api.util.StringUtils;
 import org.openide.filesystems.FileObject;
-import org.openide.util.Lookup;
+import org.openide.filesystems.FileUtil;
 
-/**
- *
- * @author junichi11
- */
-public class YiiGoToViewAction extends GoToViewAction {
+public final class YiiGoToModulesViewSupport extends YiiGoToViewSupport {
 
-    private static final long serialVersionUID = 1722745601120023354L;
-    private FileObject controller;
-    private int offset;
+    private String pathToView;
+    private static final Logger LOGGER = Logger.getLogger(YiiGoToModulesViewSupport.class.getName());
 
-    public YiiGoToViewAction(FileObject controller, int offset) {
-        this.controller = controller;
-        this.offset = offset;
+    public YiiGoToModulesViewSupport(FileObject controller, String actionId) {
+        super(controller, actionId);
+        if (controller != null && subPathToController != null) {
+            pathToView = YiiUtils.getRelativePathToView(controller, subPathToController, controllerId, actionId, null);
+        }
     }
 
     @Override
-    public boolean goToView() {
-        EditorSupport editorSupport = Lookup.getDefault().lookup(EditorSupport.class);
-        PhpBaseElement element = editorSupport.getElement(controller, offset);
-        if (element instanceof PhpClass.Method) {
-
-            // get view file
-            PhpClass.Method method = (PhpClass.Method) element;
-            String actionId = YiiUtils.getViewName(method);
-            YiiGoToViewSupport support = YiiGoToViewSupport.create(controller, actionId);
-            FileObject view = support.getView();
-
-            if (view != null) {
-                UiUtils.open(view, DEFAULT_OFFSET);
-                return true;
-            }
-
-            // create view file automatically
-            PhpModule phpModule = PhpModule.forFileObject(controller);
-            if (YiiPreferences.useAutoCreateView(phpModule) && !YiiPreferences.isFallbackToDefaultViews(phpModule)) {
-                view = support.createView();
-            }
-
-            if (view != null) {
-                UiUtils.open(view, DEFAULT_OFFSET);
-                return true;
-            }
+    public FileObject getRelativeView() {
+        if (subPathToController == null || pathToView == null) {
+            return null;
         }
-        return false;
+
+        // get view file
+        return controller.getFileObject(pathToView);
+    }
+
+    @Override
+    public FileObject createRelativeView() {
+        if (StringUtils.isEmpty(pathToView)) {
+            return null;
+        }
+
+        String viewPath = FileUtil.normalizePath(controller.getParent().getPath() + pathToView);
+        File file = new File(viewPath);
+        FileObject view = null;
+        try {
+            // create sub directories
+            File parentFile = file.getParentFile();
+            if (!parentFile.exists()) {
+                parentFile.mkdirs();
+            }
+            // create file
+            if (file.createNewFile()) {
+                view = FileUtil.toFileObject(file);
+            }
+        } catch (IOException ex) {
+            LOGGER.log(Level.WARNING, "Can't create view file : {0}", viewPath);
+        }
+        return view;
     }
 }
