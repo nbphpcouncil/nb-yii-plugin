@@ -53,6 +53,12 @@ e.g.
     ├── foo
     └── bar
 
+### Path settings
+
+You can set the some paths(e.g. path alias) to project properties.
+If you use defferent path from default, please set relative path there from source directory.
+
+
 ## Features
 
 - Badge icon
