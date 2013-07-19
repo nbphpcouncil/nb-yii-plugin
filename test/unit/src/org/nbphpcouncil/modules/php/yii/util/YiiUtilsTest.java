@@ -81,6 +81,7 @@ public class YiiUtilsTest extends NbTestCase {
     @Test
     public void testGetControllerFileName() {
         assertEquals("SiteController", YiiUtils.getControllerFileName("site"));
+        assertEquals("DemoSiteController", YiiUtils.getControllerFileName("demoSite"));
         assertEquals("SiteController", YiiUtils.getControllerFileName("Site"));
         assertEquals(null, YiiUtils.getControllerFileName(""));
         assertEquals(null, YiiUtils.getControllerFileName(null));
@@ -92,6 +93,7 @@ public class YiiUtilsTest extends NbTestCase {
     @Test
     public void testIsControllerName() {
         assertTrue(YiiUtils.isControllerName("SiteController"));
+        assertTrue(YiiUtils.isControllerName("DemoSiteController"));
         assertFalse(YiiUtils.isControllerName("Demo"));
         assertFalse(YiiUtils.isControllerName(""));
         assertFalse(YiiUtils.isControllerName(null));
@@ -103,6 +105,7 @@ public class YiiUtilsTest extends NbTestCase {
     @Test
     public void testGetActionMethodName() {
         assertEquals("actionIndex", YiiUtils.getActionMethodName("index"));
+        assertEquals("actionIndexSomething", YiiUtils.getActionMethodName("indexSomething"));
         assertEquals("actionError", YiiUtils.getActionMethodName("error"));
         assertEquals(null, YiiUtils.getActionMethodName(""));
         assertEquals(null, YiiUtils.getActionMethodName(null));
@@ -114,6 +117,7 @@ public class YiiUtilsTest extends NbTestCase {
     @Test
     public void testGetViewFolderName() {
         assertEquals("site", YiiUtils.getViewFolderName("SiteController"));
+        assertEquals("demoSite", YiiUtils.getViewFolderName("DemoSiteController"));
         assertEquals(null, YiiUtils.getViewFolderName("SiteControllers"));
         assertEquals(null, YiiUtils.getViewFolderName(""));
         assertEquals(null, YiiUtils.getViewFolderName(null));
@@ -142,6 +146,7 @@ public class YiiUtilsTest extends NbTestCase {
     @Test
     public void testIsActionMethodName() {
         assertTrue(YiiUtils.isActionMethodName("actionIndex"));
+        assertTrue(YiiUtils.isActionMethodName("actionIndexSomething"));
         assertFalse(YiiUtils.isActionMethodName("actionindex"));
         assertFalse(YiiUtils.isActionMethodName(""));
         assertFalse(YiiUtils.isActionMethodName(null));
@@ -153,10 +158,23 @@ public class YiiUtilsTest extends NbTestCase {
     @Test
     public void testToFirstUpperCase() {
         assertEquals("Site", YiiUtils.toFirstUpperCase("site"));
-        assertEquals("Demo", YiiUtils.toFirstUpperCase("demo"));
-        assertEquals("Blog", YiiUtils.toFirstUpperCase("BLOG"));
+        assertEquals("DemoSite", YiiUtils.toFirstUpperCase("demoSite"));
+        assertEquals("BLOG", YiiUtils.toFirstUpperCase("BLOG"));
         assertEquals("A", YiiUtils.toFirstUpperCase("a"));
         assertEquals(null, YiiUtils.toFirstUpperCase(""));
         assertEquals(null, YiiUtils.toFirstUpperCase(null));
+    }
+
+    /**
+     * Test of toFirstLowerCase method, of class YiiUtils.
+     */
+    @Test
+    public void testToFirstLowerCase() {
+        assertEquals("site", YiiUtils.toFirstLowerCase("Site"));
+        assertEquals("demoSite", YiiUtils.toFirstLowerCase("DemoSite"));
+        assertEquals("bLOG", YiiUtils.toFirstLowerCase("BLOG"));
+        assertEquals("a", YiiUtils.toFirstLowerCase("A"));
+        assertEquals("", YiiUtils.toFirstLowerCase(""));
+        assertEquals(null, YiiUtils.toFirstLowerCase(null));
     }
 }
