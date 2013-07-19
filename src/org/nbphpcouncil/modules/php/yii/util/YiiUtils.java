@@ -493,8 +493,8 @@ public class YiiUtils {
             return null;
         }
         String name = controllerName.replace(CONTROLLER_SUFFIX, ""); // NOI18N
-        name = name.toLowerCase();
-        return name;
+        // #44 e.g. AbcDefController -> abcDef
+        return toFirstLowerCase(name);
     }
 
     /**
@@ -533,7 +533,8 @@ public class YiiUtils {
     /**
      * Converts the first of characters to upper case.
      *
-     * Examples: "apple" -> "Apple", "Banana" -> "Banana", "ORANGE" -> "Orange"
+     * Examples: "apple" -> "Apple", "minBanana" -> "MiniBanana", "ORANGE" ->
+     * "ORANGE"
      *
      * @param string
      * @return the converted string
@@ -542,8 +543,27 @@ public class YiiUtils {
         if (string == null || string.isEmpty()) {
             return null;
         }
-        string = string.toLowerCase();
         return string.substring(0, 1).toUpperCase() + string.substring(1);
+    }
+
+    /**
+     * Converts the first of characters to lower case.
+     *
+     * Examples: "Apple" -> "apple", "MiniBanana" -> "miniBanana", "ORANGE" ->
+     * "oRANGE"
+     *
+     * @param string
+     * @return the converted string
+     */
+    public static String toFirstLowerCase(String string) {
+        if (string == null || string.isEmpty()) {
+            return string;
+        }
+
+        if (string.length() == 1) {
+            return string.toLowerCase();
+        }
+        return string.substring(0, 1).toLowerCase() + string.substring(1);
     }
 
     /**
