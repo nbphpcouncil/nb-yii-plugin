@@ -84,7 +84,7 @@ public class YiiInitAction extends BaseAction {
     @Override
     @NbBundle.Messages({
         "MSG_YiiInitAction=Complete",
-        "MSG_YiiInitActionFail=Can't create code completion file"
+        "MSG_YiiInitActionFail=Can't create code completion file(File may exist already)"
     })
     protected void actionPerformed(PhpModule phpModule) {
         // called via shortcut
