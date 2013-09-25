@@ -43,9 +43,14 @@ package org.nbphpcouncil.modules.php.yii.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.nbphpcouncil.modules.php.yii.YiiModule;
 import org.nbphpcouncil.modules.php.yii.YiiModuleFactory;
 import org.netbeans.api.project.FileOwnerQuery;
@@ -69,11 +74,18 @@ import org.openide.util.MutexException;
 public class ProjectPropertiesSupport {
 
     public static final String INCLUDE_PATH = "include.path"; // NOI18N
+    public static final String TESTING_PROVIDERS = "testing.providers"; // NOI18N
     public static final String PHP_UNIT_BOOTSTRAP = "phpunit.bootstrap"; // NOI18N
     public static final String PHP_UNIT_BOOTSTRAP_FOR_CREATE_TESTS = "phpunit.bootstrap.create.tests"; // NOI18N
     public static final String PHP_UNIT_CONFIGURATION = "phpunit.configuration"; // NOI18N
     private static final String BOOTSTRAP_PHP = "bootstrap.php"; //NOI18N
     private static final String PHPUNIT_XML = "phpunit.xml"; //NOI18N
+    private static final String UTF8 = "UTF-8"; // NOI18N
+    private static final String PHPUNIT_BOOTSTRAP_CONFIGURATION_PATH = "auxiliary.org-netbeans-modules-php-phpunit.configuration_2e_path="; // NOI18N
+    private static final String PHPUNIT_BOOTSTRAP_CONFIGURATION_ENABLED = "auxiliary.org-netbeans-modules-php-phpunit.configuration_2e_enabled="; // NOI18N
+    private static final String PHPUNIT_BOOTSTRAP_PATH = "auxiliary.org-netbeans-modules-php-phpunit.bootstrap_2e_path="; // NOI18N
+    private static final String PHPUNIT_BOOTSTRAP_ENABLED = "auxiliary.org-netbeans-modules-php-phpunit.bootstrap_2e_enabled="; // NOI18N
+    private static final String PHPUNIT_BOOTSTRAP_CREATE_TESTS = "auxiliary.org-netbeans-modules-php-phpunit.bootstrap_2e_create_2e_tests="; // NOI18N
 
     /**
      * Set include path
@@ -185,6 +197,7 @@ public class ProjectPropertiesSupport {
      * @param phpModule
      */
     public static void setPHPUnit(final PhpModule phpModule) {
+        // enabled PHPUnit
         try {
             // store properties
             ProjectManager.mutex().writeAccess(new Mutex.ExceptionAction<Void>() {
@@ -197,20 +210,7 @@ public class ProjectPropertiesSupport {
                     }
                     EditableProperties properties = helper.getProperties(AntProjectHelper.PROJECT_PROPERTIES_PATH);
                     if (properties != null) {
-                        FileObject testsDirectory = YiiUtils.getTestsDirectory(phpModule);
-                        if (testsDirectory == null) {
-                            return null;
-                        }
-                        FileObject bootstrap = testsDirectory.getFileObject(BOOTSTRAP_PHP);
-                        if (bootstrap != null) {
-                            properties.setProperty(PHP_UNIT_BOOTSTRAP, relativizeFile(project, bootstrap.getPath()));
-                            properties.setProperty(PHP_UNIT_BOOTSTRAP_FOR_CREATE_TESTS, "true"); // NOI18N
-                        }
-                        FileObject phpunitXml = testsDirectory.getFileObject(PHPUNIT_XML);
-                        if (phpunitXml != null) {
-                            properties.setProperty(PHP_UNIT_CONFIGURATION, relativizeFile(project, phpunitXml.getPath()));
-                        }
-
+                        properties.setProperty(TESTING_PROVIDERS, "PhpUnit");
                         helper.putProperties(AntProjectHelper.PROJECT_PROPERTIES_PATH, properties);
                     }
 
@@ -220,6 +220,71 @@ public class ProjectPropertiesSupport {
             });
         } catch (MutexException e) {
             Exceptions.printStackTrace((IOException) e.getException());
+        }
+
+        // PhpUnit module is changed since NB7.4
+        // set project properties for PHPUnit
+        setPhpUnitProperties(phpModule);
+    }
+
+    private static void setPhpUnitProperties(PhpModule phpModule) {
+        FileObject testsDirectory = YiiUtils.getTestsDirectory(phpModule);
+        if (testsDirectory == null) {
+            return;
+        }
+        HashMap<String, String> propertiesMap = new HashMap<String, String>();
+        FileObject bootstrap = testsDirectory.getFileObject(BOOTSTRAP_PHP);
+        if (bootstrap != null) {
+            propertiesMap.put(PHPUNIT_BOOTSTRAP_CREATE_TESTS, "true"); // NOI18N
+            propertiesMap.put(PHPUNIT_BOOTSTRAP_ENABLED, "true"); // NOI18N
+            propertiesMap.put(PHPUNIT_BOOTSTRAP_PATH, relativizeFile(phpModule, bootstrap.getPath()));
+        }
+        FileObject phpunitXml = testsDirectory.getFileObject(PHPUNIT_XML);
+        if (phpunitXml != null) {
+            propertiesMap.put(PHPUNIT_BOOTSTRAP_CONFIGURATION_ENABLED, "true"); // NOI18N
+            propertiesMap.put(PHPUNIT_BOOTSTRAP_CONFIGURATION_PATH, relativizeFile(phpModule, phpunitXml.getPath()));
+        }
+
+        // get nbproject
+        FileObject nbproject = YiiUtils.getNbproject(phpModule);
+        if (nbproject == null) {
+            return;
+        }
+        FileObject properties = nbproject.getFileObject("project.properties"); // NOI18N
+        if (properties == null) {
+            return;
+        }
+        try {
+            List<String> lines = properties.asLines(UTF8);
+            PrintWriter pw = new PrintWriter(new OutputStreamWriter(properties.getOutputStream(), UTF8));
+            try {
+                // write phpunit properties
+                for (Map.Entry<String, String> entry : propertiesMap.entrySet()) {
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+                    pw.println(key + value);
+                }
+
+                // write other properties
+                Set<String> keySet = propertiesMap.keySet();
+                for (String line : lines) {
+                    boolean isPhpUnitProperty = false;
+                    for (String key : keySet) {
+                        if (line.startsWith(key)) {
+                            isPhpUnitProperty = true;
+                            break;
+                        }
+                    }
+                    if (isPhpUnitProperty) {
+                        continue;
+                    }
+                    pw.println(line);
+                }
+            } finally {
+                pw.close();
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
         }
     }
 
@@ -264,14 +329,14 @@ public class ProjectPropertiesSupport {
     /**
      * Relativize file.
      *
-     * @param project
+     * @param phpModule
      * @param filePath
      * @return
      */
-    private static String relativizeFile(Project project, String filePath) {
+    private static String relativizeFile(PhpModule phpModule, String filePath) {
         if (StringUtils.hasText(filePath)) {
             File file = new File(filePath);
-            String path = PropertyUtils.relativizeFile(FileUtil.toFile(project.getProjectDirectory()), file);
+            String path = PropertyUtils.relativizeFile(FileUtil.toFile(phpModule.getProjectDirectory()), file);
             if (path == null) {
                 // sorry, cannot be relativized
                 path = file.getAbsolutePath();
