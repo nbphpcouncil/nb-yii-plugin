@@ -57,7 +57,7 @@ import org.openide.util.NbBundle;
 public class PHPUnitInitAction extends BaseAction {
 
     private static final long serialVersionUID = -8653981594740402654L;
-    private static PHPUnitInitAction INSTANCE = new PHPUnitInitAction();
+    private static final PHPUnitInitAction INSTANCE = new PHPUnitInitAction();
 
     private PHPUnitInitAction() {
     }
@@ -84,6 +84,7 @@ public class PHPUnitInitAction extends BaseAction {
             // called via shortcut
             return;
         }
+        // set project.properties
         ProjectPropertiesSupport.setPHPUnit(phpModule);
         NotificationDisplayer.getDefault().notify(getFullName(), ImageUtilities.loadImageIcon(Yii.YII_ICON_16, true), Bundle.MSG_PHPUnitInitAction(), null);
     }
