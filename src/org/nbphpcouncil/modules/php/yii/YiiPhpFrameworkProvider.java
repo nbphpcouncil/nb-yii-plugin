@@ -50,7 +50,6 @@ import org.nbphpcouncil.modules.php.yii.commands.YiiScript;
 import org.nbphpcouncil.modules.php.yii.editor.YiiEditorExtender;
 import org.nbphpcouncil.modules.php.yii.preferences.YiiPreferences;
 import org.nbphpcouncil.modules.php.yii.ui.options.YiiOptions;
-import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.netbeans.modules.php.api.framework.BadgeIcon;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
 import org.netbeans.modules.php.api.phpmodule.PhpModuleProperties;
@@ -192,7 +191,7 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
         }
 
         // add unit test and webroot directories
-        FileObject tests = YiiUtils.getTestsDirectory(pm);
+        FileObject tests = sourceDirectory.getFileObject("protected/tests"); // NOI18N
         if (tests != null) {
             properties = properties.setTests(tests);
         }

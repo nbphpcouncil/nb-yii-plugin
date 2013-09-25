@@ -57,6 +57,7 @@ import org.netbeans.modules.php.api.executable.InvalidPhpExecutableException;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
 import org.netbeans.modules.php.spi.framework.PhpModuleExtender;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
 
@@ -118,6 +119,12 @@ public class YiiPhpModuleExtender extends PhpModuleExtender {
         boolean usePHPUnit = panel.usePHPUnit();
         HashSet<FileObject> files = new HashSet<FileObject>();
         if (isSuccess) {
+            // update module
+            // some directories may null
+            YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+            FileUtil.refreshFor(FileUtil.toFile(yiiModule.getWebroot()));
+            yiiModule.initDirectories();
+
             // set PHPUnit Test
             if (usePHPUnit) {
                 ProjectPropertiesSupport.setPHPUnit(phpModule);
