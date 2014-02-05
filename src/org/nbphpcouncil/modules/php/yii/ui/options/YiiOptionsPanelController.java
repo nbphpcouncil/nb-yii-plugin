@@ -44,21 +44,23 @@ package org.nbphpcouncil.modules.php.yii.ui.options;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import javax.swing.JComponent;
-import org.nbphpcouncil.modules.php.yii.commands.YiiScript;
 import org.netbeans.modules.php.api.util.UiUtils;
 import org.netbeans.spi.options.OptionsPanelController;
 import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 
-@OptionsPanelController.SubRegistration(
-        location = UiUtils.OPTIONS_PATH,
-        id = YiiScript.OPTIONS_SUB_PATH,
-        displayName = "#AdvancedOption_DisplayName_Yii",
-        keywords = "#AdvancedOption_Keywords_Yii",
-        keywordsCategory = "org-netbeans-modules-php-project-ui-options-PHPOptionsCategory/Yii")
-@org.openide.util.NbBundle.Messages({"AdvancedOption_DisplayName_Yii=Yii", "AdvancedOption_Keywords_Yii=yii"})
+@UiUtils.PhpOptionsPanelRegistration(
+        id = YiiOptionsPanelController.ID,
+        displayName = "#LBL_YiiOptionsName",
+        position = 800
+)
+@NbBundle.Messages({"LBL_YiiOptionsName=Yii", "Yii.options.keywords.TabTitle=Frameworks & Tools"})
+@OptionsPanelController.Keywords(keywords = {"php", "yii"},
+        location = UiUtils.OPTIONS_PATH, tabTitle = "#Yii.options.keywords.TabTitle")
 public final class YiiOptionsPanelController extends OptionsPanelController {
 
+    static final String ID = "Yii"; // NOI18N
     private YiiOptionsPanel panel;
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private boolean changed;
