@@ -107,7 +107,7 @@ public class YiiUtils {
     }
 
     private static PhpModule getPhpModule(FileObject fileObject) {
-        return PhpModule.forFileObject(fileObject);
+        return PhpModule.Factory.forFileObject(fileObject);
     }
 
     /**
@@ -381,7 +381,7 @@ public class YiiUtils {
             String format = String.format(CONTROLLER_RELATIVE_PATH_FORMAT, nestedPathDepth, "", nestedPath, controllerName);
             controller = view.getFileObject(format);
         } else {
-            PhpModule phpModule = PhpModule.forFileObject(view);
+            PhpModule phpModule = PhpModule.Factory.forFileObject(view);
             YiiModule yiiModule = YiiModuleFactory.create(phpModule);
             if (yiiModule != null) {
                 FileObject controllersDirectory = yiiModule.getControllers();
@@ -760,7 +760,7 @@ public class YiiUtils {
         // contains module name
         int moduleIndex = path.indexOf("/", modulesIndex + modules.length()); // NOI18N
         String modulePath = path.substring(0, moduleIndex);
-        YiiModule yiiModule = YiiModuleFactory.create(PhpModule.forFileObject(fileObject));
+        YiiModule yiiModule = YiiModuleFactory.create(PhpModule.Factory.forFileObject(fileObject));
         FileObject webroot = yiiModule.getWebroot();
         if (webroot == null) {
             return null;

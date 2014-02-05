@@ -85,7 +85,7 @@ public class YiiGoToViewAction extends GoToViewAction {
             }
 
             // create view file automatically
-            PhpModule phpModule = PhpModule.forFileObject(controller);
+            PhpModule phpModule = PhpModule.Factory.forFileObject(controller);
             if (YiiPreferences.useAutoCreateView(phpModule) && !YiiPreferences.isFallbackToDefaultViews(phpModule)) {
                 view = support.createView();
             }

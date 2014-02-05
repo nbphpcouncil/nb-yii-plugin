@@ -68,7 +68,7 @@ public abstract class YiiCompletionProvider implements CompletionProvider {
             return null;
         }
 
-        PhpModule phpModule = PhpModule.forFileObject(fileObject);
+        PhpModule phpModule = PhpModule.Factory.forFileObject(fileObject);
         if (!YiiUtils.isYii(phpModule)) {
             return null;
         }

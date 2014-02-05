@@ -83,7 +83,7 @@ public class YiiActionsExtender extends PhpModuleActionsExtender {
     public RunCommandAction getRunCommandAction() {
         // check whether yiic.php exists
         // if it doesn't exist, doesn't add this action
-        PhpModule phpModule = PhpModule.inferPhpModule();
+        PhpModule phpModule = PhpModule.Factory.inferPhpModule();
         YiiModule yiiModule = YiiModuleFactory.create(phpModule);
         FileObject webroot = yiiModule.getWebroot();
         if (webroot == null) {

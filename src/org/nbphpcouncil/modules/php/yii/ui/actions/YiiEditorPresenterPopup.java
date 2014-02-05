@@ -86,7 +86,7 @@ public class YiiEditorPresenterPopup extends BaseAction implements Presenter.Pop
         JTextComponent editor = EditorRegistry.lastFocusedComponent();
         if (editor != null) {
             FileObject fileObject = YiiDocUtils.getFileObject(editor.getDocument());
-            PhpModule phpModule = PhpModule.forFileObject(fileObject);
+            PhpModule phpModule = PhpModule.Factory.forFileObject(fileObject);
             if (YiiUtils.isYii(phpModule)) {
                 // set menu
                 JMenu menu = new JMenu(Bundle.LBL_Yii());

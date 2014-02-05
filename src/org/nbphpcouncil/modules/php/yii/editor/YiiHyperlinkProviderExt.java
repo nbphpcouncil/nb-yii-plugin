@@ -112,7 +112,7 @@ public abstract class YiiHyperlinkProviderExt implements HyperlinkProviderExt {
         if (fileObject == null) {
             return false;
         }
-        PhpModule phpModule = PhpModule.forFileObject(fileObject);
+        PhpModule phpModule = PhpModule.Factory.forFileObject(fileObject);
         return YiiUtils.isYii(phpModule);
     }
 
