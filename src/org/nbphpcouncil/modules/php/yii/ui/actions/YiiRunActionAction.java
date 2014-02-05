@@ -219,7 +219,7 @@ public final class YiiRunActionAction extends BaseAction {
     private void openBrowser(PhpModule phpModule, String controllerId, String actionId, Map<String, String> getRequests) {
         // build url
         StringBuilder sb = new StringBuilder();
-        PhpModuleProperties properties = phpModule.getProperties();
+        PhpModuleProperties properties = phpModule.getLookup().lookup(PhpModuleProperties.class);
         FileObject indexFile = properties.getIndexFile();
         String urlPath = properties.getUrl();
         sb.append(urlPath);

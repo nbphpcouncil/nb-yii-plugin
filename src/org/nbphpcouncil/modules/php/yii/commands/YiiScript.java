@@ -540,7 +540,7 @@ public class YiiScript {
 
         @Override
         public Reader flushReader() {
-            return io.flushReader();
+            return getIn();
         }
 
         public void setIn(Reader in) {
