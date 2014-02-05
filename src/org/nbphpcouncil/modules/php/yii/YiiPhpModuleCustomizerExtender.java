@@ -58,17 +58,17 @@ import org.openide.util.NbBundle;
 public class YiiPhpModuleCustomizerExtender extends PhpModuleCustomizerExtender {
 
     private YiiCustomizerPanel component;
-    private boolean isEnabled;
-    private boolean useAutoCreateView;
-    private boolean isFallbackToDefaultViews;
-    private String systemPath;
-    private String applicationPath;
-    private String ziiPath;
-    private String extPath;
-    private String controllersPath;
-    private String viewsPath;
-    private String themesPath;
-    private String messagesPath;
+    private final boolean isEnabled;
+    private final boolean useAutoCreateView;
+    private final boolean isFallbackToDefaultViews;
+    private final String systemPath;
+    private final String applicationPath;
+    private final String ziiPath;
+    private final String extPath;
+    private final String controllersPath;
+    private final String viewsPath;
+    private final String themesPath;
+    private final String messagesPath;
 
     public YiiPhpModuleCustomizerExtender(PhpModule phpModule) {
         isEnabled = YiiPreferences.isEnabled(phpModule);

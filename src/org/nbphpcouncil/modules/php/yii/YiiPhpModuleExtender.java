@@ -55,6 +55,7 @@ import org.nbphpcouncil.modules.php.yii.util.ProjectPropertiesSupport;
 import org.nbphpcouncil.modules.php.yii.util.YiiUtils;
 import org.netbeans.modules.php.api.executable.InvalidPhpExecutableException;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
+import org.netbeans.modules.php.api.util.StringUtils;
 import org.netbeans.modules.php.spi.framework.PhpModuleExtender;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -91,10 +92,7 @@ public class YiiPhpModuleExtender extends PhpModuleExtender {
     @Override
     public boolean isValid() {
         String yiic = YiiOptions.getInstance().getYiiScript();
-        if (yiic == null || yiic.isEmpty()) {
-            return false;
-        }
-        return true;
+        return !StringUtils.isEmpty(yiic);
     }
 
     @Override

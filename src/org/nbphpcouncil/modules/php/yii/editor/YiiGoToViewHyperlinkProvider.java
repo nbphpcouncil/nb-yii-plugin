@@ -178,10 +178,7 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
         ts.movePrevious();
         Token<PHPTokenId> render = ts.token();
         String text = render.text().toString();
-        if (text.equals("render") || text.equals("renderPartial")) { // NOI18N
-            return true;
-        }
-        return false;
+        return text.equals("render") || text.equals("renderPartial");
     }
 
     /**

@@ -78,8 +78,8 @@ import org.openide.util.ImageUtilities;
 public class GoToPopup extends JPanel implements FocusListener {
 
     private static final long serialVersionUID = -2662042633320594913L;
-    private String caption;
-    private List<GoToItem> items;
+    private final String caption;
+    private final List<GoToItem> items;
 
     /**
      * Creates new form GoToPopup

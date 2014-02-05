@@ -83,10 +83,7 @@ public abstract class YiiGoToViewSupport {
     }
 
     public boolean isEnabled() {
-        if (controller == null || phpModule == null || actionId == null) {
-            return false;
-        }
-        return true;
+        return controller != null && phpModule != null && actionId != null;
     }
 
     /**

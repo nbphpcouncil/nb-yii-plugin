@@ -96,7 +96,7 @@ public class YiiScript {
 
     public static final String YII_SCRIPT_NAME = "yiic"; // NOI18N
     public static final String YII_SCRIPT_NAME_LONG = YII_SCRIPT_NAME + ".php"; // NOI18N
-    private String yiicPath;
+    private final String yiicPath;
     public static final String OPTIONS_SUB_PATH = "Yii"; // NOI18N
     private static final Logger LOGGER = Logger.getLogger(YiiScript.class.getName());
     // commands
@@ -550,7 +550,7 @@ public class YiiScript {
 
     private static class HelpLineProcessor implements LineProcessor {
 
-        private StringBuilder sb = new StringBuilder();
+        private final StringBuilder sb = new StringBuilder();
 
         @Override
         public void processLine(String line) {

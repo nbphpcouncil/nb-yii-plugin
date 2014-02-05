@@ -49,9 +49,9 @@ import org.openide.filesystems.FileObject;
  */
 public class GoToTItem implements GoToItem {
 
-    private FileObject fileObject;
-    private int offset;
-    private String localeID;
+    private final FileObject fileObject;
+    private final int offset;
+    private final String localeID;
 
     public GoToTItem(FileObject fileObject, int offset, String localeID) {
         this.fileObject = fileObject;

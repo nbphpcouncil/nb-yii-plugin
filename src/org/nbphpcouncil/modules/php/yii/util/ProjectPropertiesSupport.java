@@ -140,7 +140,7 @@ public class ProjectPropertiesSupport {
                 }
             });
         } catch (MutexException e) {
-            Exceptions.printStackTrace((IOException) e.getException());
+            Exceptions.printStackTrace(e);
         }
 
     }
@@ -219,7 +219,7 @@ public class ProjectPropertiesSupport {
                 }
             });
         } catch (MutexException e) {
-            Exceptions.printStackTrace((IOException) e.getException());
+            Exceptions.printStackTrace(e);
         }
 
         // PhpUnit module is changed since NB7.4
@@ -296,11 +296,7 @@ public class ProjectPropertiesSupport {
      */
     public static Project getProject(PhpModule phpModule) {
         FileObject projectDirectory = phpModule.getProjectDirectory();
-        if (projectDirectory == null) {
-            return null;
-        }
         return getProject(projectDirectory);
-
     }
 
     /**

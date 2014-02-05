@@ -87,7 +87,7 @@ import org.openide.util.NbBundle.Messages;
 public final class YiiRunActionAction extends BaseAction {
 
     private static final long serialVersionUID = -379960760560724305L;
-    private static YiiRunActionAction INSTANCE = new YiiRunActionAction();
+    private static final YiiRunActionAction INSTANCE = new YiiRunActionAction();
 
     public static YiiRunActionAction getInstance() {
         return INSTANCE;
@@ -276,7 +276,7 @@ public final class YiiRunActionAction extends BaseAction {
 
     private static class ControllerMethodVisitor extends DefaultVisitor {
 
-        private String targetMethodName;
+        private final String targetMethodName;
         private final List<FormalParameter> params = new ArrayList<FormalParameter>();
 
         public ControllerMethodVisitor(String targetMethodName) {

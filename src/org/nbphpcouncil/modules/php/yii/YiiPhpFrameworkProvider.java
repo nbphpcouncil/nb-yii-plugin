@@ -73,7 +73,7 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
 
     private static final YiiPhpFrameworkProvider INSTANCE = new YiiPhpFrameworkProvider();
     private static final String ICON_PATH = "org/nbphpcouncil/modules/php/yii/ui/resources/yii_badge_8.png";
-    private BadgeIcon badgeIcon;
+    private final BadgeIcon badgeIcon;
 
     @NbBundle.Messages({
         "LBL_FrameworkName=Yii PHP Web Framework",
@@ -122,11 +122,7 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
             return false;
         }
         FileObject yiic = sourceDirectory.getFileObject("protected/yiic"); // NOI18N
-        if (yiic == null || yiic.isFolder()) {
-            return false;
-        }
-
-        return true;
+        return yiic != null && !yiic.isFolder();
     }
 
     /**

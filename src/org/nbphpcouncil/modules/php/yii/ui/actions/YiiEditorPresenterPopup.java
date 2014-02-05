@@ -71,7 +71,7 @@ import org.openide.util.actions.Presenter;
 public class YiiEditorPresenterPopup extends BaseAction implements Presenter.Popup {
 
     private static final long serialVersionUID = 274389136242107099L;
-    private static YiiEditorPresenterPopup INSTANCE = new YiiEditorPresenterPopup();
+    private static final YiiEditorPresenterPopup INSTANCE = new YiiEditorPresenterPopup();
 
     private YiiEditorPresenterPopup() {
     }

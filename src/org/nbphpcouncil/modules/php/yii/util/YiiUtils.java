@@ -117,7 +117,7 @@ public class YiiUtils {
      * @return if exists include path, string. otherwise null.
      */
     public static List<String> getIncludePath(FileObject index) {
-        List<String> lines = null;
+        List<String> lines;
         List<String> includePath = new ArrayList<String>();
         try {
             lines = index.asLines("UTF-8"); // NOI18N
@@ -156,11 +156,7 @@ public class YiiUtils {
         if (StringUtils.isEmpty(subpath)) {
             return false;
         }
-        if (subpath.contains("/views/")) { // NOI18N
-            return true;
-        }
-
-        return false;
+        return subpath.contains("/views/");
     }
 
     /**
@@ -524,10 +520,7 @@ public class YiiUtils {
         }
         name = name.replace(ACTION_METHOD_PREFIX, ""); // NOI18N
         String first = name.substring(0, 1);
-        if (!first.equals(first.toUpperCase())) {
-            return false;
-        }
-        return true;
+        return first.equals(first.toUpperCase());
     }
 
     /**
@@ -592,10 +585,7 @@ public class YiiUtils {
     public static FileObject getNbproject(PhpModule phpModule) {
         FileObject projectDirectory = phpModule.getProjectDirectory();
         FileObject nbproject = null;
-        if (projectDirectory != null) {
-            nbproject = projectDirectory.getFileObject(NBPROJECT);
-        }
-        return nbproject;
+        return projectDirectory.getFileObject(NBPROJECT);
     }
 
     /**
@@ -686,7 +676,7 @@ public class YiiUtils {
     private static class MainVisitor extends DefaultVisitor {
 
         private static final String THEME = "theme"; // NOI18N
-        private Set<String> themeName = new HashSet<String>();
+        private final Set<String> themeName = new HashSet<String>();
 
         @Override
         public void visit(ArrayElement node) {
