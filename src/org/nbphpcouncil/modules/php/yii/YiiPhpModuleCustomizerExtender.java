@@ -46,8 +46,11 @@ import javax.swing.JComponent;
 import javax.swing.event.ChangeListener;
 import org.nbphpcouncil.modules.php.yii.preferences.YiiPreferences;
 import org.nbphpcouncil.modules.php.yii.ui.options.YiiCustomizerPanel;
+import org.nbphpcouncil.modules.php.yii.validators.YiiCustomizerValidator;
 import org.netbeans.modules.php.api.phpmodule.PhpModule;
+import org.netbeans.modules.php.api.validation.ValidationResult;
 import org.netbeans.modules.php.spi.framework.PhpModuleCustomizerExtender;
+import org.openide.filesystems.FileObject;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 
@@ -69,8 +72,12 @@ public class YiiPhpModuleCustomizerExtender extends PhpModuleCustomizerExtender 
     private final String viewsPath;
     private final String themesPath;
     private final String messagesPath;
+    private boolean isValid;
+    private String errorMessage;
+    private final PhpModule phpModule;
 
     public YiiPhpModuleCustomizerExtender(PhpModule phpModule) {
+        this.phpModule = phpModule;
         isEnabled = YiiPreferences.isEnabled(phpModule);
         useAutoCreateView = YiiPreferences.useAutoCreateView(phpModule);
         isFallbackToDefaultViews = YiiPreferences.isFallbackToDefaultViews(phpModule);
@@ -92,10 +99,12 @@ public class YiiPhpModuleCustomizerExtender extends PhpModuleCustomizerExtender 
 
     @Override
     public void addChangeListener(ChangeListener listener) {
+        getPanel().addChangeListener(listener);
     }
 
     @Override
     public void removeChangeListener(ChangeListener listener) {
+        getPanel().removeChangeListener(listener);
     }
 
     @Override
@@ -110,69 +119,114 @@ public class YiiPhpModuleCustomizerExtender extends PhpModuleCustomizerExtender 
 
     @Override
     public boolean isValid() {
-        return true;
+        validate();
+        return isValid;
     }
 
     @Override
     public String getErrorMessage() {
-        return null;
+        validate();
+        return errorMessage;
+    }
+
+    @NbBundle.Messages("YiiModuleCustomizerExtender.error.source.invalid=Can't find source directory. Project might be broken.")
+    private void validate() {
+        YiiCustomizerPanel panel = getPanel();
+        if (!(panel.isEnabledPlugin())) {
+            isValid = true;
+            errorMessage = null;
+            return;
+        }
+
+        // source directory
+        FileObject sourceDirectory = phpModule.getSourceDirectory();
+        if (sourceDirectory == null) {
+            // project may be broken
+            isValid = false;
+            errorMessage = Bundle.YiiModuleCustomizerExtender_error_source_invalid();
+            return;
+        }
+
+        // validate
+        YiiCustomizerValidator validator = new YiiCustomizerValidator()
+                .validateDirectory(sourceDirectory, panel.getSystemPath())
+                .validateDirectory(sourceDirectory, panel.getApplicationPath())
+                .validateDirectory(sourceDirectory, panel.getZiiPath())
+                .validateDirectory(sourceDirectory, panel.getExtPath())
+                .validateDirectory(sourceDirectory, panel.getControllersPath())
+                .validateDirectory(sourceDirectory, panel.getViewsPath())
+                .validateDirectory(sourceDirectory, panel.getThemesPath())
+                .validateDirectory(sourceDirectory, panel.getMessagesPath());
+        ValidationResult result = validator.getResult();
+        if (result.hasWarnings()) {
+            isValid = false;
+            errorMessage = result.getWarnings().get(0).getMessage();
+            return;
+        }
+
+        // no problem
+        isValid = true;
+        errorMessage = null;
     }
 
     @Override
     public EnumSet<Change> save(PhpModule phpModule) {
-        EnumSet<Change> change = null;
-        // paths
-        String systemPathForPanel = getPanel().getSystemPath();
-        if (!systemPath.equals(systemPathForPanel)) {
-            YiiPreferences.setSystemPath(phpModule, systemPathForPanel);
-        }
-        String applicationPathForPanel = getPanel().getApplicationPath();
-        if (!applicationPath.equals(applicationPathForPanel)) {
-            YiiPreferences.setApplicationPath(phpModule, applicationPathForPanel);
-        }
-        String ziiPathForPanel = getPanel().getZiiPath();
-        if (!ziiPath.equals(ziiPathForPanel)) {
-            YiiPreferences.setZiiPath(phpModule, ziiPathForPanel);
-        }
-        String extPathForPanel = getPanel().getExtPath();
-        if (!extPath.equals(extPathForPanel)) {
-            YiiPreferences.setExtPath(phpModule, extPathForPanel);
-        }
-        String controllerPathForPanel = getPanel().getControllersPath();
-        if (!controllersPath.equals(controllerPathForPanel)) {
-            YiiPreferences.setControllersPath(phpModule, controllerPathForPanel);
-        }
-        String viewsPathForPanel = getPanel().getViewsPath();
-        if (!viewsPath.equals(viewsPathForPanel)) {
-            YiiPreferences.setViewsPath(phpModule, viewsPathForPanel);
-        }
-        String themesPathForPanel = getPanel().getThemesPath();
-        if (!themesPath.equals(themesPathForPanel)) {
-            YiiPreferences.setThemesPath(phpModule, themesPathForPanel);
-        }
-        String messagesPathForPanel = getPanel().getMessagesPath();
-        if (!messagesPath.equals(messagesPathForPanel)) {
-            YiiPreferences.setMessagesPath(phpModule, messagesPathForPanel);
-        }
-
-        // init directories
-        YiiModule yiiModule = YiiModuleFactory.create(phpModule);
-        if (yiiModule != null) {
-            yiiModule.initDirectories();
-        }
-
-        boolean useAutoCreateViewForPanel = getPanel().useAutoCreateView();
-        if (useAutoCreateView != useAutoCreateViewForPanel) {
-            YiiPreferences.setAutoCreateViewFile(phpModule, useAutoCreateViewForPanel);
-        }
-        boolean isFallbackToDefaultViewsForPanel = getPanel().isFallbackToDefaultViews();
-        if (isFallbackToDefaultViews != isFallbackToDefaultViewsForPanel) {
-            YiiPreferences.setFallbackToDefaultViews(phpModule, isFallbackToDefaultViewsForPanel);
-        }
+        EnumSet<Change> change = EnumSet.noneOf(Change.class);
         boolean isEnabledForPanel = getPanel().isEnabledPlugin();
         if (isEnabled != isEnabledForPanel) {
             YiiPreferences.setEnabled(phpModule, isEnabledForPanel);
             change = EnumSet.of(Change.FRAMEWORK_CHANGE);
+        }
+
+        if (isEnabledForPanel) {
+            // paths
+            String systemPathForPanel = getPanel().getSystemPath();
+            if (!systemPath.equals(systemPathForPanel)) {
+                YiiPreferences.setSystemPath(phpModule, systemPathForPanel);
+            }
+            String applicationPathForPanel = getPanel().getApplicationPath();
+            if (!applicationPath.equals(applicationPathForPanel)) {
+                YiiPreferences.setApplicationPath(phpModule, applicationPathForPanel);
+            }
+            String ziiPathForPanel = getPanel().getZiiPath();
+            if (!ziiPath.equals(ziiPathForPanel)) {
+                YiiPreferences.setZiiPath(phpModule, ziiPathForPanel);
+            }
+            String extPathForPanel = getPanel().getExtPath();
+            if (!extPath.equals(extPathForPanel)) {
+                YiiPreferences.setExtPath(phpModule, extPathForPanel);
+            }
+            String controllerPathForPanel = getPanel().getControllersPath();
+            if (!controllersPath.equals(controllerPathForPanel)) {
+                YiiPreferences.setControllersPath(phpModule, controllerPathForPanel);
+            }
+            String viewsPathForPanel = getPanel().getViewsPath();
+            if (!viewsPath.equals(viewsPathForPanel)) {
+                YiiPreferences.setViewsPath(phpModule, viewsPathForPanel);
+            }
+            String themesPathForPanel = getPanel().getThemesPath();
+            if (!themesPath.equals(themesPathForPanel)) {
+                YiiPreferences.setThemesPath(phpModule, themesPathForPanel);
+            }
+            String messagesPathForPanel = getPanel().getMessagesPath();
+            if (!messagesPath.equals(messagesPathForPanel)) {
+                YiiPreferences.setMessagesPath(phpModule, messagesPathForPanel);
+            }
+
+            // init directories
+            YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+            if (yiiModule != null) {
+                yiiModule.initDirectories();
+            }
+
+            boolean useAutoCreateViewForPanel = getPanel().useAutoCreateView();
+            if (useAutoCreateView != useAutoCreateViewForPanel) {
+                YiiPreferences.setAutoCreateViewFile(phpModule, useAutoCreateViewForPanel);
+            }
+            boolean isFallbackToDefaultViewsForPanel = getPanel().isFallbackToDefaultViews();
+            if (isFallbackToDefaultViews != isFallbackToDefaultViewsForPanel) {
+                YiiPreferences.setFallbackToDefaultViews(phpModule, isFallbackToDefaultViewsForPanel);
+            }
         }
         return change;
     }

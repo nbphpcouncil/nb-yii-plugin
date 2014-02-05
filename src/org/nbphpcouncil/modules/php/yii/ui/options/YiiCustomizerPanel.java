@@ -42,6 +42,10 @@
 package org.nbphpcouncil.modules.php.yii.ui.options;
 
 import java.awt.Component;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import org.openide.util.ChangeSupport;
 
 /**
  *
@@ -50,12 +54,27 @@ import java.awt.Component;
 public class YiiCustomizerPanel extends javax.swing.JPanel {
 
     private static final long serialVersionUID = -8903833956936546001L;
+    private final ChangeSupport changeSupport = new ChangeSupport(this);
 
     /**
      * Creates new form YiiCustomizerPanel
      */
     public YiiCustomizerPanel() {
         initComponents();
+        // add document listener
+        DocumentListener documentListener = new DefaultDocumentListener();
+        addDocumentListener(documentListener);
+    }
+
+    private void addDocumentListener(DocumentListener documentListener) {
+        systemPathTextField.getDocument().addDocumentListener(documentListener);
+        applicationPathTextField.getDocument().addDocumentListener(documentListener);
+        ziiPathTextField.getDocument().addDocumentListener(documentListener);
+        extPathTextField.getDocument().addDocumentListener(documentListener);
+        controllersPathTextField.getDocument().addDocumentListener(documentListener);
+        viewsPathTextField.getDocument().addDocumentListener(documentListener);
+        themesPathTextField.getDocument().addDocumentListener(documentListener);
+        messagesPathTextField.getDocument().addDocumentListener(documentListener);
     }
 
     public boolean isEnabledPlugin() {
@@ -146,6 +165,14 @@ public class YiiCustomizerPanel extends javax.swing.JPanel {
         ziiPathTextField.setText(path);
     }
 
+    public void addChangeListener(ChangeListener changeListener) {
+        changeSupport.addChangeListener(changeListener);
+    }
+
+    public void removeChangeListener(ChangeListener changeListener) {
+        changeSupport.removeChangeListener(changeListener);
+    }
+
     /**
      * Set enabled for all components except enabledCheckBox.
      *
@@ -158,6 +185,10 @@ public class YiiCustomizerPanel extends javax.swing.JPanel {
             }
             component.setEnabled(isEnabled);
         }
+    }
+
+    void fireChange() {
+        changeSupport.fireChange();
     }
 
     /**
@@ -342,6 +373,7 @@ public class YiiCustomizerPanel extends javax.swing.JPanel {
 
     private void enabledCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enabledCheckBoxActionPerformed
         setAllComponentsEnabled(enabledCheckBox.isSelected());
+        fireChange();
     }//GEN-LAST:event_enabledCheckBoxActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -369,4 +401,29 @@ public class YiiCustomizerPanel extends javax.swing.JPanel {
     private javax.swing.JLabel ziiPathLabel;
     private javax.swing.JTextField ziiPathTextField;
     // End of variables declaration//GEN-END:variables
+
+    private class DefaultDocumentListener implements DocumentListener {
+
+        public DefaultDocumentListener() {
+        }
+
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            processUpdate();
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            processUpdate();
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            processUpdate();
+        }
+
+        private void processUpdate() {
+            fireChange();
+        }
+    }
 }
