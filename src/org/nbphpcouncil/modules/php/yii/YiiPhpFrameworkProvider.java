@@ -41,10 +41,14 @@
  */
 package org.nbphpcouncil.modules.php.yii;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.nbphpcouncil.modules.php.yii.commands.YiiFrameworkCommandSupport;
 import org.nbphpcouncil.modules.php.yii.commands.YiiScript;
 import org.nbphpcouncil.modules.php.yii.editor.YiiEditorExtender;
@@ -60,10 +64,13 @@ import org.netbeans.modules.php.spi.framework.PhpModuleCustomizerExtender;
 import org.netbeans.modules.php.spi.framework.PhpModuleExtender;
 import org.netbeans.modules.php.spi.framework.PhpModuleIgnoredFilesExtender;
 import org.netbeans.modules.php.spi.framework.commands.FrameworkCommandSupport;
+import org.openide.awt.Notification;
+import org.openide.awt.NotificationDisplayer;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
+import org.openide.util.RequestProcessor;
 
 /**
  *
@@ -71,6 +78,7 @@ import org.openide.util.NbBundle;
  */
 public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
 
+    protected static final RequestProcessor RP = new RequestProcessor(YiiPhpFrameworkProvider.class);
     private static final YiiPhpFrameworkProvider INSTANCE = new YiiPhpFrameworkProvider();
     private static final String ICON_PATH = "org/nbphpcouncil/modules/php/yii/ui/resources/yii_badge_8.png";
     private final BadgeIcon badgeIcon;
@@ -102,27 +110,15 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
     }
 
     /**
-     * Check whether project is Yii Framework. Find
-     * WebRoot/appname/protected/yiic.
+     * Check whether project is Yii Framework.
      *
      * @param pm PhpModule
-     * @return boolean true if exist yiic file, otherwise false
+     * @return
      */
     @Override
     public boolean isInPhpModule(PhpModule pm) {
         // check user settings
-        if (YiiPreferences.isEnabled(pm)) {
-            return true;
-        }
-
-        // automatic search
-        YiiModule yiiModule = YiiModuleFactory.create(pm);
-        FileObject sourceDirectory = yiiModule.getWebroot();
-        if (sourceDirectory == null) {
-            return false;
-        }
-        FileObject yiic = sourceDirectory.getFileObject("protected/yiic"); // NOI18N
-        return yiic != null && !yiic.isFolder();
+        return YiiPreferences.isEnabled(pm);
     }
 
     /**
@@ -217,5 +213,63 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
     @Override
     public PhpModuleCustomizerExtender createPhpModuleCustomizerExtender(PhpModule phpModule) {
         return new YiiPhpModuleCustomizerExtender(phpModule);
+    }
+
+    @NbBundle.Messages({
+        "# {0} - name",
+        "YiiPhpFrameworkProvider.autoditection=Yii autoditection : {0}",
+        "YiiPhpFrameworkProvider.autoditection.action=If you want to enable as Yii project, please click here."
+    })
+    @Override
+    public void phpModuleOpened(PhpModule phpModule) {
+        // autodetection
+        if (!isInPhpModule(phpModule)) {
+            RP.schedule(new YiiAutoDetectionTask(phpModule), 1, TimeUnit.MINUTES);
+        }
+    }
+
+    //~ Inner classes
+    private class YiiAutoDetectionTask implements Runnable {
+
+        private final PhpModule phpModule;
+        private Notification notification;
+
+        public YiiAutoDetectionTask(PhpModule phpModule) {
+            this.phpModule = phpModule;
+        }
+
+        @Override
+        public void run() {
+            // automatic search
+            YiiModule yiiModule = YiiModuleFactory.create(phpModule);
+            FileObject webrootDirectory = yiiModule.getWebroot();
+            if (webrootDirectory == null) {
+                return;
+            }
+
+            FileObject yiic = webrootDirectory.getFileObject("protected/yiic"); // NOI18N
+            if (yiic != null && !yiic.isFolder()) {
+                notification = NotificationDisplayer.getDefault().notify(
+                        Bundle.YiiPhpFrameworkProvider_autoditection(phpModule.getDisplayName()), // title
+                        NotificationDisplayer.Priority.LOW.getIcon(), // icon
+                        Bundle.YiiPhpFrameworkProvider_autoditection_action(), //detail
+                        new AutoDetectionActionListener(), // action
+                        NotificationDisplayer.Priority.LOW // priority
+                );
+            }
+        }
+
+        private class AutoDetectionActionListener implements ActionListener {
+
+            public AutoDetectionActionListener() {
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                YiiPreferences.setEnabled(phpModule, true);
+                phpModule.notifyPropertyChanged(new PropertyChangeEvent(this, PhpModule.PROPERTY_FRAMEWORKS, null, null));
+                notification.clear();
+            }
+        }
     }
 }
