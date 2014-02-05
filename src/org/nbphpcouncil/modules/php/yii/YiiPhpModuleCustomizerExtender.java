@@ -191,6 +191,7 @@ public class YiiPhpModuleCustomizerExtender extends PhpModuleCustomizerExtender 
             component.setViewsPath(viewsPath);
             component.setThemesPath(themesPath);
             component.setMessagesPath(messagesPath);
+            component.setAllComponentsEnabled(isEnabled);
         }
         return component;
     }

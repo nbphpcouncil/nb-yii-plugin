@@ -16,18 +16,11 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" alignment="0" attributes="0">
-                      <Component id="pathsLabel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="pathsSeparator" max="32767" attributes="0"/>
-                  </Group>
-                  <Component id="fallbackToDefaultViewsCheckBox" min="-2" max="-2" attributes="0"/>
-                  <Component id="enabledCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Component id="useAutoCreateViewCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Group type="102" alignment="0" attributes="0">
+                  <Group type="102" attributes="0">
+                      <EmptySpace min="12" pref="12" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="ziiPathLabel" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="extPathLabel" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -40,15 +33,38 @@
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="systemPathTextField" max="32767" attributes="0"/>
+                          <Component id="themesPathTextField" alignment="0" max="32767" attributes="0"/>
+                          <Component id="viewsPathTextField" alignment="0" max="32767" attributes="0"/>
+                          <Component id="controllersPathTextField" alignment="0" max="32767" attributes="0"/>
+                          <Component id="extPathTextField" alignment="0" max="32767" attributes="0"/>
                           <Component id="ziiPathTextField" alignment="0" max="32767" attributes="0"/>
                           <Component id="applicationPathTextField" alignment="0" max="32767" attributes="0"/>
-                          <Component id="extPathTextField" alignment="0" max="32767" attributes="0"/>
-                          <Component id="controllersPathTextField" max="32767" attributes="0"/>
-                          <Component id="viewsPathTextField" alignment="0" max="32767" attributes="0"/>
-                          <Component id="themesPathTextField" alignment="0" max="32767" attributes="0"/>
+                          <Component id="systemPathTextField" alignment="1" max="32767" attributes="0"/>
                           <Component id="messagesPathTextField" alignment="0" max="32767" attributes="0"/>
                       </Group>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="pathsLabel" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="pathsSeparator" max="32767" attributes="0"/>
+                  </Group>
+                  <Group type="102" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" attributes="0">
+                              <EmptySpace min="12" pref="12" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="fallbackToDefaultViewsCheckBox" min="-2" max="-2" attributes="0"/>
+                                  <Component id="useAutoCreateViewCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                          </Group>
+                          <Component id="enabledCheckBox" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="generalLabel" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="generalSeparator" max="32767" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -59,17 +75,20 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
+              <Component id="enabledCheckBox" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" attributes="0">
-                  <Group type="102" attributes="0">
-                      <Component id="enabledCheckBox" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="useAutoCreateViewCheckBox" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="fallbackToDefaultViewsCheckBox" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="pathsLabel" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <Component id="pathsSeparator" min="-2" pref="10" max="-2" attributes="0"/>
+                  <Component id="generalLabel" min="-2" max="-2" attributes="0"/>
+                  <Component id="generalSeparator" min="-2" pref="10" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="useAutoCreateViewCheckBox" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="fallbackToDefaultViewsCheckBox" min="-2" max="-2" attributes="0"/>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="pathsLabel" alignment="1" min="-2" max="-2" attributes="0"/>
+                  <Component id="pathsSeparator" alignment="1" min="-2" pref="10" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
@@ -111,7 +130,7 @@
                   <Component id="messagesPathLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="messagesPathTextField" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="17" max="32767" attributes="0"/>
+              <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -137,6 +156,9 @@
           <ResourceString bundle="org/nbphpcouncil/modules/php/yii/ui/options/Bundle.properties" key="YiiCustomizerPanel.enabledCheckBox.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="enabledCheckBoxActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="pathsLabel">
       <Properties>
@@ -258,6 +280,15 @@
           <ResourceString bundle="org/nbphpcouncil/modules/php/yii/ui/options/Bundle.properties" key="YiiCustomizerPanel.messagesPathTextField.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="generalLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/nbphpcouncil/modules/php/yii/ui/options/Bundle.properties" key="YiiCustomizerPanel.generalLabel.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JSeparator" name="generalSeparator">
     </Component>
   </SubComponents>
 </Form>
