@@ -597,7 +597,7 @@ public class YiiUtils {
     public static FileObject getViewsDirectory(PhpModule phpModule) {
         YiiModule yiiModule = YiiModuleFactory.create(phpModule);
         if (yiiModule != null) {
-            yiiModule.getViews();
+            return yiiModule.getViews();
         }
         return null;
     }
@@ -611,7 +611,7 @@ public class YiiUtils {
     public static FileObject getControllersDirectory(PhpModule phpModule) {
         YiiModule yiiModule = YiiModuleFactory.create(phpModule);
         if (yiiModule != null) {
-            yiiModule.getControllers();
+            return yiiModule.getControllers();
         }
         return null;
     }
