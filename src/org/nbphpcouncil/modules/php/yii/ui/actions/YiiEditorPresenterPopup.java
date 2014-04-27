@@ -71,7 +71,7 @@ import org.openide.util.actions.Presenter;
 public class YiiEditorPresenterPopup extends BaseAction implements Presenter.Popup {
 
     private static final long serialVersionUID = 274389136242107099L;
-    private static YiiEditorPresenterPopup INSTANCE = new YiiEditorPresenterPopup();
+    private static final YiiEditorPresenterPopup INSTANCE = new YiiEditorPresenterPopup();
 
     private YiiEditorPresenterPopup() {
     }
@@ -86,7 +86,7 @@ public class YiiEditorPresenterPopup extends BaseAction implements Presenter.Pop
         JTextComponent editor = EditorRegistry.lastFocusedComponent();
         if (editor != null) {
             FileObject fileObject = YiiDocUtils.getFileObject(editor.getDocument());
-            PhpModule phpModule = PhpModule.forFileObject(fileObject);
+            PhpModule phpModule = PhpModule.Factory.forFileObject(fileObject);
             if (YiiUtils.isYii(phpModule)) {
                 // set menu
                 JMenu menu = new JMenu(Bundle.LBL_Yii());

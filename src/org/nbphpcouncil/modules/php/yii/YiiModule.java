@@ -57,7 +57,7 @@ public abstract class YiiModule {
         WEBROOT("webroot"),
         EXT("ext"),
         NONE("");
-        private String name;
+        private final String name;
 
         private PATH_ALIAS(String name) {
             this.name = name;

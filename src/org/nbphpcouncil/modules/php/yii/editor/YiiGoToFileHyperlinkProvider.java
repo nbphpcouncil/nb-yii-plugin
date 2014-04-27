@@ -169,13 +169,9 @@ public class YiiGoToFileHyperlinkProvider extends YiiHyperlinkProviderExt {
         targetEnd = targetStart + target.length();
 
         // create go to items
-        PhpModule phpModule = PhpModule.inferPhpModule();
+        PhpModule phpModule = PhpModule.Factory.inferPhpModule();
         goToItems = createGoToItems(phpModule, doc, offset);
-        if (!goToItems.isEmpty()) {
-            return true;
-        }
-
-        return false;
+        return !goToItems.isEmpty();
     }
 
     @Override
@@ -429,7 +425,7 @@ public class YiiGoToFileHyperlinkProvider extends YiiHyperlinkProviderExt {
     private class MessageVisitor extends DefaultVisitor {
 
         private int offset;
-        private String message;
+        private final String message;
 
         public MessageVisitor(String message) {
             this.message = message;

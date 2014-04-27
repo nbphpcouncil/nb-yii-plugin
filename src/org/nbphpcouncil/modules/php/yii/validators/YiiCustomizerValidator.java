@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2014 Oracle and/or its affiliates. All rights reserved.
  *
  * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
  * Other names may be trademarks of their respective owners.
@@ -37,40 +37,43 @@
  *
  * Contributor(s):
  *
- * Portions Copyrighted 2013 Sun Microsystems, Inc.
+ * Portions Copyrighted 2014 Sun Microsystems, Inc.
  */
-package org.nbphpcouncil.modules.php.yii.editor.navi;
+package org.nbphpcouncil.modules.php.yii.validators;
 
+import org.netbeans.api.annotations.common.NonNull;
+import org.netbeans.modules.php.api.validation.ValidationResult;
 import org.openide.filesystems.FileObject;
+import org.openide.util.NbBundle;
 
 /**
  *
  * @author junichi11
  */
-public class GoToTItem implements GoToItem {
+public final class YiiCustomizerValidator {
 
-    private final FileObject fileObject;
-    private final int offset;
-    private final String localeID;
+    private final ValidationResult result = new ValidationResult();
 
-    public GoToTItem(FileObject fileObject, int offset, String localeID) {
-        this.fileObject = fileObject;
-        this.offset = offset;
-        this.localeID = localeID;
+    public ValidationResult getResult() {
+        return result;
     }
 
-    @Override
-    public FileObject getFileObject() {
-        return fileObject;
+    @NbBundle.Messages({
+        "YiiCustomizerValidator.error.dirs.path.invalid=Existing path must be set.",
+        "YiiCustomizerValidator.error.dir.invalid=Directory path must be set."
+    })
+    public YiiCustomizerValidator validateDirectory(@NonNull FileObject sourceDirectory, String subpath) {
+        FileObject targetDirectory = sourceDirectory.getFileObject(subpath);
+        if (targetDirectory == null) {
+            result.addWarning(new ValidationResult.Message("yii.dir.path", Bundle.YiiCustomizerValidator_error_dirs_path_invalid())); // NOI18N
+            return this;
+        }
+
+        if (!targetDirectory.isFolder()) {
+            result.addWarning(new ValidationResult.Message("yii.dir", Bundle.YiiCustomizerValidator_error_dir_invalid()));
+        }
+
+        return this;
     }
 
-    @Override
-    public int getOffset() {
-        return offset;
-    }
-
-    @Override
-    public String toString() {
-        return localeID;
-    }
 }

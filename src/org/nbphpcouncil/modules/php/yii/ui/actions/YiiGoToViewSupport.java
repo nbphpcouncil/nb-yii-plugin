@@ -65,7 +65,7 @@ public abstract class YiiGoToViewSupport {
         this.controller = controller;
         this.actionId = actionId;
         if (controller != null) {
-            this.phpModule = PhpModule.forFileObject(controller);
+            this.phpModule = PhpModule.Factory.forFileObject(controller);
             this.controllerId = YiiUtils.getViewFolderName(controller.getName());
             this.subPathToController = getSubPathToController();
         } else {
@@ -83,10 +83,7 @@ public abstract class YiiGoToViewSupport {
     }
 
     public boolean isEnabled() {
-        if (controller == null || phpModule == null || actionId == null) {
-            return false;
-        }
-        return true;
+        return controller != null && phpModule != null && actionId != null;
     }
 
     /**

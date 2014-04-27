@@ -69,7 +69,7 @@ public class YiiViewPathSupport {
      * @return file if file exists, otherwise null.
      */
     public static FileObject getAbsoluteViewFile(String targetPath, FileObject currentFile) {
-        PhpModule phpModule = PhpModule.forFileObject(currentFile);
+        PhpModule phpModule = PhpModule.Factory.forFileObject(currentFile);
         YiiModule yiiModule = YiiModuleFactory.create(phpModule);
         // get absolute view within the application
         if (targetPath.startsWith(APP_PATH_PREFIX)) { // NOI18N
@@ -101,7 +101,7 @@ public class YiiViewPathSupport {
      * @return file if file was created, otherwise null.
      */
     public static FileObject createAbsoluteViewFile(String targetPath, FileObject currentFile) {
-        PhpModule phpModule = PhpModule.forFileObject(currentFile);
+        PhpModule phpModule = PhpModule.Factory.forFileObject(currentFile);
         YiiModule yiiModule = YiiModuleFactory.create(phpModule);
         FileObject application = yiiModule.getApplication();
         // get absolute view within the application

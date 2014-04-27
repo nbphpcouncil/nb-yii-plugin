@@ -100,7 +100,7 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
     @Override
     public void performClickAction(Document doc, int offset, HyperlinkType type) {
         // use "create view file automatically"
-        boolean isFallback = YiiPreferences.isFallbackToDefaultViews(PhpModule.forFileObject(controller));
+        boolean isFallback = YiiPreferences.isFallbackToDefaultViews(PhpModule.Factory.forFileObject(controller));
         if (view == null && useAutoCreate && !isFallback) {
             view = support.createView();
         }
@@ -124,7 +124,7 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
         controller = NbEditorUtilities.getFileObject(doc);
 
         // check Yii
-        if (controller == null || !YiiUtils.isYii(PhpModule.forFileObject(controller))) {
+        if (controller == null || !YiiUtils.isYii(PhpModule.Factory.forFileObject(controller))) {
             return false;
         }
 
@@ -157,7 +157,7 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
         support = YiiGoToViewSupport.create(controller, target);
         view = support.getView();
 
-        useAutoCreate = YiiPreferences.useAutoCreateView(PhpModule.forFileObject(controller));
+        useAutoCreate = YiiPreferences.useAutoCreateView(PhpModule.Factory.forFileObject(controller));
         if (view != null || useAutoCreate) {
             targetStart = newOffset + 1;
             targetEnd = targetStart + target.length();
@@ -178,10 +178,7 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
         ts.movePrevious();
         Token<PHPTokenId> render = ts.token();
         String text = render.text().toString();
-        if (text.equals("render") || text.equals("renderPartial")) { // NOI18N
-            return true;
-        }
-        return false;
+        return text.equals("render") || text.equals("renderPartial");
     }
 
     /**
@@ -209,7 +206,7 @@ public class YiiGoToViewHyperlinkProvider implements HyperlinkProviderExt {
     public String getTooltipText(Document doc, int offset, HyperlinkType type) {
         String viewPath = ""; // NOI18N
         if (view != null) {
-            PhpModule phpModule = PhpModule.forFileObject(view);
+            PhpModule phpModule = PhpModule.Factory.forFileObject(view);
             YiiModule yiiModule = YiiModuleFactory.create(phpModule);
             FileObject webrootDirectory = yiiModule.getWebroot();
             if (webrootDirectory != null) {

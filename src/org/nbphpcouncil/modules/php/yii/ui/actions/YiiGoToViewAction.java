@@ -59,8 +59,8 @@ import org.openide.util.Lookup;
 public class YiiGoToViewAction extends GoToViewAction {
 
     private static final long serialVersionUID = 1722745601120023354L;
-    private FileObject controller;
-    private int offset;
+    private final FileObject controller;
+    private final int offset;
 
     public YiiGoToViewAction(FileObject controller, int offset) {
         this.controller = controller;
@@ -85,7 +85,7 @@ public class YiiGoToViewAction extends GoToViewAction {
             }
 
             // create view file automatically
-            PhpModule phpModule = PhpModule.forFileObject(controller);
+            PhpModule phpModule = PhpModule.Factory.forFileObject(controller);
             if (YiiPreferences.useAutoCreateView(phpModule) && !YiiPreferences.isFallbackToDefaultViews(phpModule)) {
                 view = support.createView();
             }

@@ -87,7 +87,7 @@ import org.openide.util.NbBundle.Messages;
 public final class YiiRunActionAction extends BaseAction {
 
     private static final long serialVersionUID = -379960760560724305L;
-    private static YiiRunActionAction INSTANCE = new YiiRunActionAction();
+    private static final YiiRunActionAction INSTANCE = new YiiRunActionAction();
 
     public static YiiRunActionAction getInstance() {
         return INSTANCE;
@@ -219,7 +219,7 @@ public final class YiiRunActionAction extends BaseAction {
     private void openBrowser(PhpModule phpModule, String controllerId, String actionId, Map<String, String> getRequests) {
         // build url
         StringBuilder sb = new StringBuilder();
-        PhpModuleProperties properties = phpModule.getProperties();
+        PhpModuleProperties properties = phpModule.getLookup().lookup(PhpModuleProperties.Factory.class).getProperties();
         FileObject indexFile = properties.getIndexFile();
         String urlPath = properties.getUrl();
         sb.append(urlPath);
@@ -276,7 +276,7 @@ public final class YiiRunActionAction extends BaseAction {
 
     private static class ControllerMethodVisitor extends DefaultVisitor {
 
-        private String targetMethodName;
+        private final String targetMethodName;
         private final List<FormalParameter> params = new ArrayList<FormalParameter>();
 
         public ControllerMethodVisitor(String targetMethodName) {

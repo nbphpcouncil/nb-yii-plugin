@@ -53,7 +53,7 @@ final class YiiOptionsPanel extends JPanel {
 
     private static final long serialVersionUID = -424018456110276101L;
     private final YiiOptionsPanelController controller;
-    private String YII_LAST_FOLDER_SUFFIX = ".yii"; // NOI18N
+    private final String YII_LAST_FOLDER_SUFFIX = ".yii"; // NOI18N
 
     YiiOptionsPanel(YiiOptionsPanelController controller) {
         this.controller = controller;

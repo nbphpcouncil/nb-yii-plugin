@@ -141,7 +141,7 @@ public class YiiEditorExtender extends EditorExtender {
         private String methodName;
         private String viewName;
         private FileObject view;
-        private HashMap<String, String> instances = new HashMap<String, String>();
+        private final HashMap<String, String> instances = new HashMap<String, String>();
 
         public YiiControllerVisitor(FileObject fileObject) {
             if (YiiUtils.isView(fileObject)) {
@@ -207,7 +207,7 @@ public class YiiEditorExtender extends EditorExtender {
             }
 
             List<Expression> params = fi.getParameters();
-            Expression expression = null;
+            Expression expression;
 
             if (params.size() > 1) {
                 expression = params.get(1);

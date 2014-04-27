@@ -100,7 +100,7 @@ public class YiiModuleImpl extends YiiModule {
     }
 
     private FileObject getIndexFile() {
-        PhpModuleProperties properties = phpModule.getProperties();
+        PhpModuleProperties properties = phpModule.getLookup().lookup(PhpModuleProperties.Factory.class).getProperties();
 
         // get index (entry script)
         FileObject indexFile = properties.getIndexFile();
@@ -122,7 +122,7 @@ public class YiiModuleImpl extends YiiModule {
     }
 
     private void setWebroot() {
-        PhpModuleProperties properties = phpModule.getProperties();
+        PhpModuleProperties properties = phpModule.getLookup().lookup(PhpModuleProperties.Factory.class).getProperties();
         FileObject webRoot = properties.getWebRoot();
         if (webRoot != null) {
             webrootDirectory = webRoot;

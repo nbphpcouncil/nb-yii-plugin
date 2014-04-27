@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2014 Oracle and/or its affiliates. All rights reserved.
  *
  * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
  * Other names may be trademarks of their respective owners.
@@ -37,40 +37,62 @@
  *
  * Contributor(s):
  *
- * Portions Copyrighted 2013 Sun Microsystems, Inc.
+ * Portions Copyrighted 2014 Sun Microsystems, Inc.
  */
-package org.nbphpcouncil.modules.php.yii.editor.navi;
+package org.nbphpcouncil.modules.php.yii.validators;
 
+import java.io.IOException;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+import org.junit.Test;
+import org.netbeans.junit.NbTestCase;
+import org.netbeans.modules.php.api.validation.ValidationResult;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileSystem;
+import org.openide.filesystems.FileUtil;
 
 /**
  *
  * @author junichi11
  */
-public class GoToTItem implements GoToItem {
+public class YiiCustomizerValidatorTest extends NbTestCase {
 
-    private final FileObject fileObject;
-    private final int offset;
-    private final String localeID;
-
-    public GoToTItem(FileObject fileObject, int offset, String localeID) {
-        this.fileObject = fileObject;
-        this.offset = offset;
-        this.localeID = localeID;
+    public YiiCustomizerValidatorTest(String name) {
+        super(name);
     }
 
-    @Override
-    public FileObject getFileObject() {
-        return fileObject;
+    /**
+     * Test of validateDirectory method, of class YiiCustomizerValidator.
+     *
+     * @throws java.io.IOException
+     */
+    @Test
+    public void testValidateDirectory() throws IOException {
+        FileSystem fileSystem = FileUtil.createMemoryFileSystem();
+        FileObject sourceDirectory = fileSystem.getRoot();
+        sourceDirectory.createFolder("myfolder");
+        sourceDirectory.createData("test.php");
+
+        // existing directory
+        YiiCustomizerValidator validator = new YiiCustomizerValidator()
+                .validateDirectory(sourceDirectory, "myfolder");
+        ValidationResult result = validator.getResult();
+        assertFalse(result.hasErrors());
+        assertFalse(result.hasWarnings());
+
+        // not existing directory
+        validator = new YiiCustomizerValidator()
+                .validateDirectory(sourceDirectory, "dummy");
+        result = validator.getResult();
+        assertFalse(result.hasErrors());
+        assertTrue(result.hasWarnings());
+
+        // file
+        validator = new YiiCustomizerValidator()
+                .validateDirectory(sourceDirectory, "test.php");
+        result = validator.getResult();
+        assertFalse(result.hasErrors());
+        assertTrue(result.hasWarnings());
     }
 
-    @Override
-    public int getOffset() {
-        return offset;
-    }
-
-    @Override
-    public String toString() {
-        return localeID;
-    }
 }
