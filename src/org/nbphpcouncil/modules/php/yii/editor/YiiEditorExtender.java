@@ -195,7 +195,7 @@ public class YiiEditorExtender extends EditorExtender {
             super.visit(node);
             FunctionInvocation fi = node.getMethod();
             String invokedMethodName = CodeUtils.extractFunctionName(fi);
-            if (!invokedMethodName.equals("render")) { // NOI18N
+            if (invokedMethodName == null || !invokedMethodName.equals("render")) { // NOI18N
                 return;
             }
             if (!methodName.equals(YiiUtils.getActionMethodName(viewName))) {
