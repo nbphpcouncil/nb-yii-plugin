@@ -44,9 +44,7 @@ package org.nbphpcouncil.modules.php.yii;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
-import java.io.File;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.nbphpcouncil.modules.php.yii.commands.YiiFrameworkCommandSupport;
@@ -64,10 +62,10 @@ import org.netbeans.modules.php.spi.framework.PhpModuleCustomizerExtender;
 import org.netbeans.modules.php.spi.framework.PhpModuleExtender;
 import org.netbeans.modules.php.spi.framework.PhpModuleIgnoredFilesExtender;
 import org.netbeans.modules.php.spi.framework.commands.FrameworkCommandSupport;
+import org.netbeans.modules.php.spi.phpmodule.ImportantFilesImplementation;
 import org.openide.awt.Notification;
 import org.openide.awt.NotificationDisplayer;
 import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileUtil;
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
 import org.openide.util.RequestProcessor;
@@ -126,26 +124,11 @@ public class YiiPhpFrameworkProvider extends PhpFrameworkProvider {
      * appname/protected/config
      *
      * @param pm PhpModule
-     * @return File[]
+     * @return ConfigurationFiles
      */
     @Override
-    public File[] getConfigurationFiles(PhpModule pm) {
-        YiiModule yiiModule = YiiModuleFactory.create(pm);
-        FileObject applicationDirectory = yiiModule.getApplication();
-        List<File> configs = new LinkedList<File>();
-        if (applicationDirectory == null) {
-            return configs.toArray(new File[configs.size()]);
-        }
-        FileObject config = applicationDirectory.getFileObject("config"); // NOI18N
-        if (config != null) {
-            for (FileObject child : config.getChildren()) {
-                configs.add(FileUtil.toFile(child));
-            }
-        }
-
-        // sort
-        Collections.sort(configs);
-        return configs.toArray(new File[configs.size()]);
+    public ImportantFilesImplementation getConfigurationFiles2(PhpModule phpModule) {
+        return new ConfigurationFiles(phpModule);
     }
 
     @Override
