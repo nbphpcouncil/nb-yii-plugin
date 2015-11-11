@@ -78,7 +78,7 @@ public class YiiRunActionPanel extends javax.swing.JPanel {
      * Create components.
      */
     private void createComponents() {
-        componentsMap = new LinkedHashMap<JLabel, JTextField>();
+        componentsMap = new LinkedHashMap<>();
         for (FormalParameter param : params) {
             String name = CodeUtils.getParamDisplayName(param);
             name = name.replace("$", ""); // NOI18N
@@ -137,7 +137,7 @@ public class YiiRunActionPanel extends javax.swing.JPanel {
      * @return
      */
     public Map<String, String> getGetRequest() {
-        Map<String, String> getRequests = new LinkedHashMap<String, String>();
+        Map<String, String> getRequests = new LinkedHashMap<>();
         int count = 0;
         for (JLabel key : componentsMap.keySet()) {
             JTextField value = componentsMap.get(key);

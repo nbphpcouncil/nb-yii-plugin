@@ -73,7 +73,7 @@ public class YiiActionsExtender extends PhpModuleActionsExtender {
 
     @Override
     public List<? extends Action> getActions() {
-        List<Action> actions = new ArrayList<Action>();
+        List<Action> actions = new ArrayList<>();
         actions.add(YiiInitAction.getInstance());
         actions.add(PHPUnitInitAction.getInstance());
         return actions;

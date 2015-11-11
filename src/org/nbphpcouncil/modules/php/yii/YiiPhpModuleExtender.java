@@ -115,7 +115,7 @@ public class YiiPhpModuleExtender extends PhpModuleExtender {
             Exceptions.printStackTrace(ex);
         }
         boolean usePHPUnit = panel.usePHPUnit();
-        HashSet<FileObject> files = new HashSet<FileObject>();
+        HashSet<FileObject> files = new HashSet<>();
         if (isSuccess) {
             // update module
             // some directories may null

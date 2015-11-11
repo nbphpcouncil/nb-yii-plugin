@@ -51,7 +51,7 @@ import org.netbeans.modules.php.api.phpmodule.PhpModule;
  */
 public final class YiiModuleFactory {
 
-    private static final Map<PhpModule, YiiModule> modules = new HashMap<PhpModule, YiiModule>();
+    private static final Map<PhpModule, YiiModule> modules = new HashMap<>();
 
     public static YiiModule create(PhpModule phpModule) {
         YiiModule module = modules.get(phpModule);

@@ -76,7 +76,7 @@ public abstract class CompletePathMethod extends Method {
 
     @Override
     public List<String> getElements(String target) {
-        List<String> elements = new LinkedList<String>();
+        List<String> elements = new LinkedList<>();
         if (useViewPath()) {
             elements.addAll(getViewPathElements(target));
         }
@@ -87,7 +87,7 @@ public abstract class CompletePathMethod extends Method {
     }
 
     private List<String> getViewPathElements(String target) {
-        List<String> elements = new LinkedList<String>();
+        List<String> elements = new LinkedList<>();
         if (target.startsWith("///")) { // NOI18N
             return elements;
         }
@@ -203,7 +203,7 @@ public abstract class CompletePathMethod extends Method {
     }
 
     private List<String> getPathAliasElements(String target) {
-        List<String> elements = new LinkedList<String>();
+        List<String> elements = new LinkedList<>();
         int firstDot = target.indexOf(DOT);
         String pathAliasName = ""; // NOI18N
         if (firstDot > 1) {

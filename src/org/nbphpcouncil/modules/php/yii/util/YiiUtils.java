@@ -118,7 +118,7 @@ public class YiiUtils {
      */
     public static List<String> getIncludePath(FileObject index) {
         List<String> lines;
-        List<String> includePath = new ArrayList<String>();
+        List<String> includePath = new ArrayList<>();
         try {
             lines = index.asLines("UTF-8"); // NOI18N
             Pattern pattern = Pattern.compile(YII_INCLUDE_PATH_REGEX);
@@ -277,7 +277,7 @@ public class YiiUtils {
      * @return theme name if find the theme, otherwise empty string.
      */
     public static String getThemeName(FileObject main) {
-        final Set<String> themes = new HashSet<String>();
+        final Set<String> themes = new HashSet<>();
         try {
             ParserManager.parse(Collections.singleton(Source.create(main)), new UserTask() {
                 @Override
@@ -676,7 +676,7 @@ public class YiiUtils {
     private static class MainVisitor extends DefaultVisitor {
 
         private static final String THEME = "theme"; // NOI18N
-        private final Set<String> themeName = new HashSet<String>();
+        private final Set<String> themeName = new HashSet<>();
 
         @Override
         public void visit(ArrayElement node) {

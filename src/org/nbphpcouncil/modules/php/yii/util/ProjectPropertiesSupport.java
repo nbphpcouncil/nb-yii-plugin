@@ -106,7 +106,7 @@ public class ProjectPropertiesSupport {
                     }
                     EditableProperties properties = helper.getProperties(AntProjectHelper.PROJECT_PROPERTIES_PATH);
                     List<String> currentIncludePaths = Arrays.asList(getIncludePaths(project));
-                    List<String> includePaths = new LinkedList<String>();
+                    List<String> includePaths = new LinkedList<>();
                     boolean isAdded = false;
                     for (String path : paths) {
                         YiiModule yiiModule = YiiModuleFactory.create(phpModule);
@@ -232,7 +232,7 @@ public class ProjectPropertiesSupport {
         if (testsDirectory == null) {
             return;
         }
-        HashMap<String, String> propertiesMap = new HashMap<String, String>();
+        HashMap<String, String> propertiesMap = new HashMap<>();
         FileObject bootstrap = testsDirectory.getFileObject(BOOTSTRAP_PHP);
         if (bootstrap != null) {
             propertiesMap.put(PHPUNIT_BOOTSTRAP_CREATE_TESTS, "true"); // NOI18N
@@ -256,8 +256,7 @@ public class ProjectPropertiesSupport {
         }
         try {
             List<String> lines = properties.asLines(UTF8);
-            PrintWriter pw = new PrintWriter(new OutputStreamWriter(properties.getOutputStream(), UTF8));
-            try {
+            try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(properties.getOutputStream(), UTF8))) {
                 // write phpunit properties
                 for (Map.Entry<String, String> entry : propertiesMap.entrySet()) {
                     String key = entry.getKey();
@@ -280,8 +279,6 @@ public class ProjectPropertiesSupport {
                     }
                     pw.println(line);
                 }
-            } finally {
-                pw.close();
             }
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);

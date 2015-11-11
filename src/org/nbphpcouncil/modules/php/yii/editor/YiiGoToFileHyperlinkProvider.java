@@ -106,7 +106,7 @@ import org.openide.util.NbBundle;
 @MimeRegistration(mimeType = FileUtils.PHP_MIME_TYPE, service = HyperlinkProviderExt.class)
 public class YiiGoToFileHyperlinkProvider extends YiiHyperlinkProviderExt {
 
-    private static final Set<String> methods = new HashSet<String>();
+    private static final Set<String> methods = new HashSet<>();
     private static final String DEFAULT_MESSAGES_DIR_NAME = "messages"; // NOI18N
     private List<GoToItem> goToItems;
     private int paramCount;
@@ -246,7 +246,7 @@ public class YiiGoToFileHyperlinkProvider extends YiiHyperlinkProviderExt {
      * @return GoToItem list
      */
     private List<GoToItem> createGoToItems(PhpModule phpModule, Document doc, int offset) {
-        List<GoToItem> items = new ArrayList<GoToItem>();
+        List<GoToItem> items = new ArrayList<>();
         // check whether target is class name
         FileObject classFile = getClassFileObject(phpModule, target);
         if (classFile != null) {
@@ -293,7 +293,7 @@ public class YiiGoToFileHyperlinkProvider extends YiiHyperlinkProviderExt {
      * @return true if item list is not empty, otherwise false.
      */
     private List<GoToItem> createGoToTItems(PhpModule phpModule, TokenSequence<PHPTokenId> ts, int offset) {
-        List<GoToItem> items = new ArrayList<GoToItem>();
+        List<GoToItem> items = new ArrayList<>();
 
         YiiModule yiiModule = YiiModuleFactory.create(phpModule);
         FileObject application = yiiModule.getApplication();
@@ -347,7 +347,7 @@ public class YiiGoToFileHyperlinkProvider extends YiiHyperlinkProviderExt {
         for (FileObject child : children) {
             // create GoToItem
             int messageOffset = DEFAULT_OFFSET;
-            final Set<Integer> mOffset = new HashSet<Integer>();
+            final Set<Integer> mOffset = new HashSet<>();
             final String messageKey = message;
             FileObject messageFile = child.getFileObject(target + ".php"); // NOI18N
             if (messageFile != null) {

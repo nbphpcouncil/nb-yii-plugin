@@ -130,7 +130,7 @@ public final class YiiRunActionAction extends BaseAction {
 
         // when more parameters exist
         final String methodName = getMethodName(element);
-        final List<FormalParameter> params = new ArrayList<FormalParameter>();
+        final List<FormalParameter> params = new ArrayList<>();
         try {
             ParserManager.parse(Collections.singleton(Source.create(document)), new UserTask() {
                 @Override
@@ -277,7 +277,7 @@ public final class YiiRunActionAction extends BaseAction {
     private static class ControllerMethodVisitor extends DefaultVisitor {
 
         private final String targetMethodName;
-        private final List<FormalParameter> params = new ArrayList<FormalParameter>();
+        private final List<FormalParameter> params = new ArrayList<>();
 
         public ControllerMethodVisitor(String targetMethodName) {
             this.targetMethodName = targetMethodName;
