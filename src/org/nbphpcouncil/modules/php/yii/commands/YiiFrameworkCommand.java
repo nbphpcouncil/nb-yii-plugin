@@ -58,13 +58,13 @@ public class YiiFrameworkCommand extends FrameworkCommand {
     public YiiFrameworkCommand(PhpModule phpModule, String command, String description, String displayName) {
         super(command, description, displayName);
         assert phpModule != null;
-        this.phpModule = new WeakReference<PhpModule>(phpModule);
+        this.phpModule = new WeakReference<>(phpModule);
     }
 
     public YiiFrameworkCommand(PhpModule phpModule, String[] commands, String description, String displayName) {
         super(commands, description, displayName);
         assert phpModule != null;
-        this.phpModule = new WeakReference<PhpModule>(phpModule);
+        this.phpModule = new WeakReference<>(phpModule);
     }
 
     @Override

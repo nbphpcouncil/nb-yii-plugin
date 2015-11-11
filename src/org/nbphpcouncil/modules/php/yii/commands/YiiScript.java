@@ -188,10 +188,10 @@ public class YiiScript {
      * @return command list
      */
     public List<FrameworkCommand> getCommands(PhpModule phpModule) {
-        List<FrameworkCommand> commands = new ArrayList<FrameworkCommand>();
+        List<FrameworkCommand> commands = new ArrayList<>();
         commands.add(new YiiFrameworkCommand(phpModule, HELP_COMMAND, HELP_COMMAND, HELP_COMMAND));
         YiiModule yiiModule = YiiModuleFactory.create(phpModule);
-        List<FileObject> commandFiles = new LinkedList<FileObject>();
+        List<FileObject> commandFiles = new LinkedList<>();
 
         // get core commands
         FileObject coreCommandsDirectory = yiiModule.getFileObject(PATH_ALIAS.SYSTEM, "cli/commands"); // NOI18N
@@ -293,7 +293,7 @@ public class YiiScript {
             return ""; // NOI18N
         }
 
-        List<String> allParams = new ArrayList<String>();
+        List<String> allParams = new ArrayList<>();
         allParams.add(HELP_COMMAND);
         allParams.add(params[0]);
 
@@ -323,7 +323,7 @@ public class YiiScript {
      * @return
      */
     private List<String> getAllParams(List<String> params) {
-        List<String> allParams = new ArrayList<String>();
+        List<String> allParams = new ArrayList<>();
         allParams.addAll(DEFAULT_PARAMS);
         allParams.addAll(params);
         return allParams;
@@ -383,7 +383,7 @@ public class YiiScript {
             return false;
         }
 
-        List<String> params = new ArrayList<String>();
+        List<String> params = new ArrayList<>();
         params.add(WEBAPP_COMMAND);
 
         // #28 Source directory name has the dot(.)

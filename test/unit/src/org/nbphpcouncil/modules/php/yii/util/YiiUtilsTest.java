@@ -69,7 +69,7 @@ public class YiiUtilsTest extends NbTestCase {
         if (dataDirectory != null) {
             index = dataDirectory.getFileObject("include_path_test.php");
         }
-        List<String> expResult = new ArrayList<String>();
+        List<String> expResult = new ArrayList<>();
         expResult.add("../../yii/framework");
         List result = YiiUtils.getIncludePath(index);
         assertEquals(expResult, result);

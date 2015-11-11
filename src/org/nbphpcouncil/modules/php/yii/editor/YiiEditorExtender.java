@@ -91,7 +91,7 @@ public class YiiEditorExtender extends EditorExtender {
         if (YiiUtils.isView(fo)) {
             FileObject controller = YiiUtils.getController(fo);
             if (controller != null) {
-                List<PhpBaseElement> elements = new LinkedList<PhpBaseElement>();
+                List<PhpBaseElement> elements = new LinkedList<>();
                 String controllerName = controller.getName();
                 // add controller and variables
                 PhpClass controllerClass = new PhpClass(controllerName, controllerName);
@@ -116,7 +116,7 @@ public class YiiEditorExtender extends EditorExtender {
         if (controller == null) {
             return Collections.emptySet();
         }
-        final HashSet<PhpVariable> phpVariables = new HashSet<PhpVariable>();
+        final HashSet<PhpVariable> phpVariables = new HashSet<>();
 
         try {
             ParserManager.parse(Collections.singleton(Source.create(controller)), new UserTask() {
@@ -137,11 +137,11 @@ public class YiiEditorExtender extends EditorExtender {
 
     private static final class YiiControllerVisitor extends DefaultVisitor {
 
-        private final Set<PhpVariable> fields = new HashSet<PhpVariable>();
+        private final Set<PhpVariable> fields = new HashSet<>();
         private String methodName;
         private String viewName;
         private FileObject view;
-        private final HashMap<String, String> instances = new HashMap<String, String>();
+        private final HashMap<String, String> instances = new HashMap<>();
 
         public YiiControllerVisitor(FileObject fileObject) {
             if (YiiUtils.isView(fileObject)) {
@@ -156,7 +156,7 @@ public class YiiEditorExtender extends EditorExtender {
          * @return php variables
          */
         public Set<PhpVariable> getPhpVariables() {
-            Set<PhpVariable> phpVariables = new HashSet<PhpVariable>();
+            Set<PhpVariable> phpVariables = new HashSet<>();
             synchronized (fields) {
                 phpVariables.addAll(fields);
             }
