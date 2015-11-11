@@ -256,8 +256,7 @@ public class ProjectPropertiesSupport {
         }
         try {
             List<String> lines = properties.asLines(UTF8);
-            PrintWriter pw = new PrintWriter(new OutputStreamWriter(properties.getOutputStream(), UTF8));
-            try {
+            try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(properties.getOutputStream(), UTF8))) {
                 // write phpunit properties
                 for (Map.Entry<String, String> entry : propertiesMap.entrySet()) {
                     String key = entry.getKey();
@@ -280,8 +279,6 @@ public class ProjectPropertiesSupport {
                     }
                     pw.println(line);
                 }
-            } finally {
-                pw.close();
             }
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
