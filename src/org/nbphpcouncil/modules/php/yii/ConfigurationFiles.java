@@ -96,6 +96,9 @@ public final class ConfigurationFiles extends FileChangeAdapter implements Impor
             return Collections.emptyList();
         }
         FileObject config = applicationDirectory.getFileObject("config"); // NOI18N
+        if (config == null) {
+            return Collections.emptyList();
+        }
         List<FileObject> directories = Collections.singletonList(config);
         if (!isInitialized) {
             isInitialized = true;
